@@ -117,7 +117,7 @@ def move_line(plateau, ligne, dir: int):
 # dir = 1 => Vers le Nord
 
 
-def move_colone(plateau, colone, dir: int):
+def move_colonne(plateau, colone, dir: int):
     n = DIM_GRILLE
     
     if dir == 1:
@@ -139,12 +139,12 @@ def deplacement(directions, plateau_initial):
         pos_case_vide = plateau.index(-1)
         if dir == 'N':
             if 0 <= pos_case_vide < n:
-                move_colone(plateau, pos_case_vide, 1)
+                move_colonne(plateau, pos_case_vide, 1)
             else:
                 swap(plateau, pos_case_vide, pos_case_vide-n)
         elif dir == 'S':
             if n*n-n <= pos_case_vide < n*n:
-                move_colone(plateau, pos_case_vide % n, -1)
+                move_colonne(plateau, pos_case_vide % n, -1)
             else:
                 swap(plateau, pos_case_vide, pos_case_vide+n)
         elif dir == 'O':
