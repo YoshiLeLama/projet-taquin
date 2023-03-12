@@ -19,14 +19,15 @@ K = 6
 
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
 
+# Nous représentons un état comme étant un objet. Il stoquera son parent, la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
 Etat = namedtuple('Etat', ['parent', 'liste_deplacement',
                            'cout'])
 Etat.__annotations__ = {
     'parent': Etat, 'liste_deplacement': list[str], 'cout': int}
 
 
+# la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
-    # régle et mouvement à définir.
     result: list[Etat] = []
 
     for d in ['N', 'S', 'O', 'E']:
@@ -36,6 +37,8 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
                            liste_deplacement=nouveaux_deplacements,
                            cout=len(nouveaux_deplacements) + heuristique(K, deplacement(nouveaux_deplacements, plateau_initial))))
     return result
+
+# permet d'inserer les états trié en fonction de leurs coûts.
 
 
 def inserer_etat(file_etat: list[Etat], etat: Etat):
@@ -65,7 +68,9 @@ def astar(plateau_initial):
             # S est une liste contenant tous les états trouvé après l'expention
             S = expanse(plateau_initial, etat_choisi)
             for etat_cree in S:
+                # a condition permet de savoir si on est en présence d'un état déjà expensé.
                 if tuple(deplacement(etat_cree.liste_deplacement, plateau_initial)) not in explored:
+                    # l'état sera inséré par odre de coût à l'aide de la fonction inserer_etat.
                     inserer_etat(frontiere, etat_cree)
 
         explored.add(tuple(plateau))
@@ -80,6 +85,8 @@ def get_poids_tuile(k: int, i: int):
 
 def distance_elem(position: tuple[int, int], i: int):
     return abs(position[1] - i // DIM_GRILLE) + abs(position[0] - i % DIM_GRILLE)
+
+# l'heuristique sera une distance de manathan pondéré.
 
 
 def heuristique(k: int, etat_courant: list[int]):
@@ -97,10 +104,10 @@ def heuristique(k: int, etat_courant: list[int]):
 def swap(l, i, j):
     l[i], l[j] = l[j], l[i]
 
+
+# move_line et la fonction qui gère le cas limite des direction Est et Ouest.
 # dir = 1 => Vers l'Est
 # dir = -1 => Vers l'Ouest
-
-
 def move_line(plateau, ligne, dir: int):
     n = DIM_GRILLE
 
@@ -112,14 +119,14 @@ def move_line(plateau, ligne, dir: int):
         for i in range(ligne * n, (ligne + 1)*n - 1):
             plateau[i] = plateau[i+1]
         plateau[(ligne + 1)*n - 1] = -1
-        
+
+
+# move_colone et la fonction qui gère les cas limite des directions Nord et sud
 # dir = -1 => Vers le Sud
 # dir = 1 => Vers le Nord
-
-
 def move_colonne(plateau, colone, dir: int):
     n = DIM_GRILLE
-    
+
     if dir == 1:
         for i in range(colone + n, n*n, n):
             plateau[i-n] = plateau[i]
@@ -131,7 +138,9 @@ def move_colonne(plateau, colone, dir: int):
 
 # la fonction permet de déplacer la case vide sur notre taquin.
 # directions est une liste de direction. Une direction peut être N,S,E,O. Ou N=Nord, S=Sud, O=Ouest, E=Est
-# n est la taille du tableau nxn ou 3x3 par exemple
+# Dans chaque déplacement, on identifiera si on est sur un cas "limite". Par exemple si on est sur la ligen 0 du taleau et qu'on veut se déplacer vers le nord on doit déplacer toutes les cases vers le haut et déscendre la case vide tout en base. On doit donc soit déplacer la colone, soit la ligne en fonction de la direction du déplacement.
+
+
 def deplacement(directions, plateau_initial):
     n = DIM_GRILLE
     plateau = plateau_initial[:]
