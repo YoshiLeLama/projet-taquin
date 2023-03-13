@@ -172,30 +172,27 @@ def deplacement(directions, plateau_initial):
 
 # permet de savoir si un taquin est sovlable.
 # Si il est non solvable la fonction retournera false.
-# Le principe est de regarder la parité entre la position de la case vide à l'état final et le nombre de swap à faire pour atteindre l'état final à partir de l'état initial.
-
-
-def solvable(plateau_initial, plateau_final):
-    plateau = plateau_initial[:]
+def solvable(plateau_initial):
     n = DIM_GRILLE
-    compt = 0
-    for i in range(0, n*n):
-        if plateau[i] != i and plateau[i] != -1:
+    plateau = plateau_initial[:]
+    nb_permutations = 0
+    # On s'arrête avant la dernière case car la grille sera forcément déjà ordonnée
+    for i in range(0, n*n-1):
+        # Si la valeur ne correspond pas à la case, on cherche la bonne valeur dans plateau et on la permute avec la valeur de la case actuelle
+        if plateau[i] != i:
             swap(plateau, plateau.index(i), i)
-            compt += 1
-        elif plateau[i] == -1:
-            if plateau.index(-1) != plateau_final.index(n*n-1):
-                swap(plateau, plateau.index(-1), plateau_final.index(n*n-1))
-                compt += 1
-
-    return compt % 2 == plateau.index(-1) % 2
+            # On compte le nombre de permutations effectuées
+            nb_permutations += 1
+    # On vérifie si la parité du nombre de permutations à effectuer et celle de l'indice de la case vide (-1) sont les mêmes 
+    # => condition de solvabilité du taquin, cf. la page Wikipedia du taquin
+    return nb_permutations % 2 == plateau_initial.index(-1) % 2
 
 
 # main
 if __name__ == '__main__':
     K = 0
     plateau = [1, 3, -1, 5, 7, 6, 4, 2, 0]
-    if solvable(plateau, [x for x in range(0, DIM_GRILLE*DIM_GRILLE)]):
+    if solvable(plateau):
         etat_final = astar(plateau)
         if etat_final is not None:
             print(etat_final.liste_deplacement)
