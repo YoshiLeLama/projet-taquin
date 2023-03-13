@@ -170,11 +170,34 @@ def deplacement(directions, plateau_initial):
                 swap(plateau, pos_case_vide, pos_case_vide+1)
     return plateau
 
+# permet de savoir si un taquin est sovlable.
+# Si il est non solvable la fonction retournera false.
+# Le principe est de regarder la parité entre la position de la case vide à l'état final et le nombre de swap à faire pour atteindre l'état final à partir de l'état initial.
+
+
+def solvable(plateau_initial, plateau_final):
+    plateau = plateau_initial[:]
+    n = DIM_GRILLE
+    compt = 0
+    for i in range(0, n*n):
+        if plateau[i] != i and plateau[i] != -1:
+            swap(plateau, plateau.index(i), i)
+            compt += 1
+        elif plateau[i] == -1:
+            if plateau.index(-1) != plateau_final.index(n*n-1):
+                swap(plateau, plateau.index(-1), plateau_final.index(n*n-1))
+                compt += 1
+
+    return compt % 2 == plateau.index(-1) % 2
+
 
 # main
 if __name__ == '__main__':
     K = 0
     plateau = [1, 3, -1, 5, 7, 6, 4, 2, 0]
-    etat_final = astar(plateau)
-    if etat_final is not None:
-        print(etat_final.liste_deplacement)
+    if solvable(plateau, [x for x in range(0, DIM_GRILLE*DIM_GRILLE)]):
+        etat_final = astar(plateau)
+        if etat_final is not None:
+            print(etat_final.liste_deplacement)
+    else:
+        print("pas de solution à ce taquin possible")
