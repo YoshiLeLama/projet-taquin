@@ -1,3 +1,4 @@
+from enum import Enum
 import pyray as pr
 from collections import namedtuple
 import taquin as tq
@@ -12,7 +13,7 @@ NOMBRE_CASES = TAILLE_GRILLE**2
 POSITIONS = [PositionCase(-1., -1.), PositionCase(0., -1), PositionCase(1., -1.),
              PositionCase(-1., 0.), PositionCase(0., 0.), PositionCase(1., 0.),
              PositionCase(-1., 1.), PositionCase(0., 1.), PositionCase(1., 1.)]
-DUREE_ANIMATION = 0.5
+DUREE_ANIMATION = 1.0
 
 # variables globales
 camera = pr.Camera3D([0., 16.0, 5.0], [0.0, 0.0, 0.0],
@@ -35,6 +36,8 @@ bloc_arrivee = PositionCase(0., 0.)
 
 def init():
     global camera, font, num_textures, blocks_models, grille
+    pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT)
+    
     pr.init_window(800, 450, "Taquin")
     pr.set_window_state(pr.ConfigFlags.FLAG_WINDOW_RESIZABLE)
     pr.set_window_min_size(800, 450)
@@ -49,7 +52,7 @@ def init():
     for i in range(0, NOMBRE_BLOCS):
         render_tex = pr.load_render_texture(200, 200)
         pr.begin_texture_mode(render_tex)
-        pr.clear_background(pr.VIOLET)
+        pr.clear_background(pr.Color(int(0 + (i / NOMBRE_BLOCS) * 155), 0, int(255 - (i / NOMBRE_BLOCS) * 155), 255))
         pr.draw_text_ex(font, str(i), pr.Vector2(
             int(render_tex.texture.width / 4), 10), 200, 1., pr.WHITE)
         pr.end_texture_mode()
@@ -102,7 +105,6 @@ def animate_bloc(t: float, depart: PositionCase, arrivee: PositionCase):
     factor = (total_t * total_t * (3.0 - 2.0 * total_t)) / DUREE_ANIMATION
     pos_depart = POSITIONS[depart.l * TAILLE_GRILLE + depart.c]
     pos_arrivee = POSITIONS[arrivee.l * TAILLE_GRILLE + arrivee.c]
-    print(pos_depart, pos_arrivee, factor)
     positions[arrivee.l * TAILLE_GRILLE + arrivee.c] = (pos_depart[0] + (pos_arrivee[0] - pos_depart[0]) * factor,
                                                         pos_depart[1] + (pos_arrivee[1] - pos_depart[1]) * factor)
     # print(arrivee.l * TAILLE_GRILLE + arrivee.c, positions[arrivee.l * TAILLE_GRILLE + arrivee.c], grille)
@@ -124,37 +126,128 @@ def handle_input():
         return
 
     case_vide = get_position_valeur(grille, -1)
-    nouvelle_pos = case_vide
+    nouvelle_pos_vide = case_vide
 
     if not move_north and pr.is_key_down(pr.KeyboardKey.KEY_UP):
         move_north = True
         if case_vide.l != TAILLE_GRILLE - 1:
-            nouvelle_pos = PositionCase(case_vide.l + 1, case_vide.c)
+            nouvelle_pos_vide = PositionCase(case_vide.l + 1, case_vide.c)
     elif not move_south and pr.is_key_down(pr.KeyboardKey.KEY_DOWN):
         move_south = True
         if case_vide.l != 0:
-            nouvelle_pos = PositionCase(case_vide.l - 1, case_vide.c)
+            nouvelle_pos_vide = PositionCase(case_vide.l - 1, case_vide.c)
     elif not move_west and pr.is_key_down(pr.KeyboardKey.KEY_LEFT):
         move_west = True
         if case_vide.c != TAILLE_GRILLE - 1:
-            nouvelle_pos = PositionCase(case_vide.l, case_vide.c + 1)
+            nouvelle_pos_vide = PositionCase(case_vide.l, case_vide.c + 1)
     elif not move_east and pr.is_key_down(pr.KeyboardKey.KEY_RIGHT):
         move_east = True
         if case_vide.c != 0:
-            nouvelle_pos = PositionCase(case_vide.l, case_vide.c - 1)
+            nouvelle_pos_vide = PositionCase(case_vide.l, case_vide.c - 1)
 
-    if case_vide != nouvelle_pos:
+    if case_vide != nouvelle_pos_vide:
         swap_cases(grille, case_vide.l, case_vide.c,
-                   nouvelle_pos.l, nouvelle_pos.c)
+                   nouvelle_pos_vide.l, nouvelle_pos_vide.c)
         animating = True
-        bloc_depart = nouvelle_pos
+        bloc_depart = nouvelle_pos_vide
         bloc_arrivee = case_vide
-        print(bloc_depart, bloc_arrivee)
 
 # grille = tq.generer_grille_aleatoire(True)
 
+plateau_init = []
 
-def run():
+def process_move(grille, deplacements, indice, nombre_deplacements):
+    global animating, bloc_depart, bloc_arrivee
+
+    if animating:
+        return indice, nombre_deplacements
+
+    case_vide = get_position_valeur(grille, -1)
+    nouvelle_pos_vide = case_vide
+
+    deplacement = deplacements[indice]
+
+    if deplacement == tq.Card.N:
+        if case_vide.l == 0:
+            nouvelle_pos_vide = PositionCase(case_vide.l + 1, case_vide.c)
+            deplacements[indice] = tq.Card.S
+        else:
+            nouvelle_pos_vide = PositionCase(case_vide.l - 1, case_vide.c)
+            indice += 1
+    elif deplacement == tq.Card.S:
+        if case_vide.l == TAILLE_GRILLE - 1:
+            nouvelle_pos_vide = PositionCase(case_vide.l - 1, case_vide.c)
+            deplacements[indice] = tq.Card.N
+        else:
+            nouvelle_pos_vide = PositionCase(case_vide.l + 1, case_vide.c)
+            indice += 1
+    elif deplacement == tq.Card.O:
+        if case_vide.c == 0:
+            nouvelle_pos_vide = PositionCase(case_vide.l, case_vide.c + 1)
+            deplacements[indice] = tq.Card.E
+        else:
+            nouvelle_pos_vide = PositionCase(case_vide.l, case_vide.c - 1)
+            indice += 1
+    elif deplacement == tq.Card.E:
+        if case_vide.c == TAILLE_GRILLE - 1:
+            nouvelle_pos_vide = PositionCase(case_vide.l, case_vide.c - 1)
+            deplacements[indice] = tq.Card.O
+        else:
+            nouvelle_pos_vide = PositionCase(case_vide.l, case_vide.c + 1)
+            indice += 1    
+
+    swap_cases(grille, case_vide.l, case_vide.c,
+                nouvelle_pos_vide.l, nouvelle_pos_vide.c)
+    nombre_deplacements += 1
+    animating = True
+    bloc_depart = nouvelle_pos_vide
+    bloc_arrivee = case_vide
+
+    return indice, nombre_deplacements
+
+def render_solving(grille_depart, deplacements):
+    global grille, animating, camera
+
+    indice = 0
+    grille = grille_depart[:]
+    nombre_deplacements = 0
+
+    while not pr.window_should_close():
+        pr.update_camera(camera)
+        i = indice
+
+        if indice != len(deplacements):
+            indice, nombre_deplacements = process_move(grille, deplacements, indice, nombre_deplacements)
+        if animating:
+            animate_bloc(pr.get_frame_time(), bloc_depart, bloc_arrivee)
+
+        pr.begin_drawing()
+        pr.clear_background(pr.Color(250, 250, 250, 255))
+        pr.begin_mode_3d(camera)
+        pr.draw_grid(20, 1.0)
+
+        for i in range(0, NOMBRE_CASES):
+            val = grille[i]
+            if val != -1:
+                pr.draw_model(blocks_models[val], pr.Vector3(
+                    positions[i][0] * 2., 1., positions[i][1] * 2), 0.9, pr.WHITE)
+        pr.end_mode_3d()
+
+        is_solved = True
+        for i in range(0, NOMBRE_BLOCS):
+            if grille[i] != i:
+                is_solved = False
+
+        pr.draw_text("Nombre de mouvements : " + str(nombre_deplacements), 300, 10, 30, pr.BLACK)
+
+        if is_solved and not animating:
+            pr.draw_text("Résolu", 10, 10, 30, pr.GREEN)
+        else:
+            pr.draw_text("Non résolu", 10, 10, 30, pr.RED)
+        pr.end_drawing()
+    pr.close_window()
+
+def run_game():
     global animating, camera
 
     while not pr.window_should_close():
@@ -163,8 +256,6 @@ def run():
         handle_input()
         if animating:
             animate_bloc(pr.get_frame_time(), bloc_depart, bloc_arrivee)
-
-        pr.get_frame_time()
 
         pr.begin_drawing()
         pr.clear_background(pr.Color(250, 250, 250, 255))
@@ -191,6 +282,14 @@ def run():
     pr.close_window()
 
 if __name__ == '__main__':
-    init()
+    plateau = [1, 3, -1, 
+               5, 7, 6, 
+               4, 2, 0]
+    deplacements = tq.astar(plateau)
+    if deplacements is not None:
+        deplacements = deplacements.liste_deplacement
+        plateau_init = plateau[:]
 
-    run()
+        init()
+
+        render_solving(plateau, deplacements)

@@ -2,7 +2,6 @@ from collections import namedtuple
 from bisect import insort
 from enum import Enum
 import random
-import render
 
 NOMBRE_TUILES = 8
 NOMBRE_CASES = 9
@@ -19,6 +18,12 @@ POIDS_TUILES = [
 
 K = 6
 
+class Card(Enum):
+    N = 0
+    S = 1
+    O = 2
+    E = 3
+
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
 
 # Nous représentons un état comme étant un objet. Il stoquera son parent, la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
@@ -32,7 +37,7 @@ Etat.__annotations__ = {
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
     result: list[Etat] = []
 
-    for d in ['N', 'S', 'O', 'E']:
+    for d in [Card.N, Card.S, Card.O, Card.E]:
         nouveaux_deplacements = etat_choisi.liste_deplacement[:]
         nouveaux_deplacements.append(d)
         result.append(Etat(parent=etat_choisi,
@@ -148,23 +153,23 @@ def deplacement(directions, plateau_initial):
     plateau = plateau_initial[:]
     for dir in directions:
         pos_case_vide = plateau.index(-1)
-        if dir == 'N':
+        if dir == Card.N:
             if 0 <= pos_case_vide < n:
                 move_colonne(plateau, pos_case_vide, 1)
             else:
                 swap(plateau, pos_case_vide, pos_case_vide-n)
-        elif dir == 'S':
+        elif dir == Card.S:
             if n*n-n <= pos_case_vide < n*n:
                 move_colonne(plateau, pos_case_vide % n, -1)
             else:
                 swap(plateau, pos_case_vide, pos_case_vide+n)
-        elif dir == 'O':
+        elif dir == Card.O:
             if pos_case_vide in [x for x in range(0, n*n, n)]:
                 move_line(plateau, pos_case_vide // n, -1)
                 # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
             else:
                 swap(plateau, pos_case_vide, pos_case_vide-1)
-        elif dir == 'E':
+        elif dir == Card.E:
             if pos_case_vide in [x for x in range(n-1, n*n, n)]:
                 move_line(plateau, pos_case_vide // n, 1)
                 # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]
