@@ -1,6 +1,8 @@
 from collections import namedtuple
 from bisect import insort
 from enum import Enum
+import random
+import render
 
 NOMBRE_TUILES = 8
 NOMBRE_CASES = 9
@@ -188,13 +190,32 @@ def solvable(plateau_initial):
     return nb_permutations % 2 == plateau_initial.index(-1) % 2
 
 
+def generer_grille_aleatoire(resolvable: bool=False):
+    grille = []
+    for i in range(0, DIM_GRILLE*DIM_GRILLE - 1):
+        grille.append(i)
+    grille.append(-1)
+    while True:
+        random.shuffle(grille)
+        if not resolvable or solvable(grille):
+            return grille
+
 # main
 if __name__ == '__main__':
     K = 0
-    plateau = [1, 3, -1, 5, 7, 6, 4, 2, 0]
+    plateau = [1, 3, -1, 
+               5, 7, 6, 
+               4, 2, 0]
     if solvable(plateau):
         etat_final = astar(plateau)
         if etat_final is not None:
             print(etat_final.liste_deplacement)
+
+            for i in range(0, len(etat_final.liste_deplacement)):
+                dep = deplacement(etat_final.liste_deplacement[:i+1], plateau)
+                print()
+                print(dep[:3])
+                print(dep[3:6])
+                print(dep[6:])
     else:
         print("pas de solution à ce taquin possible")
