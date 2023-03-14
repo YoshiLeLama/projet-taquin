@@ -194,12 +194,15 @@ def solvable(plateau_initial):
     # => condition de solvabilité du taquin, cf. la page Wikipedia du taquin
     return nb_permutations % 2 == plateau_initial.index(-1) % 2
 
-
-def generer_grille_aleatoire(resolvable: bool=False):
+def generer_grille_resolue():
     grille = []
     for i in range(0, DIM_GRILLE*DIM_GRILLE - 1):
         grille.append(i)
     grille.append(-1)
+    return grille
+
+def generer_grille_aleatoire(resolvable: bool=False):
+    grille = generer_grille_resolue()
     while True:
         random.shuffle(grille)
         if not resolvable or solvable(grille):

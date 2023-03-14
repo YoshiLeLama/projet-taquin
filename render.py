@@ -1,10 +1,25 @@
+import copy
 from enum import Enum
+import math
+import random
+import threading
+import time
 import pyray as pr
 from collections import namedtuple
 import taquin as tq
 
 # types
 PositionCase = namedtuple("PositionCase", ["l", "c"])
+
+
+class State(Enum):
+    INIT = 0
+    TITLE_SCREEN = 1
+    SETTINGS = 2
+    GAME = 3
+    RENDER_SOLVING = 4
+    SOLVING_LOADING = 5
+
 
 # constantes
 TAILLE_GRILLE = 3
@@ -13,48 +28,69 @@ NOMBRE_CASES = TAILLE_GRILLE**2
 POSITIONS = [PositionCase(-1., -1.), PositionCase(0., -1), PositionCase(1., -1.),
              PositionCase(-1., 0.), PositionCase(0., 0.), PositionCase(1., 0.),
              PositionCase(-1., 1.), PositionCase(0., 1.), PositionCase(1., 1.)]
-DUREE_ANIMATION = 1.0
+DUREE_ANIMATION = 0.5
+BASE_CAMERA_POS = [0., 16.0, 5.0]
 
 # variables globales
-camera = pr.Camera3D([0., 16.0, 5.0], [0.0, 0.0, 0.0],
-                     [0.0, 1.0, 0.0], 45.0, 0)
+camera: pr.Camera3D
 font = None
 num_textures = []
 blocks_models = []
 grille = []
+state = State.TITLE_SCREEN
+last_state = State.TITLE_SCREEN
+
 move_north = False
 move_south = False
 move_west = False
 move_east = False
 positions = POSITIONS[:]
 
+nombre_deplacements = 0
+indice = 0
+solution: tq.Etat | None
+deplacements: list[tq.Card] = []
+
 total_t = 0
 animating = False
 bloc_depart = PositionCase(0., 0.)
 bloc_arrivee = PositionCase(0., 0.)
 
+resolve_button: pr.Texture
+play_button: pr.Texture
+settings_button: pr.Texture
+reload_texture: pr.Texture
+
 
 def init():
-    global camera, font, num_textures, blocks_models, grille
+    global camera, font, num_textures, blocks_models, grille, bounding_box
     pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT)
-    
+
     pr.init_window(800, 450, "Taquin")
     pr.set_window_state(pr.ConfigFlags.FLAG_WINDOW_RESIZABLE)
     pr.set_window_min_size(800, 450)
     pr.set_target_fps(60)
 
-    camera = pr.Camera3D([0., 16.0, 5.0], [0.0, 0.0, 0.0], [
-                         0.0, 1.0, 0.0], 45.0, 0)
+    camera = pr.Camera3D(BASE_CAMERA_POS[:], [0.0, 0.0, 0.0],
+                     [0.0, 1.0, 0.0], 45.0, 0)
     pr.set_camera_mode(camera, pr.CameraMode.CAMERA_FREE)
 
     font = pr.load_font_ex("resources/font/JetBrainsMono.ttf", 200, None, 0)
 
+    global settings_button, play_button, resolve_button, reload_texture
+    resolve_button = pr.load_texture('resources/image/idea.png')
+    play_button = pr.load_texture('resources/image/play.png')
+    settings_button = pr.load_texture('resources/image/setting.png')
+    reload_texture = pr.load_texture('resources/image/reload.png')
+
     for i in range(0, NOMBRE_BLOCS):
         render_tex = pr.load_render_texture(200, 200)
         pr.begin_texture_mode(render_tex)
-        pr.clear_background(pr.Color(int(0 + (i / NOMBRE_BLOCS) * 155), 0, int(255 - (i / NOMBRE_BLOCS) * 155), 255))
+        pr.clear_background(pr.Color(
+            int(0 + (i / NOMBRE_BLOCS) * 155), 0, int(255 - (i / NOMBRE_BLOCS) * 155), 255))
+        text_size = pr.measure_text_ex(font, str(i), 200, 1.)
         pr.draw_text_ex(font, str(i), pr.Vector2(
-            int(render_tex.texture.width / 4), 10), 200, 1., pr.WHITE)
+            int((render_tex.texture.width - text_size.x) / 2), int((render_tex.texture.height - text_size.y) / 2)), 200, 1., pr.WHITE)
         pr.end_texture_mode()
         img = pr.load_image_from_texture(render_tex.texture)
         pr.unload_render_texture(render_tex)
@@ -107,7 +143,6 @@ def animate_bloc(t: float, depart: PositionCase, arrivee: PositionCase):
     pos_arrivee = POSITIONS[arrivee.l * TAILLE_GRILLE + arrivee.c]
     positions[arrivee.l * TAILLE_GRILLE + arrivee.c] = (pos_depart[0] + (pos_arrivee[0] - pos_depart[0]) * factor,
                                                         pos_depart[1] + (pos_arrivee[1] - pos_depart[1]) * factor)
-    # print(arrivee.l * TAILLE_GRILLE + arrivee.c, positions[arrivee.l * TAILLE_GRILLE + arrivee.c], grille)
 
 
 def handle_input():
@@ -152,9 +187,6 @@ def handle_input():
         bloc_depart = nouvelle_pos_vide
         bloc_arrivee = case_vide
 
-# grille = tq.generer_grille_aleatoire(True)
-
-plateau_init = []
 
 def process_move(grille, deplacements, indice, nombre_deplacements):
     global animating, bloc_depart, bloc_arrivee
@@ -194,10 +226,10 @@ def process_move(grille, deplacements, indice, nombre_deplacements):
             deplacements[indice] = tq.Card.O
         else:
             nouvelle_pos_vide = PositionCase(case_vide.l, case_vide.c + 1)
-            indice += 1    
+            indice += 1
 
     swap_cases(grille, case_vide.l, case_vide.c,
-                nouvelle_pos_vide.l, nouvelle_pos_vide.c)
+               nouvelle_pos_vide.l, nouvelle_pos_vide.c)
     nombre_deplacements += 1
     animating = True
     bloc_depart = nouvelle_pos_vide
@@ -205,91 +237,271 @@ def process_move(grille, deplacements, indice, nombre_deplacements):
 
     return indice, nombre_deplacements
 
-def render_solving(grille_depart, deplacements):
-    global grille, animating, camera
+def draw_back_button():
+    bg_color = pr.Color(50, 75, 255, 255)
+    text_width = pr.measure_text("Retour", 30)
+    if pr.check_collision_point_rec(pr.get_mouse_position(), pr.Rectangle(10, pr.get_render_height() - 40, text_width, 30)):
+        bg_color = pr.Color(50, 125, 255, 255)
+        if pr.is_mouse_button_down(pr.MouseButton.MOUSE_BUTTON_LEFT):
+            global state
+            state = State.TITLE_SCREEN
+    pr.draw_rectangle(10, pr.get_render_height() -
+                      40, text_width, 30, bg_color)
+    pr.draw_text("Retour", 10, pr.get_render_height() - 40, 30, pr.BLACK)
 
-    indice = 0
-    grille = grille_depart[:]
-    nombre_deplacements = 0
+def render_solving():
+    global animating, camera, nombre_deplacements, indice, deplacements
+
+    pr.update_camera(camera)
+    i = indice
+
+    if indice != len(deplacements):
+        indice, nombre_deplacements = process_move(
+            grille, deplacements, indice, nombre_deplacements)
+    if animating:
+        animate_bloc(pr.get_frame_time(), bloc_depart, bloc_arrivee)
+
+    pr.begin_drawing()
+    pr.clear_background(pr.Color(250, 250, 250, 255))
+    pr.begin_mode_3d(camera)
+    pr.draw_grid(20, 1.0)
+
+    for i in range(0, NOMBRE_CASES):
+        val = grille[i]
+        if val != -1:
+            pr.draw_model(blocks_models[val], pr.Vector3(
+                positions[i][0] * 2., 1., positions[i][1] * 2), 0.9, pr.WHITE)
+    pr.end_mode_3d()
+
+    is_solved = True
+    for i in range(0, NOMBRE_BLOCS):
+        if grille[i] != i:
+            is_solved = False
+
+    pr.draw_text("Nombre de mouvements : " + str(nombre_deplacements),
+                 pr.get_screen_width() - pr.measure_text("Nombre de mouvements : " +
+                                                         str(nombre_deplacements), 30) - 10,
+                 10, 30, pr.BLACK)
+    
+    pr.draw_text(str(pr.get_fps()), 10, 50, 30, pr.BLACK)
+
+    if is_solved and not animating:
+        pr.draw_text("Résolu", 10, 10, 30, pr.GREEN)
+    else:
+        pr.draw_text("Non résolu", 10, 10, 30, pr.RED)
+
+    draw_back_button()
+
+    print(state)
+
+    pr.end_drawing()
+
+
+def render_game():
+    global camera, grille, animating
+    pr.update_camera(camera)
+
+    handle_input()
+    if animating:
+        animate_bloc(pr.get_frame_time(), bloc_depart, bloc_arrivee)
+
+    pr.begin_drawing()
+    pr.clear_background(pr.Color(250, 250, 250, 255))
+    pr.begin_mode_3d(camera)
+    pr.draw_grid(20, 1.0)
+
+    for i in range(0, NOMBRE_CASES):
+        val = grille[i]
+        if val != -1:
+            pr.draw_model(blocks_models[val], pr.Vector3(
+                positions[i][0] * 2., 1., positions[i][1] * 2), 0.9, pr.WHITE)
+    pr.end_mode_3d()
+
+    is_solved = True
+    for i in range(0, NOMBRE_BLOCS):
+        if grille[i] != i:
+            is_solved = False
+
+    if is_solved and not animating:
+        pr.draw_text("Résolu", 10, 10, 30, pr.GREEN)
+    else:
+        pr.draw_text("Non résolu", 10, 10, 30, pr.RED)
+
+    draw_back_button()
+
+    pr.end_drawing()
+
+
+def get_card_from_number(value):
+    if value == 0:
+        return tq.Card.N
+    elif value == 1:
+        return tq.Card.S
+    elif value == 2:
+        return tq.Card.O
+    else:
+        return tq.Card.E
+
+
+def render_title_screen():
+    global camera, grille, nombre_deplacements
+    pr.update_camera(camera)
+
+    process_move(grille, [get_card_from_number(
+        random.randint(0, 3))], 0, nombre_deplacements)
+    if animating:
+        animate_bloc(pr.get_frame_time(), bloc_depart, bloc_arrivee)
+
+    pr.begin_drawing()
+    pr.clear_background(pr.Color(250, 250, 250, 255))
+    pr.begin_mode_3d(camera)
+    pr.draw_grid(20, 1.0)
+
+    for i in range(0, NOMBRE_CASES):
+        val = grille[i]
+        if val != -1:
+            pr.draw_model(blocks_models[val], pr.Vector3(
+                positions[i][0] * 2., 1., positions[i][1] * 2), 0.9, pr.WHITE)
+    pr.end_mode_3d()
+
+    new_state = State.TITLE_SCREEN
+
+    button_size = 100
+    button_scale = button_size / play_button.width
+
+    bg_color = pr.Color(50, 75, 255, 255)
+    button_pos = pr.Vector2(int(pr.get_screen_width(
+    ) / 2 - button_size * 1.5), int(pr.get_screen_height() - 200))
+    if pr.check_collision_point_rec(pr.get_mouse_position(), pr.Rectangle(button_pos.x, button_pos.y, button_scale * play_button.width, button_scale * play_button.width)):
+        bg_color = pr.Color(50, 125, 255, 255)
+        new_state = State.GAME
+    pr.draw_circle(int(button_pos.x + button_size / 2),
+                   int(button_pos.y + button_size / 2), button_size / 2, bg_color)
+    pr.draw_texture_ex(play_button, button_pos, 0., button_scale, pr.WHITE)
+
+    bg_color = pr.Color(50, 75, 255, 255)
+    button_pos = pr.Vector2(int(pr.get_screen_width(
+    ) / 2 + button_size / 2), int(pr.get_screen_height() - 200))
+    if pr.check_collision_point_rec(pr.get_mouse_position(), pr.Rectangle(button_pos.x, button_pos.y, button_scale * play_button.width, button_scale * play_button.width)):
+        bg_color = pr.Color(50, 125, 255, 255)
+        new_state = State.SOLVING_LOADING
+    pr.draw_circle(int(button_pos.x + button_size / 2),
+                   int(button_pos.y + button_size / 2), button_size / 2, bg_color)
+    pr.draw_texture_ex(resolve_button, button_pos, 0., button_scale, pr.WHITE)
+
+    bg_color = pr.Color(50, 75, 255, 255)
+    button_pos = pr.Vector2(int(pr.get_screen_width(
+    ) - button_size * 1.5), int(pr.get_screen_height() - button_size * 1.5))
+    if pr.check_collision_point_rec(pr.get_mouse_position(), pr.Rectangle(button_pos.x, button_pos.y, button_scale * play_button.width, button_scale * play_button.width)):
+        bg_color = pr.Color(50, 125, 255, 255)
+        new_state = State.SETTINGS
+    pr.draw_circle(int(button_pos.x + button_size / 2),
+                   int(button_pos.y + button_size / 2), button_size / 2, bg_color)
+    pr.draw_texture_ex(settings_button, button_pos, 0., button_scale, pr.WHITE)
+
+    title_width = pr.measure_text("Taquin 3D 2023", 70)
+    pr.draw_text("Taquin 3D 2023", int((pr.get_screen_width() - title_width) / 2), 50, 70, pr.Color(150, 50, 50, 255))
+
+    pr.end_drawing()
+
+    global state
+    if pr.is_mouse_button_down(pr.MouseButton.MOUSE_BUTTON_LEFT):
+        state = new_state
+    else:
+        state = State.TITLE_SCREEN
+
+
+def render_loading_screen():
+    pr.update_camera(camera)
+    pr.begin_drawing()
+    pr.clear_background(pr.GRAY)
+    reload_icon_size = 50
+    pr.draw_texture_pro(reload_texture,
+                        pr.Rectangle(0, 0, reload_texture.width,
+                                     reload_texture.height),
+                        pr.Rectangle(int(pr.get_screen_width() / 2),
+                                     int(pr.get_screen_height() / 2),
+                                     reload_icon_size, reload_icon_size),
+                        pr.Vector2(reload_icon_size / 2, reload_icon_size / 2),
+                        pr.get_time() % 30. * 360., pr.WHITE)
+    pr.begin_mode_3d(camera)
+    pr.end_mode_3d()
+
+    pr.end_drawing()
+
+
+def load_solution():
+    global deplacements
+    solution = tq.astar(grille)
+    if solution is not None:
+        deplacements = solution.liste_deplacement
+
+def base_camera():
+    return pr.Camera3D(BASE_CAMERA_POS[:], [0.0, 0.0, 0.0],
+                     [0.0, 1.0, 0.0], 45.0, 0)
+
+
+def run():
+    global animating, camera, state, last_state, grille, positions
+
+
+    random.seed()
+
+    last_state = State.INIT
+    state = State.TITLE_SCREEN
+
+    loading_thread: threading.Thread = threading.Thread()
 
     while not pr.window_should_close():
-        pr.update_camera(camera)
-        i = indice
+        if state == State.TITLE_SCREEN:
+            if state != last_state:
+                camera = base_camera()
+                camera.position.z = 18.
+                pr.set_camera_mode(camera, pr.CameraMode.CAMERA_ORBITAL)
 
-        if indice != len(deplacements):
-            indice, nombre_deplacements = process_move(grille, deplacements, indice, nombre_deplacements)
-        if animating:
-            animate_bloc(pr.get_frame_time(), bloc_depart, bloc_arrivee)
+            last_state = state
+            render_title_screen()
+        elif state == State.SETTINGS:
+            ...
+        elif state == State.GAME:
+            if state != last_state:
+                camera = base_camera()
+                pr.set_camera_mode(camera, pr.CameraMode.CAMERA_FREE)
 
-        pr.begin_drawing()
-        pr.clear_background(pr.Color(250, 250, 250, 255))
-        pr.begin_mode_3d(camera)
-        pr.draw_grid(20, 1.0)
+                grille = tq.generer_grille_aleatoire(True)
+                positions = POSITIONS[:]
+                animating = False
 
-        for i in range(0, NOMBRE_CASES):
-            val = grille[i]
-            if val != -1:
-                pr.draw_model(blocks_models[val], pr.Vector3(
-                    positions[i][0] * 2., 1., positions[i][1] * 2), 0.9, pr.WHITE)
-        pr.end_mode_3d()
+            last_state = state
+            render_game()
+        elif state == State.RENDER_SOLVING:
+            if state != last_state:
+                camera = base_camera()
+                pr.set_camera_mode(camera, pr.CameraMode.CAMERA_FREE)
+                positions = POSITIONS[:]
+                animating = False
 
-        is_solved = True
-        for i in range(0, NOMBRE_BLOCS):
-            if grille[i] != i:
-                is_solved = False
+            last_state = state
+            render_solving()
+        elif state == State.SOLVING_LOADING:
+            if state != last_state:
+                global indice, nombre_deplacements, deplacements
+                indice = 0
+                nombre_deplacements = 0
+                grille = tq.generer_grille_aleatoire(True)
+                loading_thread = threading.Thread(target=load_solution)
+                loading_thread.start()
 
-        pr.draw_text("Nombre de mouvements : " + str(nombre_deplacements), 300, 10, 30, pr.BLACK)
+            last_state = state
+            render_loading_screen()
 
-        if is_solved and not animating:
-            pr.draw_text("Résolu", 10, 10, 30, pr.GREEN)
-        else:
-            pr.draw_text("Non résolu", 10, 10, 30, pr.RED)
-        pr.end_drawing()
+            if not loading_thread.is_alive():
+                state = State.RENDER_SOLVING
+
     pr.close_window()
 
-def run_game():
-    global animating, camera
-
-    while not pr.window_should_close():
-        pr.update_camera(camera)
-
-        handle_input()
-        if animating:
-            animate_bloc(pr.get_frame_time(), bloc_depart, bloc_arrivee)
-
-        pr.begin_drawing()
-        pr.clear_background(pr.Color(250, 250, 250, 255))
-        pr.begin_mode_3d(camera)
-        pr.draw_grid(20, 1.0)
-
-        for i in range(0, NOMBRE_CASES):
-            val = grille[i]
-            if val != -1:
-                pr.draw_model(blocks_models[val], pr.Vector3(
-                    positions[i][0] * 2., 1., positions[i][1] * 2), 0.9, pr.WHITE)
-        pr.end_mode_3d()
-
-        is_solved = True
-        for i in range(0, NOMBRE_BLOCS):
-            if grille[i] != i:
-                is_solved = False
-
-        if is_solved and not animating:
-            pr.draw_text("Résolu", 10, 10, 30, pr.GREEN)
-        else:
-            pr.draw_text("Non résolu", 10, 10, 30, pr.RED)
-        pr.end_drawing()
-    pr.close_window()
 
 if __name__ == '__main__':
-    plateau = [1, 3, -1, 
-               5, 7, 6, 
-               4, 2, 0]
-    deplacements = tq.astar(plateau)
-    if deplacements is not None:
-        deplacements = deplacements.liste_deplacement
-        plateau_init = plateau[:]
-
-        init()
-
-        render_solving(plateau, deplacements)
+    init()
+    # render_solving(plateau, deplacements)
+    run()
