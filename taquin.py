@@ -33,6 +33,13 @@ Etat.__annotations__ = {
     'parent': Etat, 'liste_deplacement': list[str], 'cout': int}
 
 
+def set_weight_set(new_value):
+    global K
+    K = new_value % (len(POIDS_TUILES) // NOMBRE_TUILES)
+    if K == 0:
+        K = 6
+
+
 # la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
     result: list[Etat] = []
@@ -93,7 +100,7 @@ def get_poids_tuile(k: int, i: int):
 def distance_elem(position: tuple[int, int], i: int):
     return abs(position[1] - i // DIM_GRILLE) + abs(position[0] - i % DIM_GRILLE)
 
-# l'heuristique sera une distance de manathan pondéré.
+# l'heuristique sera une distance de Manhattan pondéré.
 
 
 def heuristique(k: int, etat_courant: list[int]):
