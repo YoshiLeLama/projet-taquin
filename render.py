@@ -47,6 +47,7 @@ nombre_deplacements = 0
 indice = 0
 solution: tq.Etat | None
 deplacements: list[tq.Card] = []
+liste_deplacements_initiale: list[tq.Card] = []
 
 duree_animation = 0.5
 total_t = 0
@@ -143,7 +144,6 @@ def animate_bloc(t: float, depart: PositionCase, arrivee: PositionCase):
     global total_t, positions, animating
     total_t += t
     if total_t >= duree_animation:
-        print(duree_animation)
         positions[arrivee.ligne * tq.DIM_GRILLE +
                   arrivee.colonne] = POSITIONS[arrivee.ligne * tq.DIM_GRILLE + arrivee.colonne]
         animating = False
@@ -246,8 +246,8 @@ def draw_back_button(target_state: State):
         if pr.is_mouse_button_pressed(pr.MouseButton.MOUSE_BUTTON_LEFT):
             global state
             state = target_state
-    pr.draw_rectangle(10, pr.get_render_height() -
-                      40, text_width, 30, bg_color)
+    pr.draw_rectangle(8, pr.get_render_height() -
+                      40, text_width + 4, 30, bg_color)
     pr.draw_text("Retour", 10, pr.get_render_height() - 40, 30, pr.BLACK)
 
 
@@ -261,7 +261,10 @@ def draw_reload_button(position: pr.Vector2, size: int):
         bg_color = BUTTON_BG_HOVERED
 
         if pr.is_mouse_button_pressed(pr.MouseButton.MOUSE_BUTTON_LEFT):
-            reload_game()
+            if state == State.GAME:
+                reload_game()
+            elif state == State.RENDER_SOLVING:
+                restart_solving()
 
     pr.draw_circle(int(position.x + size / 2),
                    int(position.y + size / 2), size / 2, bg_color)
@@ -300,6 +303,15 @@ def render_solved_text():
         pr.draw_text("Non résolu", 10, 10, 30, pr.RED)
 
 
+def restart_solving():
+    global indice, nombre_deplacements, grille_actuelle, deplacements
+    indice = 0
+    nombre_deplacements = 0
+    grille_actuelle = grille_initiale[:]
+    deplacements = liste_deplacements_initiale[:]
+    reset_animation()
+
+
 def render_solving():
     global animating, camera, nombre_deplacements, indice, deplacements
 
@@ -315,6 +327,10 @@ def render_solving():
     draw_nombre_mouvements()
 
     pr.draw_text(str(pr.get_fps()), 10, 50, 30, pr.BLACK)
+
+    button_size = 80
+    draw_reload_button(pr.Vector2(pr.get_screen_width() - button_size - 10,
+                                  pr.get_screen_height() - button_size - 10), button_size)
 
     render_solved_text()
 
@@ -463,11 +479,12 @@ def render_settings():
                       pr.get_render_height() - SETTINGS_PANEL_MARGIN * 2, pr.Color(255, 255, 255, 220))
 
     font_size = 30
-    size = int(pr.measure_text("Vitesse de déplacement : ", font_size))
+    contenu = "Durée d'animation : "
+    size = int(pr.measure_text(contenu, font_size))
     value = round(duree_animation, 1)
     position = pr.Vector2(pr.get_screen_width() / 2 - size,
                           SETTINGS_PANEL_MARGIN + 10)
-    pr.draw_text("Vitesse de déplacement : " + str(value),
+    pr.draw_text(contenu + str(value),
                  int(position.x), int(position.y), font_size, pr.BLACK)
 
     if pr.check_collision_point_rec(pr.get_mouse_position(),
@@ -575,10 +592,11 @@ def render_resolve_settings():
 
 
 def load_solution():
-    global deplacements, solution
+    global deplacements, solution, liste_deplacements_initiale
     solution = tq.astar(grille_actuelle)
     if solution is not None:
         deplacements = solution.liste_deplacement
+        liste_deplacements_initiale = deplacements[:]
 
 
 def base_camera():
