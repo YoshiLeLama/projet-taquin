@@ -484,16 +484,19 @@ def render_settings():
     value = round(duree_animation, 1)
     position = pr.Vector2(pr.get_screen_width() / 2 - size,
                           SETTINGS_PANEL_MARGIN + 10)
-    pr.draw_text(contenu + str(value),
-                 int(position.x), int(position.y), font_size, pr.BLACK)
+    color = pr.BLACK
 
     if pr.check_collision_point_rec(pr.get_mouse_position(),
                                     pr.Rectangle(position.x, position.y,
                                                  size + pr.measure_text(str(value), font_size), font_size)):
+        color = pr.GRAY
         if pr.get_mouse_wheel_move_v().y > 0:
-            duree_animation = min(2.0, duree_animation + 0.1)
+            duree_animation = min(1.5, duree_animation + 0.1)
         elif pr.get_mouse_wheel_move_v().y < 0:
             duree_animation = max(0.2, duree_animation - 0.1)
+
+    pr.draw_text(contenu + str(value),
+                 int(position.x), int(position.y), font_size, color)
 
     draw_back_button(State.TITLE_SCREEN)
     pr.end_drawing()
@@ -541,9 +544,9 @@ def render_resolve_settings():
                                case_scale,
                                pr.WHITE)
 
-            if selected_cases[0] == i:
-                pr.draw_rectangle_lines_ex(pr.Rectangle(int(position.x), int(position.y), taille_case, taille_case),
-                                           5., pr.BLACK)
+        if selected_cases[0] == i:
+            pr.draw_rectangle_lines_ex(pr.Rectangle(int(position.x), int(position.y), taille_case, taille_case),
+                                       5., pr.BLACK)
 
         if pr.check_collision_point_rec(pr.get_mouse_position(),
                                         pr.Rectangle(position.x, position.y,
