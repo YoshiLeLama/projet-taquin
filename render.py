@@ -220,7 +220,13 @@ def process_move():
         if case_vide.ligne == 0:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne + 1, case_vide.colonne)
-            deplacements[indice] = tq.Card.S
+
+            if tq.DIM_GRILLE > 2:
+                deplacements.pop(indice)
+
+                for i in range(0, tq.DIM_GRILLE - 1):
+                    deplacements.insert(indice + i, tq.Card.S)
+                indice += 1
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne - 1, case_vide.colonne)
@@ -229,7 +235,13 @@ def process_move():
         if case_vide.ligne == tq.DIM_GRILLE - 1:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne - 1, case_vide.colonne)
-            deplacements[indice] = tq.Card.N
+
+            if tq.DIM_GRILLE > 2:
+                deplacements.pop(indice)
+
+                for i in range(0, tq.DIM_GRILLE - 1):
+                    deplacements.insert(indice + 1, tq.Card.N)
+                indice += 1
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne + 1, case_vide.colonne)
@@ -238,7 +250,11 @@ def process_move():
         if case_vide.colonne == 0:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne + 1)
-            deplacements[indice] = tq.Card.E
+
+            if tq.DIM_GRILLE > 2:
+                deplacements.pop(indice)
+                for i in range(0, tq.DIM_GRILLE - 1):
+                    deplacements.insert(indice + i, tq.Card.E)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne - 1)
@@ -247,7 +263,12 @@ def process_move():
         if case_vide.colonne == tq.DIM_GRILLE - 1:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne - 1)
-            deplacements[indice] = tq.Card.O
+
+            if tq.DIM_GRILLE > 2:
+                deplacements.pop(indice)
+
+                for i in range(0, tq.DIM_GRILLE - 1):
+                    deplacements.insert(indice + i, tq.Card.O)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne + 1)
