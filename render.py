@@ -91,7 +91,6 @@ def generate_cubes():
     font_size = NUM_TEXTURE_SIZE
     max_value_str = str(tq.NOMBRE_TUILES - 1)
     if len(max_value_str) >= 3:
-        print(font_size / len(max_value_str))
         font_size /= len(max_value_str) - 1
 
     for i in range(0, tq.NOMBRE_TUILES):
@@ -124,7 +123,7 @@ def generate_cubes():
 
 
 def init():
-    global camera, font, num_textures, blocks_models, grille_actuelle, deplacements, render_tex
+    global camera, font, num_textures, blocks_models, grille_actuelle, deplacements
     pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT | pr.ConfigFlags.FLAG_VSYNC_HINT)
 
     pr.init_window(800, 450, "Taquin")
@@ -303,6 +302,7 @@ def draw_back_button(target_state: State):
     if pr.check_collision_point_rec(pr.get_mouse_position(),
                                     pr.Rectangle(10, pr.get_render_height() - 40, text_width, 30)):
         bg_color = pr.Color(50, 125, 255, 255)
+        pr.set_mouse_cursor(pr.MouseCursor.MOUSE_CURSOR_POINTING_HAND)
         if pr.is_mouse_button_pressed(pr.MouseButton.MOUSE_BUTTON_LEFT):
             global state
             state = target_state
@@ -315,10 +315,10 @@ def draw_reload_button(position: pr.Vector2, size: int):
     button_scale = size / reload_texture.width
     bg_color = BUTTON_BG
 
-    if pr.check_collision_point_rec(pr.get_mouse_position(),
-                                    pr.Rectangle(position.x, position.y, button_scale * play_texture.width,
-                                                 button_scale * play_texture.width)):
+    if pr.check_collision_point_circle(pr.get_mouse_position(), pr.Vector2(int(position.x + size / 2),
+                                                                           int(position.y + size / 2)), size / 2):
         bg_color = BUTTON_BG_HOVERED
+        pr.set_mouse_cursor(pr.MouseCursor.MOUSE_CURSOR_POINTING_HAND)
 
         if pr.is_mouse_button_pressed(pr.MouseButton.MOUSE_BUTTON_LEFT):
             if state == State.GAME:
@@ -457,10 +457,11 @@ def draw_state_switch_button(texture: pr.Texture, position: pr.Vector2, size: in
     button_scale = size / texture.width
     bg_color = BUTTON_BG
 
-    if pr.check_collision_point_rec(pr.get_mouse_position(),
-                                    pr.Rectangle(position.x, position.y, button_scale * play_texture.width,
-                                                 button_scale * play_texture.width)):
+    if pr.check_collision_point_circle(pr.get_mouse_position(),
+                                       pr.Vector2(int(position.x + size / 2), int(position.y + size / 2)),
+                                       size / 2):
         bg_color = BUTTON_BG_HOVERED
+        pr.set_mouse_cursor(pr.MouseCursor.MOUSE_CURSOR_POINTING_HAND)
 
         if pr.is_mouse_button_pressed(pr.MouseButton.MOUSE_BUTTON_LEFT):
             global state
@@ -662,8 +663,12 @@ def render_resolve_settings():
         pr.draw_texture_ex(play_texture, button_position, 0., button_size / play_texture.width,
                            pr.Color(255, 255, 255, 255))
     if tq.DIM_GRILLE == 3:
-        pr.draw_text("Set de poids " + str(tq.K), 10,
-                     pr.get_screen_height() - 100, 30, pr.BLACK)
+        text = "Set de poids " + str(tq.K)
+        font_size = 30
+        text_width = pr.measure_text(text, font_size)
+
+        pr.draw_text(text, int((pr.get_screen_width() - text_width) / 2),
+                     pr.get_screen_height() - font_size - 10, font_size, pr.BLACK)
 
         if pr.get_mouse_wheel_move_v().y > 0:
             tq.set_weight_set(tq.K + 1)
@@ -705,9 +710,9 @@ def run():
     state = State.TITLE_SCREEN
 
     loading_thread: threading.Thread = threading.Thread()
-    apply_settings_thread: threading.Thread = threading.Thread()
 
     while not pr.window_should_close():
+        pr.set_mouse_cursor(pr.MouseCursor.MOUSE_CURSOR_DEFAULT)
         if state == State.TITLE_SCREEN:
             if state != last_state:
                 camera = base_camera()
