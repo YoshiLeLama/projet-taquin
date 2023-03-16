@@ -1,3 +1,4 @@
+import collections
 import math
 import random
 import threading
@@ -25,7 +26,6 @@ class State(Enum):
 # constantes
 POSITIONS: list[PositionCase]
 
-
 BASE_CAMERA_POS = [0., 16.0, 5.0]
 BUTTON_BG = pr.Color(50, 75, 255, 255)
 BUTTON_BG_HOVERED = pr.Color(50, 125, 255, 255)
@@ -44,9 +44,8 @@ positions: list[PositionCase]
 grille_initiale: list[int] = []
 grille_actuelle: list[int] = []
 nombre_deplacements = 0
-indice = 0
 solution: tq.Etat | None
-deplacements: list[tq.Card] = []
+deplacements: collections.deque[tq.Card] = []
 liste_deplacements_initiale: list[tq.Card] = []
 
 duree_animation = 0.5
@@ -72,7 +71,7 @@ def generate_base_positions():
 
 
 def init():
-    global camera, font, num_textures, blocks_models, grille_actuelle
+    global camera, font, num_textures, blocks_models, grille_actuelle, deplacements
     pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT)
 
     pr.init_window(800, 450, "Taquin")
@@ -119,6 +118,7 @@ def init():
         blocks_models.append(model)
 
     generate_base_positions()
+    deplacements = collections.deque([tq.Card.N])
 
     for i in range(0, tq.NOMBRE_TUILES):
         grille_actuelle.append(i)
@@ -205,8 +205,15 @@ def handle_input():
         nombre_deplacements += 1
 
 
+def process_edge_case(card: tq.Card):
+    global deplacements
+    if tq.DIM_GRILLE > 2:
+        for i in range(1, tq.DIM_GRILLE - 1):
+            deplacements.appendleft(card)
+
+
 def process_move():
-    global animating, bloc_depart, bloc_arrivee, deplacements, nombre_deplacements, indice
+    global animating, bloc_depart, bloc_arrivee, deplacements, nombre_deplacements
 
     if animating:
         return
@@ -214,65 +221,44 @@ def process_move():
     case_vide = get_position_valeur(grille_actuelle, -1)
     nouvelle_pos_vide = case_vide
 
-    deplacement = deplacements[indice]
+    deplacement = deplacements.popleft()
 
     if deplacement == tq.Card.N:
         if case_vide.ligne == 0:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne + 1, case_vide.colonne)
 
-            if tq.DIM_GRILLE > 2:
-                deplacements.pop(indice)
-
-                for i in range(0, tq.DIM_GRILLE - 1):
-                    deplacements.insert(indice + i, tq.Card.S)
-                indice += 1
+            process_edge_case(tq.Card.S)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne - 1, case_vide.colonne)
-            indice += 1
     elif deplacement == tq.Card.S:
         if case_vide.ligne == tq.DIM_GRILLE - 1:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne - 1, case_vide.colonne)
 
-            if tq.DIM_GRILLE > 2:
-                deplacements.pop(indice)
-
-                for i in range(0, tq.DIM_GRILLE - 1):
-                    deplacements.insert(indice + 1, tq.Card.N)
-                indice += 1
+            process_edge_case(tq.Card.N)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne + 1, case_vide.colonne)
-            indice += 1
     elif deplacement == tq.Card.O:
         if case_vide.colonne == 0:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne + 1)
 
-            if tq.DIM_GRILLE > 2:
-                deplacements.pop(indice)
-                for i in range(0, tq.DIM_GRILLE - 1):
-                    deplacements.insert(indice + i, tq.Card.E)
+            process_edge_case(tq.Card.E)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne - 1)
-            indice += 1
     elif deplacement == tq.Card.E:
         if case_vide.colonne == tq.DIM_GRILLE - 1:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne - 1)
 
-            if tq.DIM_GRILLE > 2:
-                deplacements.pop(indice)
-
-                for i in range(0, tq.DIM_GRILLE - 1):
-                    deplacements.insert(indice + i, tq.Card.O)
+            process_edge_case(tq.Card.O)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne + 1)
-            indice += 1
 
     swap_cases(grille_actuelle, case_vide.ligne, case_vide.colonne,
                nouvelle_pos_vide.ligne, nouvelle_pos_vide.colonne)
@@ -334,9 +320,14 @@ def render_grid():
 
     for i in range(0, tq.NOMBRE_CASES):
         val = grille_actuelle[i]
+        x: float
+        if tq.DIM_GRILLE % 2 == 0:
+            x = 1.0
+        else:
+            x = 0
         if val != -1:
             pr.draw_model(blocks_models[val], pr.Vector3(
-                positions[i][0] * 2., 1., positions[i][1] * 2), 0.9, pr.WHITE)
+                positions[i][0] * 2. + x, 1., positions[i][1] * 2 + x), 0.9, pr.WHITE)
     pr.end_mode_3d()
 
 
@@ -349,20 +340,19 @@ def render_solved_text():
 
 
 def restart_solving():
-    global indice, nombre_deplacements, grille_actuelle, deplacements
-    indice = 0
+    global nombre_deplacements, grille_actuelle, deplacements
     nombre_deplacements = 0
     grille_actuelle = grille_initiale[:]
-    deplacements = liste_deplacements_initiale[:]
+    deplacements = collections.deque(liste_deplacements_initiale[:])
     reset_animation()
 
 
 def render_solving():
-    global animating, camera, nombre_deplacements, indice, deplacements
+    global animating, camera, nombre_deplacements, deplacements
 
     pr.update_camera(camera)
 
-    if indice != len(deplacements):
+    if len(deplacements) > 0:
         process_move()
 
     pr.begin_drawing()
@@ -453,9 +443,8 @@ def draw_state_switch_button(texture: pr.Texture, position: pr.Vector2, size: in
 
 
 def process_title_screen_moves():
-    global deplacements, indice, nombre_deplacements
-    deplacements = [get_card_from_number(random.randint(0, 3))]
-    indice = 0
+    global deplacements, nombre_deplacements
+    deplacements.appendleft(get_card_from_number(random.randint(0, 3)))
     process_move()
 
 
@@ -486,7 +475,7 @@ def render_title_screen():
 
     title_width = pr.measure_text("Taquin 3D 2023", 70)
     pr.draw_text("Taquin 3D 2023", int((pr.get_screen_width() -
-                 title_width) / 2), 50, 70, pr.Color(150, 50, 50, 255))
+                                        title_width) / 2), 50, 70, pr.Color(150, 50, 50, 255))
 
     pr.end_drawing()
 
@@ -573,24 +562,33 @@ def render_resolve_settings():
 
     pr.draw_text(text, 10, 10, 30, color)
 
-    taille_case = 100
+    taille_case = (min(pr.get_screen_width(), pr.get_screen_height()) * 0.75) / tq.DIM_GRILLE
+    print((min(pr.get_screen_width(), pr.get_screen_width()) / 2))
     case_scale = taille_case / num_textures_for_2d[0].width
 
     hovered_case = -1
 
     global selected_cases
     for i in range(0, tq.NOMBRE_CASES):
+        x: float
+        if tq.DIM_GRILLE % 2 == 0:
+            x = tq.DIM_GRILLE // 2
+        else:
+            x = tq.DIM_GRILLE // 2 + 0.5
         position = pr.Vector2(
             int(pr.get_screen_width() / 2 +
-                taille_case * (i % tq.DIM_GRILLE - tq.DIM_GRILLE // 2 - 0.5)),
+                taille_case * (i % tq.DIM_GRILLE - x)),
             int(pr.get_screen_height() / 2 +
-                taille_case * (i // tq.DIM_GRILLE - tq.DIM_GRILLE // 2 - 0.5)))
+                taille_case * (i // tq.DIM_GRILLE - x)))
         if grille_actuelle[i] != -1:
             pr.draw_texture_ex(num_textures_for_2d[grille_actuelle[i]],
                                position,
                                0,
                                case_scale,
                                pr.WHITE)
+
+            pr.draw_rectangle_lines_ex(pr.Rectangle(int(position.x), int(position.y), taille_case, taille_case),
+                                       2., pr.WHITE)
 
         if selected_cases[0] == i:
             pr.draw_rectangle_lines_ex(pr.Rectangle(int(position.x), int(position.y), taille_case, taille_case),
@@ -622,9 +620,14 @@ def render_resolve_settings():
                        button_size / 2, pr.GRAY)
         pr.draw_texture_ex(play_texture, button_position, 0., button_size / play_texture.width,
                            pr.Color(255, 255, 255, 255))
+    if tq.DIM_GRILLE == 3:
+        pr.draw_text("Set de poids " + str(tq.K), 10,
+                     pr.get_screen_height() - 100, 30, pr.BLACK)
 
-    pr.draw_text("Set de poids " + str(tq.K), 10,
-                 pr.get_screen_height() - 100, 30, pr.BLACK)
+        if pr.get_mouse_wheel_move_v().y > 0:
+            tq.set_weight_set(tq.K + 1)
+        elif pr.get_mouse_wheel_move_v().y < 0:
+            tq.set_weight_set(tq.K - 1)
 
     if hovered_case != -1:
         tooltip = "poids = " + str(tq.get_poids_tuile(tq.K, hovered_case))
@@ -634,11 +637,6 @@ def render_resolve_settings():
                      int(pr.get_mouse_position().y), 20,
                      pr.WHITE)
 
-    if pr.get_mouse_wheel_move_v().y > 0:
-        tq.set_weight_set(tq.K + 1)
-    elif pr.get_mouse_wheel_move_v().y < 0:
-        tq.set_weight_set(tq.K - 1)
-
     draw_back_button(State.TITLE_SCREEN)
     pr.end_drawing()
 
@@ -647,8 +645,8 @@ def load_solution():
     global deplacements, solution, liste_deplacements_initiale
     solution = tq.astar(grille_actuelle)
     if solution is not None:
-        deplacements = solution.liste_deplacement
-        liste_deplacements_initiale = deplacements[:]
+        liste_deplacements_initiale = solution.liste_deplacement[:]
+        deplacements = collections.deque(liste_deplacements_initiale)
 
 
 def base_camera():
@@ -657,7 +655,7 @@ def base_camera():
 
 
 def run():
-    global animating, camera, state, last_state, grille_actuelle, grille_initiale, positions, indice
+    global animating, camera, state, last_state, grille_actuelle, grille_initiale, positions
     global nombre_deplacements, deplacements
 
     random.seed()
@@ -674,6 +672,7 @@ def run():
                 camera.position.z = 18.
                 pr.set_camera_mode(camera, pr.CameraMode.CAMERA_ORBITAL)
                 grille_actuelle = tq.generer_grille_aleatoire()
+                deplacements = collections.deque()
                 reset_animation()
 
             last_state = state
@@ -703,7 +702,6 @@ def run():
             render_solving()
         elif state == State.SOLVING_LOADING:
             if state != last_state:
-                indice = 0
                 nombre_deplacements = 0
                 grille_initiale = grille_actuelle[:]
 
@@ -733,6 +731,6 @@ def set_dim_grille(new_dim: int):
 
 
 if __name__ == '__main__':
-    set_dim_grille(4)
+    set_dim_grille(3)
     init()
     run()

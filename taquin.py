@@ -230,7 +230,6 @@ def solvable(plateau_initial):
     # => condition de solvabilité du taquin, cf. la page Wikipedia du taquin
 
     i = plateau_initial.index(-1)
-    print(DIM_GRILLE - (i % DIM_GRILLE) + DIM_GRILLE - (i // DIM_GRILLE))
     return nb_permutations % 2 == (DIM_GRILLE - (i % DIM_GRILLE) + DIM_GRILLE - (i // DIM_GRILLE) - 2) % 2
 
 
