@@ -1,5 +1,4 @@
 import collections
-import math
 import random
 import threading
 from collections import namedtuple
@@ -21,6 +20,7 @@ class State(Enum):
     RENDER_SOLVING = 4
     SOLVING_LOADING = 5
     SOLVING_SETTINGS = 6
+    APPLY_SETTINGS = 7
 
 
 # constantes
@@ -29,10 +29,11 @@ POSITIONS: list[PositionCase]
 BASE_CAMERA_POS = [0., 16.0, 5.0]
 BUTTON_BG = pr.Color(50, 75, 255, 255)
 BUTTON_BG_HOVERED = pr.Color(50, 125, 255, 255)
+NUM_TEXTURE_SIZE = 200
 
 # variables globales
 camera: pr.Camera3D
-font = None
+font: pr.Font
 num_textures: list[pr.Texture] = []
 num_textures_for_2d: list[pr.Texture] = []
 blocks_models: list[pr.Model] = []
@@ -45,10 +46,12 @@ grille_initiale: list[int] = []
 grille_actuelle: list[int] = []
 nombre_deplacements = 0
 solution: tq.Etat | None
-deplacements: collections.deque[tq.Card] = []
+deplacements: collections.deque[tq.Card] = collections.deque()
 liste_deplacements_initiale: list[tq.Card] = []
 
-duree_animation = 0.5
+settings_duree_animation = 0.5
+settings_taille_grille = tq.DIM_GRILLE
+
 total_t = 0
 animating = False
 bloc_depart = PositionCase(0., 0.)
@@ -70,44 +73,44 @@ def generate_base_positions():
     positions = POSITIONS[:]
 
 
-def init():
-    global camera, font, num_textures, blocks_models, grille_actuelle, deplacements
-    pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT)
+def generate_cubes():
+    global font, num_textures, num_textures_for_2d, blocks_models, camera
 
-    pr.init_window(800, 450, "Taquin")
-    pr.set_window_state(pr.ConfigFlags.FLAG_WINDOW_RESIZABLE)
-    pr.set_window_min_size(800, 450)
-    pr.set_target_fps(60)
+    for i in num_textures:
+        pr.unload_texture(i)
+    for i in num_textures_for_2d:
+        pr.unload_texture(i)
+    for i in blocks_models:
+        pr.unload_model(i)
+    num_textures.clear()
+    num_textures_for_2d.clear()
+    blocks_models.clear()
 
-    camera = pr.Camera3D(BASE_CAMERA_POS[:], [0.0, 0.0, 0.0],
-                         [0.0, 1.0, 0.0], 45.0, 0)
-    pr.set_camera_mode(camera, pr.CameraMode.CAMERA_FREE)
+    render_tex = pr.load_render_texture(NUM_TEXTURE_SIZE, NUM_TEXTURE_SIZE)
 
-    font = pr.load_font_ex("resources/font/JetBrainsMono.ttf", 200, None, 0)
-
-    global settings_texture, play_texture, resolve_texture, reload_texture
-    resolve_texture = pr.load_texture('resources/image/idea.png')
-    play_texture = pr.load_texture('resources/image/play.png')
-    settings_texture = pr.load_texture('resources/image/setting.png')
-    reload_texture = pr.load_texture('resources/image/reload.png')
+    font_size = NUM_TEXTURE_SIZE
+    max_value_str = str(tq.NOMBRE_TUILES - 1)
+    if len(max_value_str) >= 3:
+        print(font_size / len(max_value_str))
+        font_size /= len(max_value_str) - 1
 
     for i in range(0, tq.NOMBRE_TUILES):
-        render_tex = pr.load_render_texture(200, 200)
         pr.begin_texture_mode(render_tex)
         pr.clear_background(
             pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), 0, int(255 - (i / tq.NOMBRE_TUILES) * 155), 255))
-        text_size = pr.measure_text_ex(font, str(i), 200, 1.)
-        pr.draw_text_ex(font, str(i), pr.Vector2(int((render_tex.texture.width - text_size.x) / 2),
-                                                 int((render_tex.texture.height - text_size.y) / 2)),
-                        200, 1., pr.WHITE)
+
+        text = str(i)
+        text_size = pr.measure_text_ex(font, text, font_size, 1.)
+        pr.draw_text_ex(font, text, pr.Vector2(int((render_tex.texture.width - text_size.x) / 2),
+                                               int((render_tex.texture.height - text_size.y) / 2)),
+                        font_size, 1., pr.WHITE)
         pr.end_texture_mode()
+
         img = pr.load_image_from_texture(render_tex.texture)
         num_textures.append(pr.load_texture_from_image(img))
         img = pr.load_image_from_texture(render_tex.texture)
         pr.image_flip_vertical(img)
         num_textures_for_2d.append(pr.load_texture_from_image(img))
-
-        pr.unload_render_texture(render_tex)
 
     for i in range(0, tq.NOMBRE_TUILES):
         mesh = pr.gen_mesh_cube(2., 2., 2.)
@@ -116,6 +119,32 @@ def init():
         model.materials[0].maps[pr.MaterialMapIndex.MATERIAL_MAP_ALBEDO].texture = num_textures[i]
 
         blocks_models.append(model)
+
+    return
+
+
+def init():
+    global camera, font, num_textures, blocks_models, grille_actuelle, deplacements, render_tex
+    pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT | pr.ConfigFlags.FLAG_VSYNC_HINT)
+
+    pr.init_window(800, 450, "Taquin")
+    pr.set_window_state(pr.ConfigFlags.FLAG_WINDOW_RESIZABLE)
+    pr.set_window_min_size(800, 450)
+    print(pr.get_monitor_refresh_rate(pr.get_current_monitor()))
+    pr.set_target_fps(pr.get_monitor_refresh_rate(pr.get_current_monitor()))
+
+    camera = pr.Camera3D(BASE_CAMERA_POS[:], [0.0, 0.0, 0.0],
+                         [0.0, 1.0, 0.0], 45.0, 0)
+    pr.set_camera_mode(camera, pr.CameraMode.CAMERA_FREE)
+
+    global settings_texture, play_texture, resolve_texture, reload_texture
+    resolve_texture = pr.load_texture('resources/image/idea.png')
+    play_texture = pr.load_texture('resources/image/play.png')
+    settings_texture = pr.load_texture('resources/image/setting.png')
+    reload_texture = pr.load_texture('resources/image/reload.png')
+    font = pr.load_font_ex("resources/font/JetBrainsMono.ttf", 200, None, 0)
+
+    generate_cubes()
 
     generate_base_positions()
     deplacements = collections.deque([tq.Card.N])
@@ -155,13 +184,13 @@ def reset_animation():
 def animate_bloc(t: float, depart: PositionCase, arrivee: PositionCase):
     global total_t, positions, animating
     total_t += t
-    if total_t >= duree_animation:
+    if total_t >= settings_duree_animation:
         positions[arrivee.ligne * tq.DIM_GRILLE +
                   arrivee.colonne] = POSITIONS[arrivee.ligne * tq.DIM_GRILLE + arrivee.colonne]
         animating = False
         total_t = 0.0
         return
-    normal_time = total_t / duree_animation
+    normal_time = total_t / settings_duree_animation
     factor = (normal_time * normal_time * (3.0 - 2.0 * normal_time))
     pos_depart = POSITIONS[depart.ligne * tq.DIM_GRILLE + depart.colonne]
     pos_arrivee = POSITIONS[arrivee.ligne * tq.DIM_GRILLE + arrivee.colonne]
@@ -326,8 +355,8 @@ def render_grid():
         else:
             x = 0
         if val != -1:
-            pr.draw_model(blocks_models[val], pr.Vector3(
-                positions[i][0] * 2. + x, 1., positions[i][1] * 2 + x), 0.9, pr.WHITE)
+            pr.draw_model(blocks_models[val], pr.Vector3(positions[i].ligne * 2. + x, 1., positions[i].colonne * 2 + x),
+                          0.9, pr.WHITE)
     pr.end_mode_3d()
 
 
@@ -360,7 +389,6 @@ def render_solving():
     render_grid()
 
     draw_nombre_mouvements()
-
     pr.draw_text(str(pr.get_fps()), 10, 50, 30, pr.BLACK)
 
     button_size = 80
@@ -402,6 +430,7 @@ def render_game():
     draw_nombre_mouvements()
 
     draw_back_button(State.TITLE_SCREEN)
+    pr.draw_text(str(pr.get_fps()), 10, 50, 30, pr.BLACK)
 
     button_size = 80
     draw_reload_button(pr.Vector2(pr.get_screen_width() - button_size - 10,
@@ -504,8 +533,33 @@ def render_loading_screen():
 SETTINGS_PANEL_MARGIN = 10
 
 
+def draw_scroll_setting(height: int, setting_name: str, unit_name: str, current_value: float, min_value: float,
+                        max_value: float, step: float):
+    font_size = 30
+    contenu = setting_name + " "
+    size = int(pr.measure_text(contenu, font_size))
+    value = round(current_value, 1)
+    position = pr.Vector2(pr.get_screen_width() / 2 - size,
+                          SETTINGS_PANEL_MARGIN + 10 + height * (font_size + SETTINGS_PANEL_MARGIN))
+    color = pr.BLACK
+
+    if pr.check_collision_point_rec(pr.get_mouse_position(),
+                                    pr.Rectangle(position.x, position.y,
+                                                 size + pr.measure_text(str(value) + unit_name, font_size), font_size)):
+        color = pr.GRAY
+        if pr.get_mouse_wheel_move_v().y > 0 or pr.is_key_pressed(pr.KeyboardKey.KEY_UP):
+            current_value = min(max_value, current_value + step)
+        elif pr.get_mouse_wheel_move_v().y < 0 or pr.is_key_pressed(pr.KeyboardKey.KEY_DOWN):
+            current_value = max(min_value, current_value - step)
+
+    pr.draw_text(contenu + str(value) + unit_name,
+                 int(position.x), int(position.y), font_size, color)
+
+    return current_value
+
+
 def render_settings():
-    global duree_animation
+    global settings_duree_animation, settings_taille_grille
     process_title_screen_moves()
 
     pr.begin_drawing()
@@ -515,28 +569,15 @@ def render_settings():
                       pr.get_screen_width() - SETTINGS_PANEL_MARGIN * 2,
                       pr.get_render_height() - SETTINGS_PANEL_MARGIN * 2, pr.Color(255, 255, 255, 220))
 
-    font_size = 30
-    contenu = "Durée d'animation : "
-    size = int(pr.measure_text(contenu, font_size))
-    value = round(duree_animation, 1)
-    position = pr.Vector2(pr.get_screen_width() / 2 - size,
-                          SETTINGS_PANEL_MARGIN + 10)
-    color = pr.BLACK
+    settings_duree_animation = draw_scroll_setting(0, "Durée d'animation", "s", settings_duree_animation, 0.2, 1.5, 0.1)
 
-    if pr.check_collision_point_rec(pr.get_mouse_position(),
-                                    pr.Rectangle(position.x, position.y,
-                                                 size + pr.measure_text(str(value), font_size), font_size)):
-        color = pr.GRAY
-        if pr.get_mouse_wheel_move_v().y > 0:
-            duree_animation = min(1.5, duree_animation + 0.1)
-        elif pr.get_mouse_wheel_move_v().y < 0:
-            duree_animation = max(0.2, duree_animation - 0.1)
-
-    pr.draw_text(contenu + str(value),
-                 int(position.x), int(position.y), font_size, color)
+    settings_taille_grille = int(draw_scroll_setting(1, "Taille grille", "", settings_taille_grille, 2, 6, 1))
 
     draw_back_button(State.TITLE_SCREEN)
     pr.end_drawing()
+
+    if settings_taille_grille != tq.DIM_GRILLE:
+        set_dim_grille(settings_taille_grille)
 
 
 case_selectionee = 0
@@ -664,6 +705,7 @@ def run():
     state = State.TITLE_SCREEN
 
     loading_thread: threading.Thread = threading.Thread()
+    apply_settings_thread: threading.Thread = threading.Thread()
 
     while not pr.window_should_close():
         if state == State.TITLE_SCREEN:
@@ -726,11 +768,18 @@ def run():
 
 
 def set_dim_grille(new_dim: int):
+    global settings_taille_grille, grille_actuelle
+    if new_dim <= 1:
+        return
+    reset_animation()
     tq.set_dim_grille(new_dim)
+    settings_taille_grille = tq.DIM_GRILLE
+    grille_actuelle = tq.generer_grille_aleatoire(True)
     generate_base_positions()
+    generate_cubes()
 
 
 if __name__ == '__main__':
-    set_dim_grille(3)
+    # NE RIEN METTRE AVANT INIT
     init()
     run()
