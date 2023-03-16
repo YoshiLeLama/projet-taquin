@@ -3,9 +3,20 @@ from bisect import insort
 from enum import Enum
 import random
 
-NOMBRE_TUILES = 8
-NOMBRE_CASES = 9
-DIM_GRILLE = 3
+DIM_GRILLE: int
+NOMBRE_TUILES: int
+NOMBRE_CASES: int
+
+
+def set_dim_grille(new_dim: int):
+    global DIM_GRILLE, NOMBRE_TUILES, NOMBRE_CASES
+    DIM_GRILLE = new_dim
+    NOMBRE_TUILES = DIM_GRILLE**2 - 1
+    NOMBRE_CASES = NOMBRE_TUILES + 1
+
+
+set_dim_grille(3)
+
 
 POIDS_TUILES = [
     36, 12, 12, 4, 1, 1, 4, 1,
@@ -18,6 +29,10 @@ POIDS_TUILES = [
 
 K = 6
 
+
+nombe_etats_explo = 0
+
+
 class Card(Enum):
     N = 0
     S = 1
@@ -25,6 +40,7 @@ class Card(Enum):
     E = 3
 
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
+
 
 # Nous représentons un état comme étant un objet. Il stoquera son parent, la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
 Etat = namedtuple('Etat', ['parent', 'liste_deplacement',
@@ -65,6 +81,8 @@ def inserer_etat(file_etat: list[Etat], etat: Etat):
 
 
 def astar(plateau_initial):
+    global nombe_etats_explo
+    nombe_etats_explo = 0
     # n est la taille du taquin
     frontiere = [Etat(parent=None, liste_deplacement=[],
                       cout=heuristique(K, plateau_initial))]
@@ -82,18 +100,27 @@ def astar(plateau_initial):
             # S est une liste contenant tous les états trouvé après l'expention
             S = expanse(plateau_initial, etat_choisi)
             for etat_cree in S:
+                grille_atteinte = deplacement(
+                    etat_cree.liste_deplacement, plateau_initial)
                 # a condition permet de savoir si on est en présence d'un état déjà expensé.
-                if tuple(deplacement(etat_cree.liste_deplacement, plateau_initial)) not in explored:
-                    # l'état sera inséré par odre de coût à l'aide de la fonction inserer_etat.
+                if tuple(grille_atteinte) not in explored:
+                    for i in range(0, len(frontiere)):
+                        if tuple(deplacement(frontiere[i], plateau_initial)) == tuple(grille_atteinte) and frontiere[i].cout + len(frontiere[i].liste_deplacement) <= etat_cree.cout + len(etat_cree.liste_deplacement):
+                            # l'état sera inséré par ordre de coût à l'aide de la fonction inserer_etat.
+                            break
                     inserer_etat(frontiere, etat_cree)
 
         explored.add(tuple(plateau))
+
+        nombe_etats_explo = len(frontiere)
     return None
 
 
 def get_poids_tuile(k: int, i: int):
     if i > NOMBRE_TUILES:
         return 0
+    if DIM_GRILLE != 3:
+        return 1
     return POIDS_TUILES[(k - 1) * NOMBRE_TUILES + i]
 
 
@@ -108,7 +135,7 @@ def heuristique(k: int, etat_courant: list[int]):
     for i in range(0, NOMBRE_CASES):
         if etat_courant[i] != -1:
             resultat += get_poids_tuile(k, etat_courant[i]) * distance_elem(
-                (i % 3, i // 3), etat_courant[i])
+                (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
     return resultat
 
 
@@ -186,6 +213,8 @@ def deplacement(directions, plateau_initial):
 
 # permet de savoir si un taquin est sovlable.
 # Si il est non solvable la fonction retournera false.
+
+
 def solvable(plateau_initial):
     n = DIM_GRILLE
     plateau = plateau_initial[:]
@@ -197,9 +226,13 @@ def solvable(plateau_initial):
             swap(plateau, plateau.index(i), i)
             # On compte le nombre de permutations effectuées
             nb_permutations += 1
-    # On vérifie si la parité du nombre de permutations à effectuer et celle de l'indice de la case vide (-1) sont les mêmes 
+    # On vérifie si la parité du nombre de permutations à effectuer et celle de l'indice de la case vide (-1) sont les mêmes
     # => condition de solvabilité du taquin, cf. la page Wikipedia du taquin
-    return nb_permutations % 2 == plateau_initial.index(-1) % 2
+
+    i = plateau_initial.index(-1)
+    print(DIM_GRILLE - (i % DIM_GRILLE) + DIM_GRILLE - (i // DIM_GRILLE))
+    return nb_permutations % 2 == (DIM_GRILLE - (i % DIM_GRILLE) + DIM_GRILLE - (i // DIM_GRILLE) - 2) % 2
+
 
 def generer_grille_resolue():
     grille = []
@@ -208,19 +241,21 @@ def generer_grille_resolue():
     grille.append(-1)
     return grille
 
-def generer_grille_aleatoire(resolvable: bool=False):
+
+def generer_grille_aleatoire(resolvable: bool = False):
     grille = generer_grille_resolue()
     while True:
         random.shuffle(grille)
         if not resolvable or solvable(grille):
             return grille
 
+
 # main
 if __name__ == '__main__':
     K = 0
-    plateau = [1, 3, -1, 
-               5, 7, 6, 
-               4, 2, 0]
+    set_dim_grille(4)
+    plateau = generer_grille_aleatoire(True)
+    print(solvable(plateau))
     if solvable(plateau):
         etat_final = astar(plateau)
         if etat_final is not None:

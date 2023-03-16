@@ -23,9 +23,9 @@ class State(Enum):
 
 
 # constantes
-POSITIONS = [PositionCase(-1., -1.), PositionCase(0., -1), PositionCase(1., -1.),
-             PositionCase(-1., 0.), PositionCase(0., 0.), PositionCase(1., 0.),
-             PositionCase(-1., 1.), PositionCase(0., 1.), PositionCase(1., 1.)]
+POSITIONS: list[PositionCase]
+
+
 BASE_CAMERA_POS = [0., 16.0, 5.0]
 BUTTON_BG = pr.Color(50, 75, 255, 255)
 BUTTON_BG_HOVERED = pr.Color(50, 125, 255, 255)
@@ -39,7 +39,7 @@ blocks_models: list[pr.Model] = []
 state = State.TITLE_SCREEN
 last_state = State.TITLE_SCREEN
 
-positions = POSITIONS[:]
+positions: list[PositionCase]
 
 grille_initiale: list[int] = []
 grille_actuelle: list[int] = []
@@ -59,6 +59,16 @@ resolve_texture: pr.Texture
 play_texture: pr.Texture
 settings_texture: pr.Texture
 reload_texture: pr.Texture
+
+
+def generate_base_positions():
+    global POSITIONS, positions
+    POSITIONS = []
+    half = tq.DIM_GRILLE // 2
+    for i in range(0, tq.DIM_GRILLE):
+        for j in range(0, tq.DIM_GRILLE):
+            POSITIONS.append(PositionCase(j - half, i - half))
+    positions = POSITIONS[:]
 
 
 def init():
@@ -107,6 +117,8 @@ def init():
         model.materials[0].maps[pr.MaterialMapIndex.MATERIAL_MAP_ALBEDO].texture = num_textures[i]
 
         blocks_models.append(model)
+
+    generate_base_positions()
 
     for i in range(0, tq.NOMBRE_TUILES):
         grille_actuelle.append(i)
@@ -169,16 +181,20 @@ def handle_input():
 
     if pr.is_key_pressed(pr.KeyboardKey.KEY_UP):
         if case_vide.ligne != tq.DIM_GRILLE - 1:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne + 1, case_vide.colonne)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne + 1, case_vide.colonne)
     elif pr.is_key_pressed(pr.KeyboardKey.KEY_DOWN):
         if case_vide.ligne != 0:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne - 1, case_vide.colonne)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne - 1, case_vide.colonne)
     elif pr.is_key_pressed(pr.KeyboardKey.KEY_LEFT):
         if case_vide.colonne != tq.DIM_GRILLE - 1:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne, case_vide.colonne + 1)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne, case_vide.colonne + 1)
     elif pr.is_key_pressed(pr.KeyboardKey.KEY_RIGHT):
         if case_vide.colonne != 0:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne, case_vide.colonne - 1)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne, case_vide.colonne - 1)
 
     if case_vide != nouvelle_pos_vide:
         swap_cases(grille_actuelle, case_vide.ligne, case_vide.colonne,
@@ -202,31 +218,39 @@ def process_move():
 
     if deplacement == tq.Card.N:
         if case_vide.ligne == 0:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne + 1, case_vide.colonne)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne + 1, case_vide.colonne)
             deplacements[indice] = tq.Card.S
         else:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne - 1, case_vide.colonne)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne - 1, case_vide.colonne)
             indice += 1
     elif deplacement == tq.Card.S:
         if case_vide.ligne == tq.DIM_GRILLE - 1:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne - 1, case_vide.colonne)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne - 1, case_vide.colonne)
             deplacements[indice] = tq.Card.N
         else:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne + 1, case_vide.colonne)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne + 1, case_vide.colonne)
             indice += 1
     elif deplacement == tq.Card.O:
         if case_vide.colonne == 0:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne, case_vide.colonne + 1)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne, case_vide.colonne + 1)
             deplacements[indice] = tq.Card.E
         else:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne, case_vide.colonne - 1)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne, case_vide.colonne - 1)
             indice += 1
     elif deplacement == tq.Card.E:
         if case_vide.colonne == tq.DIM_GRILLE - 1:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne, case_vide.colonne - 1)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne, case_vide.colonne - 1)
             deplacements[indice] = tq.Card.O
         else:
-            nouvelle_pos_vide = PositionCase(case_vide.ligne, case_vide.colonne + 1)
+            nouvelle_pos_vide = PositionCase(
+                case_vide.ligne, case_vide.colonne + 1)
             indice += 1
 
     swap_cases(grille_actuelle, case_vide.ligne, case_vide.colonne,
@@ -440,7 +464,8 @@ def render_title_screen():
                              button_size, State.SETTINGS)
 
     title_width = pr.measure_text("Taquin 3D 2023", 70)
-    pr.draw_text("Taquin 3D 2023", int((pr.get_screen_width() - title_width) / 2), 50, 70, pr.Color(150, 50, 50, 255))
+    pr.draw_text("Taquin 3D 2023", int((pr.get_screen_width() -
+                 title_width) / 2), 50, 70, pr.Color(150, 50, 50, 255))
 
     pr.end_drawing()
 
@@ -452,6 +477,8 @@ def render_loading_screen():
     pr.begin_mode_3d(camera)
     pr.end_mode_3d()
     reload_icon_size = 50
+    pr.draw_text(str(tq.nombe_etats_explo), 0, 0, 30, pr.BLACK)
+
     pr.draw_texture_pro(reload_texture,
                         pr.Rectangle(0, 0, reload_texture.width,
                                      reload_texture.height),
@@ -459,7 +486,7 @@ def render_loading_screen():
                                      int(pr.get_screen_height() / 2),
                                      reload_icon_size, reload_icon_size),
                         pr.Vector2(reload_icon_size / 2, reload_icon_size / 2),
-                        pr.get_time() % 30. * 360., pr.WHITE)
+                        - (pr.get_time() % 30. * 360.), pr.WHITE)
 
     pr.end_drawing()
 
@@ -575,7 +602,8 @@ def render_resolve_settings():
         pr.draw_texture_ex(play_texture, button_position, 0., button_size / play_texture.width,
                            pr.Color(255, 255, 255, 255))
 
-    pr.draw_text("Set de poids " + str(tq.K), 10, pr.get_screen_height() - 100, 30, pr.BLACK)
+    pr.draw_text("Set de poids " + str(tq.K), 10,
+                 pr.get_screen_height() - 100, 30, pr.BLACK)
 
     if hovered_case != -1:
         tooltip = "poids = " + str(tq.get_poids_tuile(tq.K, hovered_case))
@@ -678,7 +706,12 @@ def run():
     pr.close_window()
 
 
+def set_dim_grille(new_dim: int):
+    tq.set_dim_grille(new_dim)
+    generate_base_positions()
+
+
 if __name__ == '__main__':
+    set_dim_grille(4)
     init()
-    # render_solving(plateau, deplacements)
     run()
