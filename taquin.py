@@ -123,7 +123,7 @@ def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_
 
 def astar(plateau_initial):
     global nombre_etats_explo
-    nombe_etats_explo = 0
+    nombre_etats_explo = 0
     # n est la taille du taquin
     frontiere = [Etat(parent=None, liste_deplacement=[],
                       cout=heuristique(K, plateau_initial))]
@@ -309,7 +309,8 @@ if __name__ == '__main__':
             print(etat_final.liste_deplacement)
 
             for i in range(0, len(etat_final.liste_deplacement)):
-                dep = deplacement(etat_final.liste_deplacement[:i + 1], plateau)
+                dep = deplacement(
+                    etat_final.liste_deplacement[:i + 1], plateau)
                 print()
                 print(dep[:3])
                 print(dep[3:6])
