@@ -306,19 +306,24 @@ def generer_grille_aleatoire(resolvable: bool = False):
 if __name__ == '__main__':
     K = 0
     set_dim_grille(4)
-    plateau = generer_grille_aleatoire(True)
-    print(solvable(plateau))
-    if solvable(plateau):
-        etat_final = astar(plateau)
-        if etat_final is not None:
-            print(etat_final.liste_deplacement)
+    plateau = [0, 1, 2, -1,
+               4, 5, 6, 7,
+               8, 9, 10, 11,
+               12, 3, 13, 14]
+    # print(solvable(plateau))
+    # if solvable(plateau):
+    #     etat_final = astar(plateau)
+    #     if etat_final is not None:
+    #         print(etat_final.liste_deplacement)
+    #
+    #         for i in range(0, len(etat_final.liste_deplacement)):
+    #             dep = deplacement(
+    #                 etat_final.liste_deplacement[:i + 1], plateau)
+    #             print()
+    #             print(dep[:3])
+    #             print(dep[3:6])
+    #             print(dep[6:])
+    # else:
+    #     print("pas de solution à ce taquin possible")
 
-            for i in range(0, len(etat_final.liste_deplacement)):
-                dep = deplacement(
-                    etat_final.liste_deplacement[:i + 1], plateau)
-                print()
-                print(dep[:3])
-                print(dep[3:6])
-                print(dep[6:])
-    else:
-        print("pas de solution à ce taquin possible")
+    walking_distance(plateau, 4)
