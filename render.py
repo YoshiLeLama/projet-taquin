@@ -155,7 +155,7 @@ def init():
     generate_cubes()
 
     generate_base_positions()
-    deplacements = collections.deque([tq.Card.N])
+    deplacements = collections.deque([tq.Card.NORD])
 
     for i in range(0, tq.NOMBRE_TUILES):
         grille_actuelle.append(i)
@@ -260,39 +260,39 @@ def process_move():
 
     deplacement = deplacements.popleft()
 
-    if deplacement == tq.Card.N:
+    if deplacement == tq.Card.NORD:
         if case_vide.ligne == 0:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne + 1, case_vide.colonne)
 
-            process_edge_case(tq.Card.S)
+            process_edge_case(tq.Card.SUD)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne - 1, case_vide.colonne)
-    elif deplacement == tq.Card.S:
+    elif deplacement == tq.Card.SUD:
         if case_vide.ligne == tq.DIM_GRILLE - 1:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne - 1, case_vide.colonne)
 
-            process_edge_case(tq.Card.N)
+            process_edge_case(tq.Card.NORD)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne + 1, case_vide.colonne)
-    elif deplacement == tq.Card.O:
+    elif deplacement == tq.Card.OUEST:
         if case_vide.colonne == 0:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne + 1)
 
-            process_edge_case(tq.Card.E)
+            process_edge_case(tq.Card.EST)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne - 1)
-    elif deplacement == tq.Card.E:
+    elif deplacement == tq.Card.EST:
         if case_vide.colonne == tq.DIM_GRILLE - 1:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne - 1)
 
-            process_edge_case(tq.Card.O)
+            process_edge_case(tq.Card.OUEST)
         else:
             nouvelle_pos_vide = PositionCase(
                 case_vide.ligne, case_vide.colonne + 1)
@@ -463,13 +463,13 @@ def render_game():
 
 def get_card_from_number(value):
     if value == 0:
-        return tq.Card.N
+        return tq.Card.NORD
     elif value == 1:
-        return tq.Card.O
+        return tq.Card.OUEST
     elif value == 2:
-        return tq.Card.S
+        return tq.Card.SUD
     else:
-        return tq.Card.E
+        return tq.Card.EST
 
 
 def draw_state_switch_button(texture: pr.Texture, position: pr.Vector2, size: int, target_state: State):
@@ -796,6 +796,7 @@ def run():
             render_resolve_settings()
 
     pr.close_window()
+    tq.quit_solving()
 
 
 def set_dim_grille(new_dim: int):

@@ -33,13 +33,19 @@ nombre_etats_explo = 0
 
 writing_in_frontiere_semaphore = threading.Semaphore(1)
 
+should_quit = False
+
+
+def quit_solving():
+    global should_quit
+    should_quit = True
 
 
 class Card(Enum):
-    N = 0
-    S = 1
-    O = 2
-    E = 3
+    NORD = 0
+    SUD = 1
+    OUEST = 2
+    EST = 3
 
 
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
@@ -63,7 +69,7 @@ def set_weight_set(new_value):
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
     result: list[Etat] = []
 
-    for d in [Card.N, Card.S, Card.O, Card.E]:
+    for d in [Card.NORD, Card.SUD, Card.OUEST, Card.EST]:
         nouveaux_deplacements = etat_choisi.liste_deplacement[:]
         nouveaux_deplacements.append(d)
         result.append(Etat(parent=etat_choisi,
@@ -149,6 +155,9 @@ def astar(plateau_initial):
         explored.add(tuple(plateau))
 
         nombre_etats_explo = len(frontiere)
+
+        if should_quit:
+            return None
     return None
 
 
@@ -225,23 +234,23 @@ def deplacement(directions, plateau_initial):
     plateau = plateau_initial[:]
     for dir in directions:
         pos_case_vide = plateau.index(-1)
-        if dir == Card.N:
+        if dir == Card.NORD:
             if 0 <= pos_case_vide < n:
                 move_colonne(plateau, pos_case_vide, 1)
             else:
                 swap(plateau, pos_case_vide, pos_case_vide - n)
-        elif dir == Card.S:
+        elif dir == Card.SUD:
             if n * n - n <= pos_case_vide < n * n:
                 move_colonne(plateau, pos_case_vide % n, -1)
             else:
                 swap(plateau, pos_case_vide, pos_case_vide + n)
-        elif dir == Card.O:
+        elif dir == Card.OUEST:
             if pos_case_vide in [x for x in range(0, n * n, n)]:
                 move_line(plateau, pos_case_vide // n, -1)
                 # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
             else:
                 swap(plateau, pos_case_vide, pos_case_vide - 1)
-        elif dir == Card.E:
+        elif dir == Card.EST:
             if pos_case_vide in [x for x in range(n - 1, n * n, n)]:
                 move_line(plateau, pos_case_vide // n, 1)
                 # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]
