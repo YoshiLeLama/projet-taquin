@@ -51,6 +51,7 @@ liste_deplacements_initiale: list[tq.Card] = []
 
 settings_duree_animation = 0.5
 settings_taille_grille = tq.DIM_GRILLE
+settings_color_set = 1
 
 total_t = 0
 animating = False
@@ -95,8 +96,17 @@ def generate_cubes():
 
     for i in range(0, tq.NOMBRE_TUILES):
         pr.begin_texture_mode(render_tex)
-        pr.clear_background(
-            pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), 0, int(255 - (i / tq.NOMBRE_TUILES) * 155), 255))
+
+        bg_color: pr.Color
+        if settings_color_set == 1:
+            bg_color = pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), 0, int(255 - (i / tq.NOMBRE_TUILES) * 155), 255)
+        elif settings_color_set == 2:
+            bg_color = pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), 0, 0, 255)
+        else:
+            bg_color = pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), int(0 + (i / tq.NOMBRE_TUILES) * 155),
+                                int(0 + (i / tq.NOMBRE_TUILES) * 155), 255)
+
+        pr.clear_background(bg_color)
 
         text = str(i)
         text_size = pr.measure_text_ex(font, text, font_size, 1.)
@@ -129,7 +139,6 @@ def init():
     pr.init_window(800, 450, "Taquin")
     pr.set_window_state(pr.ConfigFlags.FLAG_WINDOW_RESIZABLE)
     pr.set_window_min_size(800, 450)
-    print(pr.get_monitor_refresh_rate(pr.get_current_monitor()))
     pr.set_target_fps(pr.get_monitor_refresh_rate(pr.get_current_monitor()))
 
     camera = pr.Camera3D(BASE_CAMERA_POS[:], [0.0, 0.0, 0.0],
@@ -311,6 +320,12 @@ def draw_back_button(target_state: State):
     pr.draw_text("Retour", 10, pr.get_render_height() - 40, 30, pr.BLACK)
 
 
+def reset_game():
+    global nombre_deplacements, grille_actuelle, grille_initiale
+    nombre_deplacements = 0
+    grille_actuelle = grille_initiale[:]
+
+
 def draw_reload_button(position: pr.Vector2, size: int):
     button_scale = size / reload_texture.width
     bg_color = BUTTON_BG
@@ -322,9 +337,12 @@ def draw_reload_button(position: pr.Vector2, size: int):
 
         if pr.is_mouse_button_pressed(pr.MouseButton.MOUSE_BUTTON_LEFT):
             if state == State.GAME:
-                reload_game()
+                reset_game()
             elif state == State.RENDER_SOLVING:
                 restart_solving()
+        elif pr.is_mouse_button_pressed(pr.MouseButton.MOUSE_BUTTON_RIGHT):
+            if state == State.GAME:
+                reload_game()
 
     pr.draw_circle(int(position.x + size / 2),
                    int(position.y + size / 2), size / 2, bg_color)
@@ -411,9 +429,10 @@ def draw_nombre_mouvements():
 
 
 def reload_game():
-    global nombre_deplacements, grille_actuelle
+    global nombre_deplacements, grille_actuelle, grille_initiale
     nombre_deplacements = 0
-    grille_actuelle = tq.generer_grille_aleatoire(True)
+    grille_initiale = tq.generer_grille_aleatoire(True)
+    grille_actuelle = grille_initiale[:]
     reset_animation()
 
 
@@ -517,7 +536,7 @@ def render_loading_screen():
     pr.begin_mode_3d(camera)
     pr.end_mode_3d()
     reload_icon_size = 50
-    pr.draw_text(str(tq.nombe_etats_explo), 0, 0, 30, pr.BLACK)
+    pr.draw_text(str(tq.nombre_etats_explo), 0, 0, 30, pr.BLACK)
 
     pr.draw_texture_pro(reload_texture,
                         pr.Rectangle(0, 0, reload_texture.width,
@@ -560,7 +579,7 @@ def draw_scroll_setting(height: int, setting_name: str, unit_name: str, current_
 
 
 def render_settings():
-    global settings_duree_animation, settings_taille_grille
+    global settings_duree_animation, settings_taille_grille, settings_color_set
     process_title_screen_moves()
 
     pr.begin_drawing()
@@ -572,13 +591,19 @@ def render_settings():
 
     settings_duree_animation = draw_scroll_setting(0, "Durée d'animation", "s", settings_duree_animation, 0.2, 1.5, 0.1)
 
-    settings_taille_grille = int(draw_scroll_setting(1, "Taille grille", "", settings_taille_grille, 2, 6, 1))
+    settings_taille_grille = int(draw_scroll_setting(1, "Taille grille", "", settings_taille_grille, 2, 5, 1))
+
+    old_settings_color_set = settings_color_set
+    settings_color_set = int(draw_scroll_setting(2, "Couleurs blocs", "", settings_color_set, 1, 3, 1))
 
     draw_back_button(State.TITLE_SCREEN)
     pr.end_drawing()
 
     if settings_taille_grille != tq.DIM_GRILLE:
         set_dim_grille(settings_taille_grille)
+
+    if old_settings_color_set != settings_color_set:
+        generate_cubes()
 
 
 case_selectionee = 0
@@ -605,7 +630,6 @@ def render_resolve_settings():
     pr.draw_text(text, 10, 10, 30, color)
 
     taille_case = (min(pr.get_screen_width(), pr.get_screen_height()) * 0.75) / tq.DIM_GRILLE
-    print((min(pr.get_screen_width(), pr.get_screen_width()) / 2))
     case_scale = taille_case / num_textures_for_2d[0].width
 
     hovered_case = -1
@@ -712,6 +736,8 @@ def run():
     loading_thread: threading.Thread = threading.Thread()
 
     while not pr.window_should_close():
+        if pr.is_key_pressed(pr.KeyboardKey.KEY_R):
+            camera = base_camera()
         pr.set_mouse_cursor(pr.MouseCursor.MOUSE_CURSOR_DEFAULT)
         if state == State.TITLE_SCREEN:
             if state != last_state:
