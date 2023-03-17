@@ -36,6 +36,11 @@ writing_in_frontiere_semaphore = threading.Semaphore(1)
 should_quit = False
 
 
+def reset_solving():
+    global should_quit
+    should_quit = False
+
+
 def quit_solving():
     global should_quit
     should_quit = True

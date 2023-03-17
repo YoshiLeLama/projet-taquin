@@ -162,15 +162,15 @@ def init():
     grille_actuelle.append(-1)
 
 
-def get_case(grille, ligne, colonne):
+def get_case(grille: list[int], ligne: int, colonne: int):
     return grille[ligne * tq.DIM_GRILLE + colonne]
 
 
-def set_case(grille, ligne, colonne, valeur):
+def set_case(grille: list[int], ligne: int, colonne: int, valeur: int):
     grille[ligne * tq.DIM_GRILLE + colonne] = valeur
 
 
-def swap_cases(grille, ligne_1, colonne_1, ligne_2, colonne_2):
+def swap_cases(grille: list[int], ligne_1: int, colonne_1: int, ligne_2: int, colonne_2: int):
     val_1 = get_case(grille, ligne_1, colonne_1)
     val_2 = get_case(grille, ligne_2, colonne_2)
     set_case(grille, ligne_2, colonne_2, val_1)
@@ -547,6 +547,8 @@ def render_loading_screen():
                         pr.Vector2(reload_icon_size / 2, reload_icon_size / 2),
                         - (pr.get_time() % 30. * 360.), pr.WHITE)
 
+    draw_back_button(State.SOLVING_SETTINGS)
+
     pr.end_drawing()
 
 
@@ -591,7 +593,7 @@ def render_settings():
 
     settings_duree_animation = draw_scroll_setting(0, "Durée d'animation", "s", settings_duree_animation, 0.2, 1.5, 0.1)
 
-    settings_taille_grille = int(draw_scroll_setting(1, "Taille grille", "", settings_taille_grille, 2, 5, 1))
+    settings_taille_grille = int(draw_scroll_setting(1, "Taille grille", "", settings_taille_grille, 3, 5, 1))
 
     old_settings_color_set = settings_color_set
     settings_color_set = int(draw_scroll_setting(2, "Couleurs blocs", "", settings_color_set, 1, 3, 1))
@@ -611,7 +613,7 @@ case_selectionee = 0
 selected_cases = [-1, -1]
 
 
-def render_resolve_settings():
+def render_solving_settings():
     pr.update_camera(camera)
 
     pr.begin_drawing()
@@ -628,6 +630,10 @@ def render_resolve_settings():
         color = pr.RED
 
     pr.draw_text(text, 10, 10, 30, color)
+
+    if soluble:
+        text = "Difficulté : " + str(tq.heuristique(tq.K, grille_actuelle))
+        pr.draw_text(text, 10, 40, 30, pr.BLACK)
 
     taille_case = (min(pr.get_screen_width(), pr.get_screen_height()) * 0.75) / tq.DIM_GRILLE
     case_scale = taille_case / num_textures_for_2d[0].width
@@ -786,14 +792,18 @@ def run():
 
             if not loading_thread.is_alive():
                 state = State.RENDER_SOLVING
+            elif state == State.TITLE_SCREEN:
+                tq.quit_solving()
+                loading_thread.join()
         elif state == State.SOLVING_SETTINGS:
             if state != last_state:
+                tq.reset_solving()
                 grille_actuelle = grille_initiale[:]
                 if last_state != State.RENDER_SOLVING:
                     grille_actuelle = tq.generer_grille_aleatoire(True)
 
             last_state = state
-            render_resolve_settings()
+            render_solving_settings()
 
     pr.close_window()
     tq.quit_solving()
