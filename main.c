@@ -11,7 +11,7 @@
 
 #define  WDTBL_SIZE  24964 /* WalkingDistance TableSize */
 
-typedef  unsigned __int64  u64;
+typedef  unsigned long long  u64;
 
 int   TABLE[BOARD_WIDTH][BOARD_WIDTH];
 // WDTOP correspond au nombre d'itérations dans Simuration
@@ -28,7 +28,7 @@ void WriteDisk(void)
 {
     int  i, j, k, work[8];
     u64 table;
-    char *filename = "sql.txt";
+    char *filename = "distances.sql";
     FILE *fp;
 
     fp = fopen(filename, "wb");
@@ -49,14 +49,20 @@ void WriteDisk(void)
         }
     }*/
 
+    char table_str[30];
     char sql_command[200];
 
+    fputs("CREATE TABLE distances (table_id TEXT PRIMARY KEY NOT NULL, cout INTEGER NOT NULL);\n", fp);
+
     for (i=0; i < WDTBL_SIZE; i++) {
-        sprintf(sql_command, "INSERT INTO distances VALUES (%lld, %d);\n", WDPTN[i], WDTBL[i]);
+        sprintf(table_str, "%llu", WDPTN[i]);
+        sprintf(sql_command, "INSERT INTO distances VALUES (\"%s\", %d);\n", table_str, WDTBL[i]);
         fputs(sql_command, fp);
     }
 
     fclose(fp);
+
+    int p = system("rm distances.db & cat distances.sql | sqlite3 distances.db");
 }
 /*********************************************/
 /* パターンの登録と双方向リンクの形成        */

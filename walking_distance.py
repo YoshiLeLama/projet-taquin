@@ -4,24 +4,24 @@ import sqlite3 as sql
 BOARD_WIDTH = 4
 WDTBL_SIZE = 24964
 
-TABLE: list[list[int]] = []
+TABLE = np.empty(BOARD_WIDTH, dtype=np.ndarray)
 for i in range(0, BOARD_WIDTH):
-    TABLE.append([])
+    TABLE[i] = np.empty(BOARD_WIDTH, dtype=int)
     for j in range(0, BOARD_WIDTH):
-        TABLE[i].append(0)
+        TABLE[i][j] = 0
 
 u64 = np.ulonglong
 
 WDTOP, WDEND = 0, 1
-WDPTN = [u64(0)] * WDTBL_SIZE
-WDTBL = [0] * WDTBL_SIZE
-WDLNK: list[list[list[np.short]]] = []
+WDPTN = np.zeros(WDTBL_SIZE, dtype=u64)
+WDTBL = np.zeros(WDTBL_SIZE, dtype=np.ndarray)
+WDLNK = np.empty(WDTBL_SIZE, dtype=np.ndarray)
 for i in range(0, WDTBL_SIZE):
-    WDLNK.append([])
+    WDLNK[i] = np.empty(2, np.ndarray)
     for j in range(0, 2):
-        WDLNK[i].append([])
+        WDLNK[i][j] = np.empty(BOARD_WIDTH, dtype=np.ndarray)
         for k in range(0, BOARD_WIDTH):
-            WDLNK[i][j].append(np.short(0))
+            WDLNK[i][j][k] = np.short(0)
 
 
 U64_SEVEN = u64(7)
@@ -33,16 +33,20 @@ def write_disk():
     i: int
     j: int
     k: int
-    work: list[int] = [0] * 8
     table: u64
 
     con = sql.connect("walking_distance.db")
+    con.isolation_level = None
     cur = con.cursor()
-    cur.execute("CREATE TABLE distances(ptn, tbl)")
+    cur.execute("DROP TABLE distances;")
+    cur.execute("CREATE TABLE distances(table_id TEXT PRIMARY KEY , cout INTEGER);")
+
+    cur.execute("BEGIN TRANSACTION;")
 
     for i in range(WDTBL_SIZE):
-        cur.execute("INSERT INTO distances VALUES (" + str(WDPTN[i]) + ", " + str(WDTBL[i]) + ")")
-        con.commit()
+        cur.execute("INSERT INTO distances VALUES (?, ?);", (str(WDPTN[i]),  str(WDTBL[i])))
+
+    cur.execute("COMMIT;")
 
     con.close()
 
@@ -57,13 +61,14 @@ def write_table(count: int, vect: int, group: int):
     for i in range(0, 4):
         for j in range(0, 4):
             table = u64(np.bitwise_or(u64(np.left_shift(table, U64_THREE)), u64(TABLE[i][j])))
-    i = 0
-    while True:
-        i += 1
-        if i >= WDEND or np.equal(WDPTN[i], table):
-            break
 
-    if i == WDEND:
+    result: np.int64 = np.where(np.equal(WDPTN, table))[0]
+    if len(result) == 0:
+        i = WDEND
+    else:
+        i = result[0]
+
+    if np.equal(i, WDEND):
         WDPTN[WDEND] = table
         WDTBL[WDEND] = count
         WDEND += 1
@@ -73,7 +78,7 @@ def write_table(count: int, vect: int, group: int):
 
     j = WDTOP - 1
     WDLNK[j][vect][group] = i
-    WDLNK[i][vect ^ 1][group] = j
+    WDLNK[i][np.bitwise_xor(vect, 1)][group] = j
 
 
 
@@ -88,9 +93,7 @@ def simulation():
     table: u64
 
     #  On met la table à 0
-    for i in range(0,4):
-        for j in range(0,4):
-            TABLE[i][j]=0
+    TABLE = np.zeros([4, 4], dtype=int)
 
     # On donne à la diagonale la valeur 4 sauf pour tout en bas à droite
 
