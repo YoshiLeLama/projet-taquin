@@ -1,3 +1,6 @@
+import sqlite3
+import time
+
 import numpy as np
 import sqlite3 as sql
 
@@ -23,7 +26,6 @@ for i in range(0, WDTBL_SIZE):
         for k in range(0, BOARD_WIDTH):
             WDLNK[i][j][k] = np.short(0)
 
-
 U64_SEVEN = u64(7)
 U64_THREE = u64(3)
 U64_EIGHT = u64(8)
@@ -44,7 +46,7 @@ def write_disk():
     cur.execute("BEGIN TRANSACTION;")
 
     for i in range(WDTBL_SIZE):
-        cur.execute("INSERT INTO distances VALUES (?, ?);", (str(WDPTN[i]),  str(WDTBL[i])))
+        cur.execute("INSERT INTO distances VALUES (?, ?);", (str(WDPTN[i]), str(WDTBL[i])))
 
     cur.execute("COMMIT;")
 
@@ -81,7 +83,6 @@ def write_table(count: int, vect: int, group: int):
     WDLNK[i][np.bitwise_xor(vect, 1)][group] = j
 
 
-
 def simulation():
     global WDEND, WDTOP, WDPTN, WDTBL, WDLNK, TABLE
     i: int
@@ -101,24 +102,24 @@ def simulation():
     TABLE[3][3] = 3
     table = u64(0)
 
-    for i in range(0,4):
-        for j in range(0,4):
+    for i in range(0, 4):
+        for j in range(0, 4):
             table = u64(np.bitwise_or(u64(np.left_shift(table, U64_THREE)), u64(TABLE[i][j])))
 
     # la première valeur de WPDTN est def comme étant table, t celle de WDTBL comme étant 0
-    WDPTN[0]= table
+    WDPTN[0] = table
     WDTBL[0] = 0
 
     # On remplit le premier tableau de WDLNK avec WDTBL_SIZE
 
-    for j in range(0,2):
-        for k in range(0,4):
+    for j in range(0, 2):
+        for k in range(0, 4):
             WDLNK[0][j][k] = WDTBL_SIZE
 
     WDTOP = 0
     WDEND = 1
 
-    while WDTOP < WDEND :
+    while WDTOP < WDEND:
         # On prend la valeur de l'identifiant de la table de l'état à expanser
         table = WDPTN[WDTOP]
         # Cout de l'état à expanser
@@ -133,9 +134,9 @@ def simulation():
         #  7 == 111b
         #  ...000 | 011 = 011 & 111 = 011 < - valeur de la case
         #  table | val = bloc de 3 dans table & 7 = val
-        for i in range(3,-1,-1) :
-            piece=0
-            for j in range(3,-1,-1):
+        for i in range(3, -1, -1):
+            piece = 0
+            for j in range(3, -1, -1):
                 TABLE[i][j] = int(np.bitwise_and(table, U64_SEVEN))
                 table = np.right_shift(table, U64_THREE)
                 piece += TABLE[i][j]
@@ -145,7 +146,7 @@ def simulation():
         # piece = bloc de 4 en dessous de la case vide
         piece = space + 1
         if piece < 4:
-            for i in range (0,4):
+            for i in range(0, 4):
                 # Si le bloc considéré contient une pièce du groupe i,
                 # on fait monter la pièce et descendre la case vide
                 if TABLE[piece][i] != 0:
@@ -162,7 +163,7 @@ def simulation():
         if piece >= 0:
             # Si le bloc considéré contient une pièce du groupe i,
             # on fait descendre la pièce et monter la case vide
-            for i in range(0,4):
+            for i in range(0, 4):
                 if TABLE[piece][i] != 0:
                     TABLE[piece][i] -= 1
                     TABLE[space][i] += 1
@@ -173,18 +174,68 @@ def simulation():
                     TABLE[space][i] -= 1
 
 
+table_dict: dict
+wd_db_con: sqlite3.Connection
+wd_db_cur: sqlite3.Cursor
 
 
+def dict_factory(cursor: sqlite3.Cursor, row):
+    d = {}
+    d[row[0]] = row[1]
+    return d
 
 
+def init_db():
+    global wd_db_con, wd_db_cur, table_dict
+    table_dict = dict()
+    wd_db_con = sqlite3.connect("walking_distance.db")
+    wd_db_cur = wd_db_con.cursor()
+    wd_db_cur.execute("SELECT * FROM distances;")
+    for x in wd_db_cur.fetchall():
+        table_dict[u64(x[0])] = x[1]
+    print()
 
 
+def walking_distance(table: np.ndarray):
+    beg = time.time_ns()
+    if len(table) != 16:
+        return -1
+
+    table = table.reshape((4, 4))
+
+    rows = np.zeros((4, 4), dtype=u64)
+
+    for i in range(0, 4):
+        for j in range(0, 4):
+            val = table[i][j]
+            if val != -1:
+                rows[i][val // 4] += u64(1)
+
+    columns = np.zeros((4, 4), dtype=u64)
+
+    for i in range(0, 4):
+        for j in range(0, 4):
+            val = table[j][i]
+            if val != -1:
+                columns[i][val % 4] += u64(1)
+
+    table_id_1 = u64(0)
+    for i in range(0, 4):
+        for j in range(0, 4):
+            table_id_1 = np.bitwise_or(np.left_shift(table_id_1, U64_THREE), rows[i][j])
+
+    table_id_2 = u64(0)
+    for i in range(0, 4):
+        for j in range(0, 4):
+            table_id_2 = np.bitwise_or(np.left_shift(table_id_2, U64_THREE), columns[i][j])
+    return table_dict[table_id_1] + table_dict[table_id_2]
+
+    # print("making")
+    # simulation()
+    # print("finish")
+    # write_disk()
 
 
+init_db()
 
-if __name__ == "__main__":
-    print("making")
-    simulation()
-    print("finish")
-    write_disk()
-    
+walking_distance(np.array([11, 12, 2, 0, 8, 6, 14, -1, 3, 4, 1, 7, 13, 10, 5, 9]))

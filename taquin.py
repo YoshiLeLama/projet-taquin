@@ -1,8 +1,14 @@
+import math
 import threading
+import time
 from collections import namedtuple
 from bisect import insort
 from enum import Enum
 import random
+
+import numpy as np
+
+import walking_distance as wd
 
 DIM_GRILLE: int
 NOMBRE_TUILES: int
@@ -57,10 +63,33 @@ class Card(Enum):
 
 
 # Nous représentons un état comme étant un objet. Il stoquera son parent, la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
-Etat = namedtuple('Etat', ['parent', 'liste_deplacement',
-                           'cout'])
+Etat = namedtuple('Etat', ['parent', 'liste_deplacement', 'cout'])
 Etat.__annotations__ = {
     'parent': Etat, 'liste_deplacement': list[str], 'cout': int}
+
+
+def etat_le(self: Etat, x: Etat):
+    return self.cout <= x.cout
+
+
+def etat_ge(self: Etat, x: Etat):
+    return self.cout >= x.cout
+
+
+def etat_gt(self: Etat, x: Etat):
+    return self.cout > x.cout
+
+
+def etat_lt(self: Etat, x: Etat):
+    return self.cout < x.cout
+
+
+def etat_eq(self: Etat, x: Etat):
+    return self.cout == x.cout
+
+
+def etat_ne(self: Etat, x: Etat):
+    return self.cout != x.cout
 
 
 def set_weight_set(new_value):
@@ -181,7 +210,9 @@ def distance_elem(position: tuple[int, int], i: int):
 # l'heuristique sera une distance de Manhattan pondéré.
 
 
-def heuristique(k: int, etat_courant: list[int]):
+def heuristique(k: int, etat_courant: list[int], use_wd: bool = True):
+    if use_wd and DIM_GRILLE == 4:
+        return wd.walking_distance(np.array(etat_courant))
     resultat = 0
     for i in range(0, NOMBRE_CASES):
         if etat_courant[i] != -1:
@@ -302,28 +333,88 @@ def generer_grille_aleatoire(resolvable: bool = False):
             return grille
 
 
+GRILLE_FINALE = tuple([0, 1, 2, 3,
+                       4, 5, 6, 7,
+                       8, 9, 10, 11,
+                       12, 13, 14, -1])
+
+
+def is_goal(node: Etat, plateau_initial: list[int]):
+    return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
+
+
+def ida_star(plateau_initial):
+    bound = wd.walking_distance(np.array(plateau_initial))
+    path = [Etat(None, [], bound)]
+    grilles_rencontrees = [tuple(plateau_initial)]
+    while True:
+        t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
+        if t == -1:
+            return path, bound
+        print(t)
+        if t == math.inf:
+            return -1
+        bound = t
+        print(bound)
+
+
+etat_type = [('parent', Etat), ('liste_deplacement', list[int]), ('cout', int)]
+
+
+def successors(node: Etat, plateau_initial: list[int]):
+    values = expanse(plateau_initial, node)
+
+    for i in range(len(values)):
+        x = values[i]
+        j = i
+        while j > 0 and values[j - 1].cout > x.cout:
+            values[j] = values[j - 1]
+            j = j - 1
+        values[j] = x
+
+    return values
+
+
+num_nodes = 0
+
+
+def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
+    global num_nodes
+    node = path[-1]
+    f_value = g + heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
+    if f_value > bound:
+        return f_value
+    if f_value - g == 0:
+        return -1
+    min_val = math.inf
+    for succ in successors(node, plateau_initial):
+        depl = tuple(deplacement(succ.liste_deplacement, plateau_initial))
+        if depl not in grilles_rencontrees:
+            path.append(succ)
+            grilles_rencontrees.append(depl)
+            t = search(path, grilles_rencontrees, g + 1, bound, plateau_initial)
+            if t == -1:
+                return -1
+            if t < min_val:
+                min_val = t
+            path.pop()
+            grilles_rencontrees.pop()
+    return min_val
+
+
 # main
 if __name__ == '__main__':
     K = 0
     set_dim_grille(4)
-    plateau = [0, 1, 2, -1,
-               4, 5, 6, 7,
-               8, 9, 10, 11,
-               12, 3, 13, 14]
-    # print(solvable(plateau))
-    # if solvable(plateau):
-    #     etat_final = astar(plateau)
-    #     if etat_final is not None:
-    #         print(etat_final.liste_deplacement)
-    #
-    #         for i in range(0, len(etat_final.liste_deplacement)):
-    #             dep = deplacement(
-    #                 etat_final.liste_deplacement[:i + 1], plateau)
-    #             print()
-    #             print(dep[:3])
-    #             print(dep[3:6])
-    #             print(dep[6:])
-    # else:
-    #     print("pas de solution à ce taquin possible")
-
-    walking_distance(plateau, 4)
+    plateau = [12, 1, -1, 5,
+               11, 9, 7, 13,
+               0, 10, 3, 2,
+               4, 8, 14, 6]
+    print(solvable(plateau))
+    if solvable(plateau):
+        beg = time.time_ns()
+        res = ida_star(plateau)
+        print(time.time_ns() - beg, res)
+        beg = time.time_ns()
+        res = astar(plateau)
+        print(time.time_ns() - beg, res)

@@ -63,6 +63,7 @@ void WriteDisk(void)
     fclose(fp);
 
     int p = system("rm distances.db & cat distances.sql | sqlite3 distances.db");
+    p = system("rm distances.sql");
 }
 /*********************************************/
 /* パターンの登録と双方向リンクの形成        */

@@ -792,7 +792,7 @@ def run():
 
             if not loading_thread.is_alive():
                 state = State.RENDER_SOLVING
-            elif state == State.TITLE_SCREEN:
+            elif state == State.SOLVING_SETTINGS:
                 tq.quit_solving()
                 loading_thread.join()
         elif state == State.SOLVING_SETTINGS:

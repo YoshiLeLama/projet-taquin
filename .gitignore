@@ -2,5 +2,6 @@
 __pycache__
 *.db
 *.sql
+*.sqlite
 sql.txt
 *.out
