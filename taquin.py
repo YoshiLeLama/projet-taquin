@@ -344,7 +344,9 @@ def is_goal(node: Etat, plateau_initial: list[int]):
 
 
 def ida_star(plateau_initial):
+    # bound=> estimate cost of the cheapest path
     bound = wd.walking_distance(np.array(plateau_initial))
+    # path => current search path
     path = [Etat(None, [], bound)]
     grilles_rencontrees = [tuple(plateau_initial)]
     while True:
@@ -381,7 +383,8 @@ num_nodes = 0
 def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
     global num_nodes
     node = path[-1]
-    f_value = g + heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
+    f_value = g + \
+        heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
     if f_value > bound:
         return f_value
     if f_value - g == 0:
@@ -392,7 +395,8 @@ def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: in
         if depl not in grilles_rencontrees:
             path.append(succ)
             grilles_rencontrees.append(depl)
-            t = search(path, grilles_rencontrees, g + 1, bound, plateau_initial)
+            t = search(path, grilles_rencontrees,
+                       g + 1, bound, plateau_initial)
             if t == -1:
                 return -1
             if t < min_val:
