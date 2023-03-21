@@ -40,7 +40,7 @@ def write_disk():
     con = sql.connect("walking_distance.db")
     con.isolation_level = None
     cur = con.cursor()
-    cur.execute("DROP TABLE distances;")
+    cur.execute("DROP TABLE IF EXISTS distances;")
     cur.execute("CREATE TABLE distances(table_id TEXT PRIMARY KEY , cout INTEGER, wdlnk1 INTEGER, wdlnk2 INTEGER);")
 
     cur.execute("BEGIN TRANSACTION;")
@@ -245,10 +245,11 @@ def walking_distance(table: np.ndarray):
     return table_dict[table_ids[0]] + table_dict[table_ids[1]]
 
 
-# print("making")
-# simulation()
-# print("finish")
-# write_disk()
+if __name__=='__main__':
+    print("making")
+    simulation()
+    print("finish")
+    write_disk()
 
 
 init_db()
