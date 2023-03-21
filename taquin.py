@@ -62,7 +62,7 @@ class Card(Enum):
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
 
 
-# Nous représentons un état comme étant un objet. Il stoquera son parent, la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
+# Nous représentons un état comme étant un objet. Il stoquera la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
 Etat = namedtuple('Etat', ['liste_deplacement', 'cout'])
 Etat.__annotations__ = {
     'liste_deplacement': list[str], 'cout': int}
@@ -159,7 +159,7 @@ def astar(plateau_initial):
     global nombre_etats_explo
     nombre_etats_explo = 0
     # n est la taille du taquin
-    frontiere = [Etat(parent=None, liste_deplacement=[],
+    frontiere = [Etat(liste_deplacement=[],
                       cout=heuristique(K, plateau_initial))]
     grilles_frontiere = [tuple(plateau_initial[:])]
     explored = set()
