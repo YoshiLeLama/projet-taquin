@@ -462,8 +462,21 @@ def draw_state_switch_button(texture: pr.Texture, position: pr.Vector2, size: in
 
 def process_title_screen_moves():
     global deplacements, nombre_deplacements
-    deplacements.appendleft(get_card_from_number(random.randint(0, 3)))
-    process_move()
+    if len(deplacements) != 0:
+        process_move()
+    pos_case_vide = grille_actuelle.index(-1)
+    depl = tq.Card(random.randint(0, 3))
+
+    if depl == tq.Card.NORD and 0 <= pos_case_vide < tq.DIM_GRILLE:
+        depl = tq.Card.SUD
+    elif depl == tq.Card.SUD and tq.DIM_GRILLE * (tq.DIM_GRILLE - 1) <= pos_case_vide < tq.DIM_GRILLE * tq.DIM_GRILLE:
+        depl = tq.Card.NORD
+    elif depl == tq.Card.OUEST and pos_case_vide in [x for x in range(0, tq.DIM_GRILLE * tq.DIM_GRILLE, tq.DIM_GRILLE)]:
+        depl = tq.Card.EST
+    elif depl == tq.Card.EST and pos_case_vide in [x for x in range(tq.DIM_GRILLE - 1, tq.DIM_GRILLE * tq.DIM_GRILLE, tq.DIM_GRILLE)]:
+        depl = tq.Card.OUEST
+
+    deplacements.appendleft(depl)
 
 
 def render_title_screen():
