@@ -330,7 +330,7 @@ def successors(node: Etat, plateau_initial: list[int]):
 
 def ida_star(plateau_initial):
     bound = wd.walking_distance(np.array(plateau_initial))
-    path = [Etat(None, [], bound)]
+    path = [Etat([], bound)]
     grilles_rencontrees = [tuple(plateau_initial)]
     while True:
         t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
