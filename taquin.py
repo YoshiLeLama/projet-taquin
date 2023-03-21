@@ -63,9 +63,9 @@ class Card(Enum):
 
 
 # Nous représentons un état comme étant un objet. Il stoquera son parent, la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
-Etat = namedtuple('Etat', ['parent', 'liste_deplacement', 'cout'])
+Etat = namedtuple('Etat', ['liste_deplacement', 'cout'])
 Etat.__annotations__ = {
-    'parent': Etat, 'liste_deplacement': list[str], 'cout': int}
+    'liste_deplacement': list[str], 'cout': int}
 
 
 def etat_le(self: Etat, x: Etat):
@@ -108,8 +108,7 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
         nouveaux_deplacements.append(d)
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
-            result.append(Etat(parent=etat_choisi,
-                               liste_deplacement=nouveaux_deplacements,
+            result.append(Etat(liste_deplacement=nouveaux_deplacements,
                                cout=len(nouveaux_deplacements) + heuristique(K, depl)))
     return result
 
@@ -312,10 +311,7 @@ def is_goal(node: Etat, plateau_initial: list[int]):
     return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
 
 
-
-
-
-etat_type = [('parent', Etat), ('liste_deplacement', list[int]), ('cout', int)]
+etat_type = [('liste_deplacement', list[int]), ('cout', int)]
 
 
 def successors(node: Etat, plateau_initial: list[int]):
