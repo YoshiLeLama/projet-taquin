@@ -242,13 +242,6 @@ def handle_input():
         nombre_deplacements += 1
 
 
-def process_edge_case(card: tq.Card):
-    global deplacements
-    if tq.DIM_GRILLE > 2:
-        for i in range(1, tq.DIM_GRILLE - 1):
-            deplacements.appendleft(card)
-
-
 def process_move():
     global animating, bloc_depart, bloc_arrivee, deplacements, nombre_deplacements
 
@@ -261,41 +254,17 @@ def process_move():
     deplacement = deplacements.popleft()
 
     if deplacement == tq.Card.NORD:
-        if case_vide.ligne == 0:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne + 1, case_vide.colonne)
-
-            process_edge_case(tq.Card.SUD)
-        else:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne - 1, case_vide.colonne)
+        nouvelle_pos_vide = PositionCase(
+            case_vide.ligne - 1, case_vide.colonne)
     elif deplacement == tq.Card.SUD:
-        if case_vide.ligne == tq.DIM_GRILLE - 1:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne - 1, case_vide.colonne)
-
-            process_edge_case(tq.Card.NORD)
-        else:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne + 1, case_vide.colonne)
+        nouvelle_pos_vide = PositionCase(
+            case_vide.ligne + 1, case_vide.colonne)
     elif deplacement == tq.Card.OUEST:
-        if case_vide.colonne == 0:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne, case_vide.colonne + 1)
-
-            process_edge_case(tq.Card.EST)
-        else:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne, case_vide.colonne - 1)
+        nouvelle_pos_vide = PositionCase(
+            case_vide.ligne, case_vide.colonne - 1)
     elif deplacement == tq.Card.EST:
-        if case_vide.colonne == tq.DIM_GRILLE - 1:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne, case_vide.colonne - 1)
-
-            process_edge_case(tq.Card.OUEST)
-        else:
-            nouvelle_pos_vide = PositionCase(
-                case_vide.ligne, case_vide.colonne + 1)
+        nouvelle_pos_vide = PositionCase(
+            case_vide.ligne, case_vide.colonne + 1)
 
     swap_cases(grille_actuelle, case_vide.ligne, case_vide.colonne,
                nouvelle_pos_vide.ligne, nouvelle_pos_vide.colonne)
