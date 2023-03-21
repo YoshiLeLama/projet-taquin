@@ -343,10 +343,69 @@ def is_goal(node: Etat, plateau_initial: list[int]):
     return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
 
 
+def deplacement_2(directions, plateau_initial):
+    n = DIM_GRILLE
+    plateau = plateau_initial[:]
+    for dir in directions:
+        pos_case_vide = plateau.index(-1)
+        if dir == Card.NORD:
+            if 0 <= pos_case_vide < n:
+                return None
+            else:
+                swap(plateau, pos_case_vide, pos_case_vide - n)
+        elif dir == Card.SUD:
+            if n * n - n <= pos_case_vide < n * n:
+                return None
+            else:
+                swap(plateau, pos_case_vide, pos_case_vide + n)
+        elif dir == Card.OUEST:
+            if pos_case_vide in [x for x in range(0, n * n, n)]:
+                return None
+                # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
+            else:
+                swap(plateau, pos_case_vide, pos_case_vide - 1)
+        elif dir == Card.EST:
+            if pos_case_vide in [x for x in range(n - 1, n * n, n)]:
+                return None
+                # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]
+            else:
+                swap(plateau, pos_case_vide, pos_case_vide + 1)
+    return plateau
+
+
+def expanse_2(plateau_initial: list[int], etat_choisi: Etat):
+    result: list[Etat] = []
+
+    for d in [Card.NORD, Card.SUD, Card.OUEST, Card.EST]:
+        nouveaux_deplacements = etat_choisi.liste_deplacement[:]
+        nouveaux_deplacements.append(d)
+        depl = deplacement_2(nouveaux_deplacements, plateau_initial)
+        if depl is not None:
+            result.append(Etat(parent=etat_choisi,
+                               liste_deplacement=nouveaux_deplacements,
+                               cout=len(nouveaux_deplacements) + wd.walking_distance(np.array(depl))))
+    return result
+
+
+etat_type = [('parent', Etat), ('liste_deplacement', list[int]), ('cout', int)]
+
+
+def successors(node: Etat, plateau_initial: list[int]):
+    values = expanse_2(plateau_initial, node)
+
+    for i in range(len(values)):
+        x = values[i]
+        j = i
+        while j > 0 and values[j - 1].cout > x.cout:
+            values[j] = values[j - 1]
+            j = j - 1
+        values[j] = x
+
+    return values
+
+
 def ida_star(plateau_initial):
-    # bound=> estimate cost of the cheapest path
     bound = wd.walking_distance(np.array(plateau_initial))
-    # path => current search path
     path = [Etat(None, [], bound)]
     grilles_rencontrees = [tuple(plateau_initial)]
     while True:
@@ -360,34 +419,18 @@ def ida_star(plateau_initial):
         print(bound)
 
 
-etat_type = [('parent', Etat), ('liste_deplacement', list[int]), ('cout', int)]
-
-
-def successors(node: Etat, plateau_initial: list[int]):
-    values = expanse(plateau_initial, node)
-
-    for i in range(len(values)):
-        x = values[i]
-        j = i
-        while j > 0 and values[j - 1].cout > x.cout:
-            values[j] = values[j - 1]
-            j = j - 1
-        values[j] = x
-
-    return values
-
-
 num_nodes = 0
 
 
 def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
     global num_nodes
+    num_nodes += 1
     node = path[-1]
-    f_value = g + \
-        heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
+    h = heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
+    f_value = g + h
     if f_value > bound:
         return f_value
-    if f_value - g == 0:
+    if h == 0:
         return -1
     min_val = math.inf
     for succ in successors(node, plateau_initial):

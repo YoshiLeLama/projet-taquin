@@ -41,12 +41,21 @@ def write_disk():
     con.isolation_level = None
     cur = con.cursor()
     cur.execute("DROP TABLE distances;")
-    cur.execute("CREATE TABLE distances(table_id TEXT PRIMARY KEY , cout INTEGER);")
+    cur.execute("CREATE TABLE distances(table_id TEXT PRIMARY KEY , cout INTEGER, wdlnk1 INTEGER, wdlnk2 INTEGER);")
 
     cur.execute("BEGIN TRANSACTION;")
 
     for i in range(WDTBL_SIZE):
-        cur.execute("INSERT INTO distances VALUES (?, ?);", (str(WDPTN[i]), str(WDTBL[i])))
+        wdlnk1 = np.longlong(WDLNK[i][0][0])
+        wdlnk2 = np.longlong(WDLNK[i][1][0])
+        for k in range(1, BOARD_WIDTH):
+            wdlnk1 = np.left_shift(wdlnk1, 16)
+            wdlnk2 = np.left_shift(wdlnk2, 16)
+            wdlnk1 = np.bitwise_or(wdlnk1, WDLNK[i][0][k])
+            wdlnk2 = np.bitwise_or(wdlnk2, WDLNK[i][1][k])
+
+        cur.execute("INSERT INTO distances VALUES (?, ?, ?, ?);",
+                    (str(WDPTN[i]), str(WDTBL[i]), str(wdlnk1), str(wdlnk2)))
 
     cur.execute("COMMIT;")
 
@@ -175,6 +184,8 @@ def simulation():
 
 
 table_dict: dict
+wdlnk_dict: dict
+
 wd_db_con: sqlite3.Connection
 wd_db_cur: sqlite3.Cursor
 
@@ -188,54 +199,56 @@ def dict_factory(cursor: sqlite3.Cursor, row):
 def init_db():
     global wd_db_con, wd_db_cur, table_dict
     table_dict = dict()
+    wdlnk_dict = dict()
     wd_db_con = sqlite3.connect("walking_distance.db")
     wd_db_cur = wd_db_con.cursor()
     wd_db_cur.execute("SELECT * FROM distances;")
+    factor = 2 ** 16 - 1
     for x in wd_db_cur.fetchall():
+        wdlnk_arr = np.empty((2, BOARD_WIDTH), dtype=int)
+        wdlnk_1 = np.longlong(x[2])
+        wdlnk_2 = np.longlong(x[3])
+        for k in range(0, BOARD_WIDTH):
+            wdlnk_arr[0][k] = np.bitwise_and(wdlnk_1, factor)
+            wdlnk_arr[1][k] = np.bitwise_and(wdlnk_2, factor)
+            wdlnk_1 = np.right_shift(wdlnk_1, 16)
+            wdlnk_2 = np.right_shift(wdlnk_2, 16)
+        wdlnk_dict[u64(x[0])] = wdlnk_arr
         table_dict[u64(x[0])] = x[1]
     print()
 
 
 def walking_distance(table: np.ndarray):
-    beg = time.time_ns()
     if len(table) != 16:
         return -1
 
     table = table.reshape((4, 4))
 
     rows = np.zeros((4, 4), dtype=u64)
+    columns = np.zeros((4, 4), dtype=u64)
 
     for i in range(0, 4):
         for j in range(0, 4):
             val = table[i][j]
             if val != -1:
                 rows[i][val // 4] += u64(1)
-
-    columns = np.zeros((4, 4), dtype=u64)
-
-    for i in range(0, 4):
-        for j in range(0, 4):
             val = table[j][i]
             if val != -1:
                 columns[i][val % 4] += u64(1)
 
-    table_id_1 = u64(0)
+    table_ids = np.zeros(2, dtype=u64)
     for i in range(0, 4):
         for j in range(0, 4):
-            table_id_1 = np.bitwise_or(np.left_shift(table_id_1, U64_THREE), rows[i][j])
+            table_ids = np.bitwise_or(
+                np.left_shift(table_ids, U64_THREE), np.array([rows[i][j], columns[i][j]]))
 
-    table_id_2 = u64(0)
-    for i in range(0, 4):
-        for j in range(0, 4):
-            table_id_2 = np.bitwise_or(np.left_shift(table_id_2, U64_THREE), columns[i][j])
-    return table_dict[table_id_1] + table_dict[table_id_2]
+    return table_dict[table_ids[0]] + table_dict[table_ids[1]]
 
-    # print("making")
-    # simulation()
-    # print("finish")
-    # write_disk()
+
+# print("making")
+# simulation()
+# print("finish")
+# write_disk()
 
 
 init_db()
-
-walking_distance(np.array([11, 12, 2, 0, 8, 6, 14, -1, 3, 4, 1, 7, 13, 10, 5, 9]))
