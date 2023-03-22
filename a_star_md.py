@@ -1,6 +1,6 @@
 # *************************
 #
-# resolveur taquin 3x3 utilisant A* et l'heuristique distance de manattan pondéré.
+# resolveur taquin 3x3 utilisant A* et l'heuristique distance de Manhattan pondéré.
 #
 # *************************
 
