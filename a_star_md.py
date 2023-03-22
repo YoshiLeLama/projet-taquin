@@ -226,6 +226,29 @@ def heuristique(k: int, etat_courant: list[int], use_wd: bool = True):
                 (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
     return resultat
 
+# heuristique linear conflict
+
+
+def linear_conflict(etat_courant):
+    l = DIM_GRILLE
+    nb_tuile = NOMBRE_TUILES
+    nb_tuile_conflit_l = 0
+    nb_tuile_conflit_c = 0
+    # nb de tuile à supprimer de la ligne de rj pour resoudre le conflit linéaire
+    lc_l = 0
+    lc_c = 0
+    # distande de Manhattan
+    md = 0
+    # la somme des distance de Manhattan
+    MD = 0
+    # nb minimum de mouvement additionnel pour résoudre le coflit de s
+    LC = 0
+
+    for row in range(l):
+        lc_l = 0
+        for _ in range():
+            pass
+
 
 # la fonction swap permet de  calculer le nouveau plateau en fonction des de la direction qu'on aura trouver dans le deplacement sans les cas limites.
 # i : la position de la case vide
