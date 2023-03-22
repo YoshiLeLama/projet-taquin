@@ -350,8 +350,10 @@ def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: in
     global num_nodes
     num_nodes += 1
     node = path[-1]
+    # on utilise walking distance pour calculer l'heuristique et non la dm pondérée.
     h = heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
     f_value = g + h
+    # on impose un limite sur la profondeur de calcul.
     if f_value > bound:
         return f_value
     if h == 0:
