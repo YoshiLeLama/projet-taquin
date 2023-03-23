@@ -216,9 +216,7 @@ def distance_elem(position: tuple[int, int], i: int):
 # l'heuristique sera une distance de Manhattan pondéré.
 
 
-def heuristique(k: int, etat_courant: list[int], use_wd: bool = True):
-    if use_wd and DIM_GRILLE == 4:
-        return wd.walking_distance(np.array(etat_courant))
+def heuristique(k: int, etat_courant: list[int]):
     resultat = 0
     for i in range(0, NOMBRE_CASES):
         if etat_courant[i] != -1:
@@ -226,28 +224,48 @@ def heuristique(k: int, etat_courant: list[int], use_wd: bool = True):
                 (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
     return resultat
 
+
 # heuristique linear conflict
+# On regarde le nombre de conflit liéaire pour la ligne donné
+
+def row_conflict(row, deb_intervale):
+    end = DIM_GRILLE
+    end2 = deb_intervale + DIM_GRILLE
+    res = 0
+    for i in range(0, end):
+        # on vérifie que la position final de la case est bien sur la ligne et qu'elle ne se situe pas dessus
+        if deb_intervale <= row[i] < end2 and row[i] != deb_intervale+i:
+            for y in range(i+1, end):
+                # si une des tuiles à sa position final sur la ligne alors elles sont en conflits
+                if deb_intervale <= row[y] < end2:
+                    res += 1
+    return res
+
+# pour un taquin 3x3 row_number peut être 0,1 ou 2.
 
 
-def linear_conflict(etat_courant):
-    l = DIM_GRILLE
-    nb_tuile = NOMBRE_TUILES
-    nb_tuile_conflit_l = 0
-    nb_tuile_conflit_c = 0
-    # nb de tuile à supprimer de la ligne de rj pour resoudre le conflit linéaire
-    lc_l = 0
-    lc_c = 0
-    # distande de Manhattan
-    md = 0
-    # la somme des distance de Manhattan
-    MD = 0
-    # nb minimum de mouvement additionnel pour résoudre le coflit de s
-    LC = 0
+def col_conflict(col, row_number):
+    res = 0
+    for i in range(0, DIM_GRILLE):
+        # on vérifie que la position final de la case est bien sur la colone et qu'elle ne se situe pas dessus.
+        if col[i] % 3 == row_number and col[i] != row_number+i*DIM_GRILLE:
+            for y in range(i+1, DIM_GRILLE):
+                if col[y] % 3 == row_number:
+                    res += 1
+    return res
 
-    for row in range(l):
-        lc_l = 0
-        for _ in range():
-            pass
+
+def linear_conflict(plateau_courant):
+    res = 0
+
+    # conflit linéaire ligne :
+    for i in range(0, NOMBRE_CASES, DIM_GRILLE):
+        res += row_conflict(plateau_courant[i:i+DIM_GRILLE], i)
+
+    # confli linéaire colone
+    for i in range(0, DIM_GRILLE):
+        res += col_conflict(plateau_courant[i:NOMBRE_CASES:DIM_GRILLE], i)
+    return heuristique(6, plateau_courant) + 2*res
 
 
 # la fonction swap permet de  calculer le nouveau plateau en fonction des de la direction qu'on aura trouver dans le deplacement sans les cas limites.
@@ -343,4 +361,4 @@ if __name__ == '__main__':
     if solvable(plateau):
         beg = time.time_ns()
         res = astar(plateau)
-        print(time.time_ns() - beg, res)
+        print(time.time_ns() - beg, '\n', res)
