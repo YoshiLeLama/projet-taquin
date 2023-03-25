@@ -114,7 +114,6 @@ def bfs(root: list[int]) -> None:
         queue.append(
             Etat(pattern_study(root, pattern), c))
         while queue != []:
-            print(queue[0])
             v = queue.pop(0)
             plate_explored.add(tuple(v.patterne_table))
             s = expanse(v)
