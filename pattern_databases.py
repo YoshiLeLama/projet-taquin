@@ -34,6 +34,8 @@ class Card(Enum):
 def distance_elem(position: tuple[int, int], i: int) -> int:
     return abs(position[1] - i // DIM_GRILLE) + abs(position[0] - i % DIM_GRILLE)
 
+# Distance de manhattan pondéré. On veut juste vérifié que le nb de "déplacement" ou le coût et bien de 1 + le coût du parent.
+
 
 def heuristique(etat_courant: list[int]) -> int:
     resultat = 0
@@ -43,10 +45,13 @@ def heuristique(etat_courant: list[int]) -> int:
                 (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
     return resultat
 
+# On calcul tous les états qu'on peut générer à partir de l'état choisie. Pour cela on devra faire tous les déplacement possible pour chaque tuile du paterne. De plus pour que l'état soit considéré il faut respecter la condition que le cout augmente de 1 comme on est sur une expension en largeur d'abord.
+
 
 def expanse(etat_choisi: Etat) -> list[Etat]:
     result: list[Etat] = []
     c = 0
+    # variable qui permet de vérifier qu'un plateau n'est pas déjà généré.
     alrdy_generate = set()
     for element in etat_choisi.patterne_table:
         if element != -1:
@@ -55,18 +60,20 @@ def expanse(etat_choisi: Etat) -> list[Etat]:
                                    etat_choisi.patterne_table, element)
                 if depl is not None:
                     c = heuristique(depl)
-                    if c == etat_choisi.cout+1:
+                    if c == etat_choisi.cout+1 and tuple(depl) not in alrdy_generate:
                         result.append(Etat(patterne_table=depl,
                                            cout=heuristique(depl)))
-                        # alrdy_generate.add(tuple(depl))
+                        alrdy_generate.add(tuple(depl))
     return result
 
 
 def swap(l, i, j):
     l[i], l[j] = l[j], l[i]
 
+# On va déplacer notre tuile cible et non la case vide. La tuile à déplacer dépend de notre paterne.
 
-def deplacement(dir, plateau_courant, case_deplace) -> list:
+
+def deplacement(dir, plateau_courant, case_deplace) -> list[int]:
     n = DIM_GRILLE
     plateau = plateau_courant[:]
 
@@ -95,6 +102,8 @@ def deplacement(dir, plateau_courant, case_deplace) -> list:
             swap(plateau, pos_case_a_deplace, pos_case_a_deplace + 1)
     return plateau
 
+# générer le plateau en fct du parterne utilisé. On place toutes les tuiles comme des tuiles vides pour celles qui ne sont pas dans le patterne
+
 
 def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
     tab_pattern = grille_resolue[:]
@@ -102,6 +111,8 @@ def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
         if tab_pattern[i] not in pattern:
             tab_pattern[i] = -1
     return tab_pattern
+
+# Pour générer tous les coûts possible pour tous les paternes on utilisera une stratégie de largeur d'abord.
 
 
 def bfs(root: list[int]) -> None:
@@ -123,7 +134,7 @@ def bfs(root: list[int]) -> None:
             explored.append(v)
 
 
-def generer_grille_resolue():
+def generer_grille_resolue() -> list[int]:
     grille = []
     for i in range(0, DIM_GRILLE * DIM_GRILLE - 1):
         grille.append(i)
