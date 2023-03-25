@@ -13,7 +13,8 @@ Etat.__annotations__ = {
 DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
-PATERN = [[1, 2, 3, 5, 6], [4, 7, 8, 11, 12], [9, 10, 13, 14, 15]]
+# Patern pour un 4x4
+PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
 
 
 def set_dim_grille(new_dim: int):
@@ -46,15 +47,18 @@ def heuristique(etat_courant: list[int]) -> int:
 def expanse(etat_choisi: Etat) -> list[Etat]:
     result: list[Etat] = []
     c = 0
+    alrdy_generate = set()
     for element in etat_choisi.patterne_table:
         if element != -1:
             for d in [Card.NORD, Card.SUD, Card.OUEST, Card.EST]:
                 depl = deplacement(d,
                                    etat_choisi.patterne_table, element)
-                c = heuristique(depl)
-                if depl is not None and c == etat_choisi.cout+1:
-                    result.append(Etat(patterne_table=depl,
-                                       cout=heuristique(depl)))
+                if depl is not None:
+                    c = heuristique(depl)
+                    if c == etat_choisi.cout+1:
+                        result.append(Etat(patterne_table=depl,
+                                           cout=heuristique(depl)))
+                        # alrdy_generate.add(tuple(depl))
     return result
 
 
@@ -92,34 +96,32 @@ def deplacement(dir, plateau_courant, case_deplace) -> list:
     return plateau
 
 
-def pattern_sudy(grille_resolue: list[int], pattern_number) -> list[int]:
+def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
     tab_pattern = grille_resolue[:]
-    pattern = PATERN[pattern_number]
     for i in range(0, NOMBRE_TUILES):
         if tab_pattern[i] not in pattern:
             tab_pattern[i] = -1
     return tab_pattern
 
 
-def bfs(root) -> None:
+def bfs(root: list[int]) -> None:
     queue: list[Etat] = []
-    queue.append(root)
     explored: list[Etat] = []
+    plate_explored = set()
     s: list[Etat] = []
-    cout = 0
-    while queue != []:
-        for element in queue:
-            print(element[0:4])
-            print(element[5:8])
-            print(element[9:12])
-            print(element[13:16])
-        v = queue.pop(0)
-        explored.append(v)
-        s = expanse(v)
-        for element in s:
-            if s not in explored:
-                ...
-        queue.append(s)
+    for pattern in PATERN:
+        c = 0
+        queue.append(
+            Etat(pattern_study(root, pattern), c))
+        while queue != []:
+            print(queue[0])
+            v = queue.pop(0)
+            plate_explored.add(tuple(v.patterne_table))
+            s = expanse(v)
+            for element in s:
+                if tuple(element.patterne_table) not in plate_explored:
+                    queue.append(element)
+            explored.append(v)
 
 
 def generer_grille_resolue():
@@ -132,5 +134,4 @@ def generer_grille_resolue():
 
 if __name__ == '__main__':
     set_dim_grille(4)
-    initial_state = Etat(generer_grille_resolue(), 0)
-    bfs(initial_state)
+    bfs(generer_grille_resolue())
