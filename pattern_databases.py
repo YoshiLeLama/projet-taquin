@@ -4,6 +4,8 @@
 
 from collections import namedtuple
 from enum import Enum
+import sqlite3
+from sqlite3 import Error
 
 
 Etat = namedtuple('Etat', ['patterne_table', 'cout'])
@@ -29,6 +31,25 @@ class Card(Enum):
     SUD = 1
     OUEST = 2
     EST = 3
+
+
+def write_disk(data: list[Etat]):
+    databases = None
+    try:
+        databases = sqlite3.connect("pa_db.db")
+    except Error as e:
+        print(e)
+    databases.isolation_level = None
+    cur = databases.cursor()
+    cur.execute("DROP TABLE IF EXISTS paterne;")
+    cur.execute(
+        "CREATE TABLE paterne(table_id TEXT PRIMARY KEY , cout INTEGER);")
+    cur.execute("BEGIN TRANSACTION;")
+    for i in data:
+        cur.execute("INSERT INTO paterne VALUES (?, ?);",
+                    (str(i.patterne_table), i.cout))
+    cur.execute("COMMIT;")
+    databases.close()
 
 
 def distance_elem(position: tuple[int, int], i: int) -> int:
