@@ -35,9 +35,7 @@ class Card(Enum):
     EST = 3
 
 
-def write_disk(data: list[Etat]):
-    writing_in_disk_semaphore.acquire()
-    databases = None
+def create_SQL_table():
     try:
         databases = sqlite3.connect("pa_db.db")
     except Error as e:
@@ -47,6 +45,20 @@ def write_disk(data: list[Etat]):
     cur.execute("DROP TABLE IF EXISTS paterne;")
     cur.execute(
         "CREATE TABLE paterne(table_id TEXT PRIMARY KEY , cout INTEGER);")
+    cur.execute("BEGIN TRANSACTION;")
+    cur.execute("COMMIT;")
+    databases.close()
+
+
+def write_disk(data: list[Etat]):
+    writing_in_disk_semaphore.acquire()
+    databases = None
+    try:
+        databases = sqlite3.connect("pa_db.db")
+    except Error as e:
+        print(e)
+    databases.isolation_level = None
+    cur = databases.cursor()
     cur.execute("BEGIN TRANSACTION;")
     for i in data:
         cur.execute("INSERT INTO paterne VALUES (?, ?);",
@@ -169,6 +181,7 @@ def generer_grille_resolue() -> list[int]:
 
 if __name__ == '__main__':
     set_dim_grille(4)
+    create_SQL_table()
     grille_resolue = generer_grille_resolue()
     calculating_threads = [threading.Thread()] * 3
     for i in range(3):
