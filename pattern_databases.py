@@ -136,7 +136,7 @@ def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
 # Pour générer tous les coûts possible pour tous les paternes on utilisera une stratégie de largeur d'abord.
 
 
-def bfs(root: list[int]) -> None:
+def bfs(root: list[int]) -> list[Etat]:
     queue: list[Etat] = []
     explored: list[Etat] = []
     plate_explored = set()
@@ -153,6 +153,7 @@ def bfs(root: list[int]) -> None:
                 if tuple(element.patterne_table) not in plate_explored:
                     queue.append(element)
             explored.append(v)
+    return explored
 
 
 def generer_grille_resolue() -> list[int]:
@@ -165,4 +166,4 @@ def generer_grille_resolue() -> list[int]:
 
 if __name__ == '__main__':
     set_dim_grille(4)
-    bfs(generer_grille_resolue())
+    write_disk(bfs(generer_grille_resolue()))
