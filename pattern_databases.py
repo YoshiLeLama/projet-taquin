@@ -3,6 +3,7 @@
 # **************************************
 
 from collections import namedtuple
+import threading
 from enum import Enum
 import sqlite3
 from sqlite3 import Error
@@ -17,6 +18,7 @@ NOMBRE_TUILES: int
 NOMBRE_CASES: int
 # Patern pour un 4x4
 PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
+writing_in_disk_semaphore = threading.Semaphore(1)
 
 
 def set_dim_grille(new_dim: int):
@@ -34,6 +36,7 @@ class Card(Enum):
 
 
 def write_disk(data: list[Etat]):
+    writing_in_disk_semaphore.acquire()
     databases = None
     try:
         databases = sqlite3.connect("pa_db.db")
@@ -50,6 +53,7 @@ def write_disk(data: list[Etat]):
                     (str(i.patterne_table), i.cout))
     cur.execute("COMMIT;")
     databases.close()
+    writing_in_disk_semaphore.release()
 
 
 def distance_elem(position: tuple[int, int], i: int) -> int:
@@ -141,18 +145,17 @@ def bfs(root: list[int]) -> list[Etat]:
     explored: list[Etat] = []
     plate_explored = set()
     s: list[Etat] = []
-    for pattern in PATERN:
-        c = 0
-        queue.append(
-            Etat(pattern_study(root, pattern), c))
-        while queue != []:
-            v = queue.pop(0)
-            plate_explored.add(tuple(v.patterne_table))
-            s = expanse(v)
-            for element in s:
-                if tuple(element.patterne_table) not in plate_explored:
-                    queue.append(element)
-            explored.append(v)
+
+    queue.append(
+        Etat(root, 0))
+    while queue != []:
+        v = queue.pop(0)
+        plate_explored.add(tuple(v.patterne_table))
+        s = expanse(v)
+        for element in s:
+            if tuple(element.patterne_table) not in plate_explored:
+                queue.append(element)
+        explored.append(v)
     return explored
 
 
@@ -166,4 +169,11 @@ def generer_grille_resolue() -> list[int]:
 
 if __name__ == '__main__':
     set_dim_grille(4)
-    write_disk(bfs(generer_grille_resolue()))
+    grille_resolue = generer_grille_resolue()
+    calculating_threads = [threading.Thread()] * 3
+    for i in range(3):
+        calculating_threads[i] = threading.Thread(
+            target=lambda: bfs(pattern_study(grille_resolue, PATERN[i])))
+        calculating_threads[i].start()
+    for i in range(3):
+        calculating_threads[i].join()
