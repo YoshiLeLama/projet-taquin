@@ -34,6 +34,8 @@ class Card(Enum):
     OUEST = 2
     EST = 3
 
+# on créer la bd pour ensuite pouvoir la réutiliser plus tard.
+
 
 def create_SQL_table():
     try:
