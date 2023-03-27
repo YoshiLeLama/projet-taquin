@@ -18,8 +18,8 @@ DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
 # Patern pour un 4x4
-# PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
-PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
+PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
+# PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
 
 writing_in_disk_semaphore = threading.Semaphore(1)
 
