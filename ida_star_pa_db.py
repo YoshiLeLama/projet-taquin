@@ -9,7 +9,8 @@ import random
 import numpy as np
 
 import walking_distance as wd
-
+import sqlite3
+from sqlite3 import Error
 DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
@@ -94,7 +95,7 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
             result.append(Etat(liste_deplacement=nouveaux_deplacements,
-                               cout=len(nouveaux_deplacements) + heuristique(K, depl)))
+                               cout=len(nouveaux_deplacements) + heuristique(depl)))
     return result
 
 
@@ -104,15 +105,41 @@ def f(etat: Etat):
 
 # l'heuristique sera une distance de Manhattan pondéré.
 
+PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
 
-def heuristique(k: int, etat_courant: list[int], use_wd: bool = True):
-    if use_wd and DIM_GRILLE == 4:
-        return wd.walking_distance(np.array(etat_courant))
+
+def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
+    tab_pattern = grille_resolue[:]
+    for i in range(0, NOMBRE_CASES):
+        if tab_pattern[i] not in pattern:
+            tab_pattern[i] = -1
+    return tuple(tab_pattern)
+
+
+def heuristique(etat_courant: list[int]):
+    result = 0
+    try:
+        databases = sqlite3.connect("pa_db.db")
+    except Error as e:
+        print(e)
+    cur = databases.cursor()
+    for i in PATERN:
+        cur.execute(
+            "SELECT cout FROM paterne WHERE table_id =?", (str(
+                pattern_study(etat_courant, i)),))
+        rows = cur.fetchall()
+        for row in rows:
+            result += row[0]
+
+    databases.close()
+    return result
 
 
 # la fonction swap permet de  calculer le nouveau plateau en fonction des de la direction qu'on aura trouver dans le deplacement sans les cas limites.
 # i : la position de la case vide
 # j : la position de la case à changer.
+
+
 def swap(l, i, j):
     l[i], l[j] = l[j], l[i]
 
@@ -218,7 +245,7 @@ def successors(node: Etat, plateau_initial: list[int]):
 
 
 def ida_star(plateau_initial):
-    bound = wd.walking_distance(np.array(plateau_initial))
+    bound = heuristique(plateau_initial)
     path = [Etat([], bound)]
     grilles_rencontrees = [tuple(plateau_initial)]
     while True:
@@ -240,7 +267,7 @@ def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: in
     num_nodes += 1
     node = path[-1]
     # on utilise walking distance pour calculer l'heuristique et non la dm pondérée.
-    h = heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
+    h = heuristique(deplacement(node.liste_deplacement, plateau_initial))
     f_value = g + h
     # on impose un limite sur la profondeur de calcul.
     if f_value > bound:
