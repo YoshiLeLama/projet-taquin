@@ -52,7 +52,7 @@ def create_SQL_table():
     databases.close()
 
 
-def write_disk(data: list[Etat]):
+def write_disk(data: dict):
     writing_in_disk_semaphore.acquire()
     databases = None
     try:
@@ -62,27 +62,14 @@ def write_disk(data: list[Etat]):
     databases.isolation_level = None
     cur = databases.cursor()
     cur.execute("BEGIN TRANSACTION;")
-    for i in data:
+    print("writting")
+    for k, v in data.items():
         cur.execute("INSERT INTO paterne VALUES (?, ?);",
-                    (str(i.patterne_table), i.cout))
+                    (str(k), v))
     cur.execute("COMMIT;")
+    print("finish")
     databases.close()
     writing_in_disk_semaphore.release()
-
-
-def distance_elem(position: tuple[int, int], i: int) -> int:
-    return abs(position[1] - i // DIM_GRILLE) + abs(position[0] - i % DIM_GRILLE)
-
-# Distance de manhattan pondéré. On veut juste vérifié que le nb de "déplacement" ou le coût et bien de 1 + le coût du parent.
-
-
-def heuristique(etat_courant: list[int]) -> int:
-    resultat = 0
-    for i in range(0, NOMBRE_CASES):
-        if etat_courant[i] != -1:
-            resultat += distance_elem(
-                (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
-    return resultat
 
 # On calcul tous les états qu'on peut générer à partir de l'état choisie. Pour cela on devra faire tous les déplacement possible pour chaque tuile du paterne. De plus pour que l'état soit considéré il faut respecter la condition que le cout augmente de 1 comme on est sur une expension en largeur d'abord.
 
@@ -204,13 +191,13 @@ def generer_grille_resolue() -> list[int]:
 
 if __name__ == '__main__':
     set_dim_grille(4)
-    # create_SQL_table()
+    create_SQL_table()
     grille_resolue = generer_grille_resolue()
-    # calculating_threads = [threading.Thread()] * 3
-    # for i in range(3):
-    #     calculating_threads[i] = threading.Thread(
-    #         target=lambda: bfs(pattern_study(grille_resolue, PATERN[i])))
-    #     calculating_threads[i].start()
-    # for i in range(3):
-    #     calculating_threads[i].join()
-    bfs(pattern_study(grille_resolue, PATERN[0]), PATERN[0])
+    calculating_threads = [threading.Thread()] * 3
+    for i in range(3):
+        calculating_threads[i] = threading.Thread(
+            target=lambda: bfs(pattern_study(grille_resolue, PATERN[i]), PATERN[i]))
+        calculating_threads[i].start()
+    for i in range(3):
+        calculating_threads[i].join()
+    # bfs(pattern_study(grille_resolue, PATERN[0]), PATERN[0])

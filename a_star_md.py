@@ -176,28 +176,28 @@ def astar(plateau_initial):
         etat_choisi = frontiere.pop(0)
         grilles_frontiere.pop(0)
         plateau = deplacement(etat_choisi.liste_deplacement, plateau_initial)
+        if tuple(plateau) not in explored:
+            if heuristique(K, plateau) == 0:
+                return etat_choisi
+                # ici on retroune la solution. Faire une fct qui calcul la solution si besoins.
+            else:
+                # S est une liste contenant tous les états trouvé après l'expention
+                S = expanse(plateau_initial, etat_choisi)
+                for i in range(0, len(S)):
+                    calculating_threads[i] = threading.Thread(target=lambda: calculate_if_valid(
+                        S[i], plateau_initial, explored, frontiere, grilles_frontiere
+                    ))
+                    calculating_threads[i].start()
 
-        if heuristique(K, plateau) == 0:
-            return etat_choisi
-            # ici on retroune la solution. Faire une fct qui calcul la solution si besoins.
-        else:
-            # S est une liste contenant tous les états trouvé après l'expention
-            S = expanse(plateau_initial, etat_choisi)
-            for i in range(0, len(S)):
-                calculating_threads[i] = threading.Thread(target=lambda: calculate_if_valid(
-                    S[i], plateau_initial, explored, frontiere, grilles_frontiere
-                ))
-                calculating_threads[i].start()
+                for i in range(len(S)):
+                    calculating_threads[i].join()
 
-            for i in range(len(S)):
-                calculating_threads[i].join()
+            explored.add(tuple(plateau))
 
-        explored.add(tuple(plateau))
+            nombre_etats_explo = len(frontiere)
 
-        nombre_etats_explo = len(frontiere)
-
-        if should_quit:
-            return None
+            if should_quit:
+                return None
     return None
 
 
@@ -351,12 +351,13 @@ def generer_grille_aleatoire(resolvable: bool = False):
 # main
 if __name__ == '__main__':
     K = 0
-    set_dim_grille(3)
+    set_dim_grille(4)
     # plateau = [12, 1, -1, 5,
     #            11, 9, 7, 13,
     #            0, 10, 3, 2,
     #            4, 8, 14, 6]
     plateau = generer_grille_aleatoire()
+    print(plateau)
     print(solvable(plateau))
     if solvable(plateau):
         beg = time.time_ns()
