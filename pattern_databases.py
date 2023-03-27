@@ -17,7 +17,9 @@ DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
 # Patern pour un 4x4
-PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
+# PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
+PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
+
 writing_in_disk_semaphore = threading.Semaphore(1)
 
 
@@ -193,12 +195,13 @@ if __name__ == '__main__':
     set_dim_grille(4)
     create_SQL_table()
     grille_resolue = generer_grille_resolue()
-    calculating_threads = [threading.Thread()] * 3
-    for i in range(3):
+    print(len(PATERN))
+    calculating_threads = [threading.Thread()] * len(PATERN)
+    for i in range(len(PATERN)):
         calculating_threads[i] = threading.Thread(
             target=lambda: write_disk(bfs(pattern_study(grille_resolue, PATERN[i]), PATERN[i])))
         calculating_threads[i].start()
-    for i in range(3):
+    for i in range(len(PATERN)):
         calculating_threads[i].join()
 
     # bfs(pattern_study(grille_resolue, PATERN[0]), PATERN[0])
