@@ -299,7 +299,7 @@ if __name__ == '__main__':
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
 
-    print(solvable(plateau))
+    print(plateau)
     if solvable(plateau):
         beg = time.time_ns()
         res = ida_star(plateau)

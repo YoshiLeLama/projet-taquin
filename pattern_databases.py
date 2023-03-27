@@ -7,6 +7,7 @@ import threading
 from enum import Enum
 import sqlite3
 from sqlite3 import Error
+import time
 # Attention subsite des bugs
 
 Etat = namedtuple('Etat', ['patterne_table', 'cout'])
@@ -164,22 +165,29 @@ def bfs(root: list[int], pattern: list[int]) -> dict:
     queue = dict()
     alrdy_found = dict()
     explored = dict()
+    e2 = set()
     s = dict()
     queue.update({tuple(root): 0})
     alrdy_found.update({tuple(root): 0})
+    # explored.update({tuple(suppression_de_la_case_vide(root, pattern)): 0})
+    e2.add(tuple(suppression_de_la_case_vide(root, pattern)))
     # Un dictionnaire vide est évalué à faux.
     while bool(queue):
+
         # k permet de récuprer la position 0 du dictionnaire donc de la file. En vérité il donne la première clef
         position0 = next(iter(queue))
         selected = {position0: queue.pop(position0)}
         # s est le résultat de l'expension
         s = expanse(selected)
         for k, v in s.items():
-            if k not in alrdy_found and k not in queue:
+            if k not in alrdy_found and e2:
                 queue.update({k: v})
                 alrdy_found.update({k: v})
-        explored.update(
-            {tuple(suppression_de_la_case_vide(list(position0), pattern)): selected.pop(position0)})
+        e2.add(position0)
+        var = tuple(suppression_de_la_case_vide(list(position0), pattern))
+        if var not in explored:
+            explored.update(
+                {var: selected.pop(position0)})
     return explored
 
 
@@ -203,5 +211,4 @@ if __name__ == '__main__':
         calculating_threads[i].start()
     for i in range(len(PATERN)):
         calculating_threads[i].join()
-
-    # bfs(pattern_study(grille_resolue, PATERN[0]), PATERN[0])
+    # bfs(pattern_study(grille_resolue, PATERN[3]), PATERN[3])
