@@ -7,7 +7,7 @@ import threading
 from enum import Enum
 import sqlite3
 from sqlite3 import Error
-
+# Attention subsite des bugs
 
 Etat = namedtuple('Etat', ['patterne_table', 'cout'])
 Etat.__annotations__ = {
