@@ -196,8 +196,9 @@ if __name__ == '__main__':
     calculating_threads = [threading.Thread()] * 3
     for i in range(3):
         calculating_threads[i] = threading.Thread(
-            target=lambda: bfs(pattern_study(grille_resolue, PATERN[i]), PATERN[i]))
+            target=lambda: write_disk(bfs(pattern_study(grille_resolue, PATERN[i]), PATERN[i])))
         calculating_threads[i].start()
     for i in range(3):
         calculating_threads[i].join()
+
     # bfs(pattern_study(grille_resolue, PATERN[0]), PATERN[0])
