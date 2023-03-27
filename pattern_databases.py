@@ -17,7 +17,7 @@ DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
 # Patern pour un 4x4
-PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
+PATERN = [[1, 2, 5, 6], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
 writing_in_disk_semaphore = threading.Semaphore(1)
 
 
@@ -87,22 +87,14 @@ def heuristique(etat_courant: list[int]) -> int:
 # On calcul tous les états qu'on peut générer à partir de l'état choisie. Pour cela on devra faire tous les déplacement possible pour chaque tuile du paterne. De plus pour que l'état soit considéré il faut respecter la condition que le cout augmente de 1 comme on est sur une expension en largeur d'abord.
 
 
-def expanse(etat_choisi: Etat) -> list[Etat]:
-    result: list[Etat] = []
-    c = 0
+def expanse(etat_choisi: dict()) -> dict:
+    result = dict()
     # variable qui permet de vérifier qu'un plateau n'est pas déjà généré.
-    alrdy_generate = set()
-    for element in etat_choisi.patterne_table:
-        if element != -1:
-            for d in [Card.NORD, Card.SUD, Card.OUEST, Card.EST]:
-                depl = deplacement(d,
-                                   etat_choisi.patterne_table, element)
-                if depl is not None:
-                    c = heuristique(depl)
-                    if c == etat_choisi.cout+1 and tuple(depl) not in alrdy_generate:
-                        result.append(Etat(patterne_table=depl,
-                                           cout=heuristique(depl)))
-                        alrdy_generate.add(tuple(depl))
+
+    for d in [Card.NORD, Card.SUD, Card.OUEST, Card.EST]:
+        depl = deplacement(d, etat_choisi)
+        if depl is not None:
+            result.update(depl)
     return result
 
 
@@ -112,64 +104,93 @@ def swap(l, i, j):
 # On va déplacer notre tuile cible et non la case vide. La tuile à déplacer dépend de notre paterne.
 
 
-def deplacement(dir, plateau_courant, case_deplace) -> list[int]:
+def deplacement(dir, state: dict):
     n = DIM_GRILLE
-    plateau = plateau_courant[:]
-
-    pos_case_a_deplace = plateau.index(case_deplace)
+    k = next(iter(state))
+    plateau = list(k)
+    result = dict()
+    cost = state.get(k)
+    pos_case_vide = plateau.index(-1)
     if dir == Card.NORD:
-        if 0 <= pos_case_a_deplace < n:
+        if 0 <= pos_case_vide < n:
             return None
         else:
-            swap(plateau, pos_case_a_deplace, pos_case_a_deplace - n)
+            if plateau[pos_case_vide-n] != -2:
+                cost = state.get(k)+1
+            swap(plateau, pos_case_vide, pos_case_vide - n)
+            result.update(
+                {tuple(plateau): cost})
     elif dir == Card.SUD:
-        if n * n - n <= pos_case_a_deplace < n * n:
+        if n * n - n <= pos_case_vide < n * n:
             return None
         else:
-            swap(plateau, pos_case_a_deplace, pos_case_a_deplace + n)
+            if plateau[pos_case_vide+n] != -2:
+                cost = state.get(k)+1
+            swap(plateau, pos_case_vide, pos_case_vide + n)
+            result.update(
+                {tuple(plateau): cost})
     elif dir == Card.OUEST:
-        if pos_case_a_deplace in [x for x in range(0, n * n, n)]:
+        if pos_case_vide in [x for x in range(0, n * n, n)]:
             return None
             # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
         else:
-            swap(plateau, pos_case_a_deplace, pos_case_a_deplace - 1)
+            if plateau[pos_case_vide-1] != -2:
+                cost = state.get(k)+1
+            swap(plateau, pos_case_vide, pos_case_vide - 1)
+            result.update(
+                {tuple(plateau): cost})
     elif dir == Card.EST:
-        if pos_case_a_deplace in [x for x in range(n - 1, n * n, n)]:
+        if pos_case_vide in [x for x in range(n - 1, n * n, n)]:
             return None
             # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]
         else:
-            swap(plateau, pos_case_a_deplace, pos_case_a_deplace + 1)
-    return plateau
+            if plateau[pos_case_vide+1] != -2:
+                cost = state.get(k)+1
+            swap(plateau, pos_case_vide, pos_case_vide + 1)
+            result.update(
+                {tuple(plateau): cost})
+    return result
 
 # générer le plateau en fct du parterne utilisé. On place toutes les tuiles comme des tuiles vides pour celles qui ne sont pas dans le patterne
 
 
 def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
     tab_pattern = grille_resolue[:]
-    for i in range(0, NOMBRE_TUILES):
+    for i in range(0, NOMBRE_CASES):
+        if tab_pattern[i] not in pattern and tab_pattern[i] != -1:
+            tab_pattern[i] = -2
+    return tab_pattern
+# Pour générer tous les coûts possible pour tous les paternes on utilisera une stratégie de largeur d'abord.
+
+
+def suppression_de_la_case_vide(grille: list[int], pattern: list[int]) -> list[int]:
+    tab_pattern = grille[:]
+    for i in range(0, NOMBRE_CASES):
         if tab_pattern[i] not in pattern:
             tab_pattern[i] = -1
     return tab_pattern
 
-# Pour générer tous les coûts possible pour tous les paternes on utilisera une stratégie de largeur d'abord.
 
-
-def bfs(root: list[int]) -> list[Etat]:
-    queue: list[Etat] = []
-    explored: list[Etat] = []
-    plate_explored = set()
-    s: list[Etat] = []
-
-    queue.append(
-        Etat(root, 0))
-    while queue != []:
-        v = queue.pop(0)
-        plate_explored.add(tuple(v.patterne_table))
-        s = expanse(v)
-        for element in s:
-            if tuple(element.patterne_table) not in plate_explored:
-                queue.append(element)
-        explored.append(v)
+def bfs(root: list[int], pattern: list[int]) -> dict:
+    queue = dict()
+    alrdy_found = dict()
+    explored = dict()
+    s = dict()
+    queue.update({tuple(root): 0})
+    alrdy_found.update({tuple(root): 0})
+    # Un dictionnaire vide est évalué à faux.
+    while bool(queue):
+        # k permet de récuprer la position 0 du dictionnaire donc de la file. En vérité il donne la première clef
+        position0 = next(iter(queue))
+        selected = {position0: queue.pop(position0)}
+        # s est le résultat de l'expension
+        s = expanse(selected)
+        for k, v in s.items():
+            if k not in alrdy_found and k not in queue:
+                queue.update({k: v})
+                alrdy_found.update({k: v})
+        explored.update(
+            {tuple(suppression_de_la_case_vide(list(position0), pattern)): selected.pop(position0)})
     return explored
 
 
@@ -183,12 +204,13 @@ def generer_grille_resolue() -> list[int]:
 
 if __name__ == '__main__':
     set_dim_grille(4)
-    create_SQL_table()
+    # create_SQL_table()
     grille_resolue = generer_grille_resolue()
-    calculating_threads = [threading.Thread()] * 3
-    for i in range(3):
-        calculating_threads[i] = threading.Thread(
-            target=lambda: bfs(pattern_study(grille_resolue, PATERN[i])))
-        calculating_threads[i].start()
-    for i in range(3):
-        calculating_threads[i].join()
+    # calculating_threads = [threading.Thread()] * 3
+    # for i in range(3):
+    #     calculating_threads[i] = threading.Thread(
+    #         target=lambda: bfs(pattern_study(grille_resolue, PATERN[i])))
+    #     calculating_threads[i].start()
+    # for i in range(3):
+    #     calculating_threads[i].join()
+    bfs(pattern_study(grille_resolue, PATERN[0]), PATERN[0])
