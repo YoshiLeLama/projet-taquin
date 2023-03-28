@@ -105,7 +105,9 @@ def f(etat: Etat):
 
 # l'heuristique sera une distance de Manhattan pondéré.
 
-PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
+# PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
+
+PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
 
 
 def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
@@ -119,7 +121,7 @@ def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
 def heuristique(etat_courant: list[int]):
     result = 0
     try:
-        databases = sqlite3.connect("pa_db.db")
+        databases = sqlite3.connect("pa5-5-5_db.db")
     except Error as e:
         print(e)
     cur = databases.cursor()
@@ -298,7 +300,10 @@ if __name__ == '__main__':
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
-
+    plateau = [12, 1, -1, 5,
+               11, 9, 7, 13,
+               0, 10, 3, 2,
+               4, 8, 14, 6]
     print(plateau)
     if solvable(plateau):
         beg = time.time_ns()
