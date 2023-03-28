@@ -253,7 +253,7 @@ def ida_star(plateau_initial):
     while True:
         t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
         if t == -1:
-            return path, bound
+            return path[-1], bound
         print(t)
         if t == math.inf:
             return -1
@@ -308,4 +308,4 @@ if __name__ == '__main__':
     if solvable(plateau):
         beg = time.time_ns()
         res = ida_star(plateau)
-        print(time.time_ns() - beg, res)
+        print((time.time_ns() - beg)*10**(-9), res)
