@@ -105,7 +105,7 @@ def deplacement(dir, state: dict):
             return None
         else:
             if plateau[pos_case_vide-n] != -2:
-                cost = state.get(k)+1
+                cost += 1
             swap(plateau, pos_case_vide, pos_case_vide - n)
             result.update(
                 {tuple(plateau): cost})
@@ -114,7 +114,7 @@ def deplacement(dir, state: dict):
             return None
         else:
             if plateau[pos_case_vide+n] != -2:
-                cost = state.get(k)+1
+                cost += 1
             swap(plateau, pos_case_vide, pos_case_vide + n)
             result.update(
                 {tuple(plateau): cost})
@@ -124,7 +124,7 @@ def deplacement(dir, state: dict):
             # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
         else:
             if plateau[pos_case_vide-1] != -2:
-                cost = state.get(k)+1
+                cost += 1
             swap(plateau, pos_case_vide, pos_case_vide - 1)
             result.update(
                 {tuple(plateau): cost})
@@ -134,7 +134,7 @@ def deplacement(dir, state: dict):
             # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]
         else:
             if plateau[pos_case_vide+1] != -2:
-                cost = state.get(k)+1
+                cost += 1
             swap(plateau, pos_case_vide, pos_case_vide + 1)
             result.update(
                 {tuple(plateau): cost})
