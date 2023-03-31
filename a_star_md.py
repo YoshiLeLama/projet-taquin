@@ -8,6 +8,7 @@ import math
 import threading
 import time
 from collections import namedtuple
+from collections import deque
 from bisect import insort
 from enum import Enum
 import random
@@ -148,7 +149,8 @@ def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_
         else:
             if f(etat_cree) < f(frontiere[duplicate]):
                 writing_in_frontiere_semaphore.acquire()
-                frontiere.pop(duplicate)
+                # frontiere.pop(duplicate)
+                frontiere.remove(frontiere[duplicate])
                 grilles_frontiere.pop(duplicate)
                 writing_in_frontiere_semaphore.release()
             # l'état sera inséré par ordre de coût à l'aide de la fonction inserer_etat.
@@ -167,13 +169,16 @@ def astar(plateau_initial):
     # n est la taille du taquin
     frontiere = [Etat(liste_deplacement=[],
                       cout=heuristique(K, plateau_initial))]
+    frontiere = deque()
+    frontiere.append(Etat(liste_deplacement=[],
+                          cout=heuristique(K, plateau_initial)))
     grilles_frontiere = [tuple(plateau_initial[:])]
     explored = set()
     # l'état finale à une heuristique de 0 : toutes les cases sont à la bonnes position.
     calculating_threads = [threading.Thread()] * 4
 
     while len(frontiere) != 0:
-        etat_choisi = frontiere.pop(0)
+        etat_choisi = frontiere.popleft()
         grilles_frontiere.pop(0)
         plateau = deplacement(etat_choisi.liste_deplacement, plateau_initial)
         if tuple(plateau) not in explored:
@@ -351,12 +356,15 @@ def generer_grille_aleatoire(resolvable: bool = False):
 # main
 if __name__ == '__main__':
     K = 0
-    set_dim_grille(4)
+    set_dim_grille(3)
     # plateau = [12, 1, -1, 5,
     #            11, 9, 7, 13,
     #            0, 10, 3, 2,
     #            4, 8, 14, 6]
     plateau = generer_grille_aleatoire()
+    while not solvable(plateau):
+        plateau = generer_grille_aleatoire()
+
     print(plateau)
     print(solvable(plateau))
     if solvable(plateau):
