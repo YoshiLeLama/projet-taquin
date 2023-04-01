@@ -118,7 +118,7 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
 
 
 def f(etat: Etat):
-    return etat.cout + len(etat.liste_deplacement)
+    return etat.cout
 
 
 def inserer_etat(file_etat: list[Etat], etat: Etat):
