@@ -41,7 +41,7 @@ POIDS_TUILES = [
 ]
 
 K = 6
-
+COEF_NORM = [4, 1, 4, 1, 4, 1]
 nombre_etats_explo = 0
 
 writing_in_frontiere_semaphore = threading.Semaphore(1)
@@ -228,7 +228,7 @@ def heuristique(k: int, etat_courant: list[int]):
         if etat_courant[i] != -1:
             resultat += get_poids_tuile(k, etat_courant[i]) * distance_elem(
                 (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
-    return resultat
+    return resultat // COEF_NORM[k-1]
 
 
 # heuristique linear conflict
