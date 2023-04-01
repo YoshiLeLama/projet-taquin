@@ -167,11 +167,12 @@ def astar(plateau_initial):
     global nombre_etats_explo
     nombre_etats_explo = 0
     # n est la taille du taquin
-    frontiere = [Etat(liste_deplacement=[],
-                      cout=heuristique(K, plateau_initial))]
+    # frontiere = [Etat(liste_deplacement=[],
+    #                   cout=heuristique(K, plateau_initial))]
     frontiere = deque()
     frontiere.append(Etat(liste_deplacement=[],
                           cout=heuristique(K, plateau_initial)))
+    # stocke les grilles déjà trouvés synchronisé avec la frontière.
     grilles_frontiere = [tuple(plateau_initial[:])]
     explored = set()
     # l'état finale à une heuristique de 0 : toutes les cases sont à la bonnes position.
@@ -201,8 +202,8 @@ def astar(plateau_initial):
 
             nombre_etats_explo = len(frontiere)
 
-            if should_quit:
-                return None
+        if should_quit:
+            return None
     return None
 
 
