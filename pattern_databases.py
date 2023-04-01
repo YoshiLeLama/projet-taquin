@@ -2,7 +2,7 @@
 # pattern databases generation
 # **************************************
 
-from collections import namedtuple
+from collections import OrderedDict, namedtuple
 import threading
 from enum import Enum
 import sqlite3
@@ -161,10 +161,15 @@ def suppression_de_la_case_vide(grille: list[int], pattern: list[int]) -> list[i
 
 
 def bfs(root: list[int], pattern: list[int]) -> dict:
-    queue = dict()
+    # file
+    queue = OrderedDict()
+    # état déjà générer
     alrdy_found = dict()
+    # notre liste d'état explorer que nous voulons garder en mémoire sans prendre en considération la case vide
     explored = dict()
+    # Notre liste d'état explorer en prenant en compte la case vide
     e2 = set()
+    # ensemble des états expansés.
     s = dict()
     queue.update({tuple(root): 0})
     alrdy_found.update({tuple(root): 0})
