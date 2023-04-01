@@ -300,12 +300,12 @@ if __name__ == '__main__':
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
-    # plateau = [12, 1, -1, 5,
-    #            11, 9, 7, 13,
-    #            0, 10, 3, 2,
-    #            4, 8, 14, 6]
+    plateau = [12, 1, -1, 5,
+               11, 9, 7, 13,
+               0, 10, 3, 2,
+               4, 8, 14, 6]
     print(plateau)
     if solvable(plateau):
         beg = time.time_ns()
         res = ida_star(plateau)
-        print((time.time_ns() - beg)*10**(-9), res)
+        print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)

@@ -17,12 +17,12 @@ u64 = np.ulonglong
 
 WDTOP, WDEND = 0, 1
 WDPTN = np.zeros(WDTBL_SIZE, dtype=u64)
-WDTBL = np.zeros(WDTBL_SIZE, dtype=np.ndarray)
+WDTBL = np.zeros(WDTBL_SIZE, dtype=int)
 WDLNK = np.empty(WDTBL_SIZE, dtype=np.ndarray)
 for i in range(0, WDTBL_SIZE):
     WDLNK[i] = np.empty(2, np.ndarray)
     for j in range(0, 2):
-        WDLNK[i][j] = np.empty(BOARD_WIDTH, dtype=np.ndarray)
+        WDLNK[i][j] = np.empty(BOARD_WIDTH, dtype=np.short)
         for k in range(0, BOARD_WIDTH):
             WDLNK[i][j][k] = np.short(0)
 
