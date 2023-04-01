@@ -1,7 +1,14 @@
+# *************************
+#
+# resolveur taquin 3x3 utilisant A* et l'heuristique distance de Manhattan pondéré.
+#
+# *************************
+
 import math
 import threading
 import time
 from collections import namedtuple
+from collections import deque
 from bisect import insort
 from enum import Enum
 import random
@@ -117,7 +124,7 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
 
 
 def f(etat: Etat):
-    return etat.cout
+    return etat.cout + len(etat.liste_deplacement)
 
 
 def inserer_etat(file_etat: list[Etat], etat: Etat):
@@ -142,7 +149,8 @@ def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_
         else:
             if f(etat_cree) < f(frontiere[duplicate]):
                 writing_in_frontiere_semaphore.acquire()
-                frontiere.pop(duplicate)
+                # frontiere.pop(duplicate)
+                frontiere.remove(frontiere[duplicate])
                 grilles_frontiere.pop(duplicate)
                 writing_in_frontiere_semaphore.release()
             # l'état sera inséré par ordre de coût à l'aide de la fonction inserer_etat.
@@ -161,37 +169,40 @@ def astar(plateau_initial):
     # n est la taille du taquin
     frontiere = [Etat(liste_deplacement=[],
                       cout=heuristique(K, plateau_initial))]
+    frontiere = deque()
+    frontiere.append(Etat(liste_deplacement=[],
+                          cout=heuristique(K, plateau_initial)))
     grilles_frontiere = [tuple(plateau_initial[:])]
     explored = set()
     # l'état finale à une heuristique de 0 : toutes les cases sont à la bonnes position.
     calculating_threads = [threading.Thread()] * 4
 
     while len(frontiere) != 0:
-        etat_choisi = frontiere.pop(0)
+        etat_choisi = frontiere.popleft()
         grilles_frontiere.pop(0)
         plateau = deplacement(etat_choisi.liste_deplacement, plateau_initial)
+        if tuple(plateau) not in explored:
+            if heuristique(K, plateau) == 0:
+                return etat_choisi
+                # ici on retroune la solution. Faire une fct qui calcul la solution si besoins.
+            else:
+                # S est une liste contenant tous les états trouvé après l'expention
+                S = expanse(plateau_initial, etat_choisi)
+                for i in range(0, len(S)):
+                    calculating_threads[i] = threading.Thread(target=lambda: calculate_if_valid(
+                        S[i], plateau_initial, explored, frontiere, grilles_frontiere
+                    ))
+                    calculating_threads[i].start()
 
-        if heuristique(K, plateau) == 0:
-            return etat_choisi
-            # ici on retroune la solution. Faire une fct qui calcul la solution si besoins.
-        else:
-            # S est une liste contenant tous les états trouvé après l'expention
-            S = expanse(plateau_initial, etat_choisi)
-            for i in range(0, len(S)):
-                calculating_threads[i] = threading.Thread(target=lambda: calculate_if_valid(
-                    S[i], plateau_initial, explored, frontiere, grilles_frontiere
-                ))
-                calculating_threads[i].start()
+                for i in range(len(S)):
+                    calculating_threads[i].join()
 
-            for i in range(len(S)):
-                calculating_threads[i].join()
+            explored.add(tuple(plateau))
 
-        explored.add(tuple(plateau))
+            nombre_etats_explo = len(frontiere)
 
-        nombre_etats_explo = len(frontiere)
-
-        if should_quit:
-            return None
+            if should_quit:
+                return None
     return None
 
 
@@ -210,15 +221,56 @@ def distance_elem(position: tuple[int, int], i: int):
 # l'heuristique sera une distance de Manhattan pondéré.
 
 
-def heuristique(k: int, etat_courant: list[int], use_wd: bool = True):
-    if use_wd and DIM_GRILLE == 4:
-        return wd.walking_distance(np.array(etat_courant))
+def heuristique(k: int, etat_courant: list[int]):
     resultat = 0
     for i in range(0, NOMBRE_CASES):
         if etat_courant[i] != -1:
             resultat += get_poids_tuile(k, etat_courant[i]) * distance_elem(
                 (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
     return resultat
+
+
+# heuristique linear conflict
+# On regarde le nombre de conflit liéaire pour la ligne donné
+
+def row_conflict(row, deb_intervale):
+    end = DIM_GRILLE
+    end2 = deb_intervale + DIM_GRILLE
+    res = 0
+    for i in range(0, end):
+        # on vérifie que la position final de la case est bien sur la ligne et qu'elle ne se situe pas dessus
+        if deb_intervale <= row[i] < end2 and row[i] != deb_intervale+i:
+            for y in range(i+1, end):
+                # si une des tuiles à sa position final sur la ligne alors elles sont en conflits
+                if deb_intervale <= row[y] < end2:
+                    res += 1
+    return res
+
+# pour un taquin 3x3 row_number peut être 0,1 ou 2.
+
+
+def col_conflict(col, row_number):
+    res = 0
+    for i in range(0, DIM_GRILLE):
+        # on vérifie que la position final de la case est bien sur la colone et qu'elle ne se situe pas dessus.
+        if col[i] % 3 == row_number and col[i] != row_number+i*DIM_GRILLE:
+            for y in range(i+1, DIM_GRILLE):
+                if col[y] % 3 == row_number:
+                    res += 1
+    return res
+
+
+def linear_conflict(plateau_courant):
+    res = 0
+
+    # conflit linéaire ligne :
+    for i in range(0, NOMBRE_CASES, DIM_GRILLE):
+        res += row_conflict(plateau_courant[i:i+DIM_GRILLE], i)
+
+    # confli linéaire colone
+    for i in range(0, DIM_GRILLE):
+        res += col_conflict(plateau_courant[i:NOMBRE_CASES:DIM_GRILLE], i)
+    return heuristique(6, plateau_courant) + 2*res
 
 
 # la fonction swap permet de  calculer le nouveau plateau en fonction des de la direction qu'on aura trouver dans le deplacement sans les cas limites.
@@ -301,93 +353,21 @@ def generer_grille_aleatoire(resolvable: bool = False):
             return grille
 
 
-GRILLE_FINALE = tuple([0, 1, 2, 3,
-                       4, 5, 6, 7,
-                       8, 9, 10, 11,
-                       12, 13, 14, -1])
-
-
-def is_goal(node: Etat, plateau_initial: list[int]):
-    return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
-
-
-etat_type = [('liste_deplacement', list[int]), ('cout', int)]
-
-
-def successors(node: Etat, plateau_initial: list[int]):
-    values = expanse(plateau_initial, node)
-
-    for i in range(len(values)):
-        x = values[i]
-        j = i
-        while j > 0 and values[j - 1].cout > x.cout:
-            values[j] = values[j - 1]
-            j = j - 1
-        values[j] = x
-
-    return values
-
-
-def ida_star(plateau_initial):
-    bound = wd.walking_distance(np.array(plateau_initial))
-    path = [Etat([], bound)]
-    grilles_rencontrees = [tuple(plateau_initial)]
-    while True:
-        t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
-        if t == -1:
-            return path, bound
-        print(t)
-        if t == math.inf:
-            return -1
-        bound = t
-        print(bound)
-
-
-num_nodes = 0
-
-
-def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
-    global num_nodes
-    num_nodes += 1
-    node = path[-1]
-    # on utilise walking distance pour calculer l'heuristique et non la dm pondérée.
-    h = heuristique(1, deplacement(node.liste_deplacement, plateau_initial))
-    f_value = g + h
-    # on impose un limite sur la profondeur de calcul.
-    if f_value > bound:
-        return f_value
-    if h == 0:
-        return -1
-    min_val = math.inf
-    for succ in successors(node, plateau_initial):
-        depl = tuple(deplacement(succ.liste_deplacement, plateau_initial))
-        if depl not in grilles_rencontrees:
-            path.append(succ)
-            grilles_rencontrees.append(depl)
-            t = search(path, grilles_rencontrees,
-                       g + 1, bound, plateau_initial)
-            if t == -1:
-                return -1
-            if t < min_val:
-                min_val = t
-            path.pop()
-            grilles_rencontrees.pop()
-    return min_val
-
-
 # main
 if __name__ == '__main__':
     K = 0
-    set_dim_grille(4)
-    plateau = [12, 1, -1, 5,
-               11, 9, 7, 13,
-               0, 10, 3, 2,
-               4, 8, 14, 6]
+    set_dim_grille(3)
+    # plateau = [12, 1, -1, 5,
+    #            11, 9, 7, 13,
+    #            0, 10, 3, 2,
+    #            4, 8, 14, 6]
+    plateau = generer_grille_aleatoire()
+    while not solvable(plateau):
+        plateau = generer_grille_aleatoire()
+
+    print(plateau)
     print(solvable(plateau))
     if solvable(plateau):
         beg = time.time_ns()
-        res = ida_star(plateau)
-        print(time.time_ns() - beg, res)
-        beg = time.time_ns()
         res = astar(plateau)
-        print(time.time_ns() - beg, res)
+        print(time.time_ns() - beg, '\n', res)

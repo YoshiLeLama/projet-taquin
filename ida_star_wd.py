@@ -24,14 +24,6 @@ def set_dim_grille(new_dim: int):
 
 set_dim_grille(3)
 
-POIDS_TUILES = [
-    36, 12, 12, 4, 1, 1, 4, 1,
-    8, 7, 6, 5, 4, 3, 2, 1,
-    8, 7, 6, 5, 4, 3, 2, 1,
-    8, 7, 6, 5, 3, 2, 4, 1,
-    8, 7, 6, 5, 3, 2, 4, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-]
 
 K = 6
 
@@ -92,13 +84,6 @@ def etat_ne(self: Etat, x: Etat):
     return self.cout != x.cout
 
 
-def set_weight_set(new_value):
-    global K
-    K = new_value % (len(POIDS_TUILES) // NOMBRE_TUILES)
-    if K == 0:
-        K = 6
-
-
 # la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
     result: list[Etat] = []
@@ -113,98 +98,8 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
     return result
 
 
-# permet d'inserer les états trié en fonction de leurs coûts.
-
-
 def f(etat: Etat):
-    return etat.cout
-
-
-def inserer_etat(file_etat: list[Etat], etat: Etat):
-    for i in range(0, len(file_etat)):
-        if file_etat[i].cout > etat.cout:
-            file_etat.insert(i, etat)
-            return i
-
-    file_etat.append(etat)
-    return -1
-
-
-def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_frontiere: list[tuple]):
-    grille_atteinte = tuple(deplacement(
-        etat_cree.liste_deplacement, plateau_initial))
-    # a condition permet de savoir si on est en présence d'un état déjà expensé.
-    if grille_atteinte not in explored:
-        try:
-            duplicate = grilles_frontiere.index(grille_atteinte)
-        except ValueError:
-            ...
-        else:
-            if f(etat_cree) < f(frontiere[duplicate]):
-                writing_in_frontiere_semaphore.acquire()
-                frontiere.pop(duplicate)
-                grilles_frontiere.pop(duplicate)
-                writing_in_frontiere_semaphore.release()
-            # l'état sera inséré par ordre de coût à l'aide de la fonction inserer_etat.
-        writing_in_frontiere_semaphore.acquire()
-        indice = inserer_etat(frontiere, etat_cree)
-        if indice == -1:
-            grilles_frontiere.append(grille_atteinte)
-        else:
-            grilles_frontiere.insert(indice, grille_atteinte)
-        writing_in_frontiere_semaphore.release()
-
-
-def astar(plateau_initial):
-    global nombre_etats_explo
-    nombre_etats_explo = 0
-    # n est la taille du taquin
-    frontiere = [Etat(liste_deplacement=[],
-                      cout=heuristique(K, plateau_initial))]
-    grilles_frontiere = [tuple(plateau_initial[:])]
-    explored = set()
-    # l'état finale à une heuristique de 0 : toutes les cases sont à la bonnes position.
-    calculating_threads = [threading.Thread()] * 4
-
-    while len(frontiere) != 0:
-        etat_choisi = frontiere.pop(0)
-        grilles_frontiere.pop(0)
-        plateau = deplacement(etat_choisi.liste_deplacement, plateau_initial)
-
-        if heuristique(K, plateau) == 0:
-            return etat_choisi
-            # ici on retroune la solution. Faire une fct qui calcul la solution si besoins.
-        else:
-            # S est une liste contenant tous les états trouvé après l'expention
-            S = expanse(plateau_initial, etat_choisi)
-            for i in range(0, len(S)):
-                calculating_threads[i] = threading.Thread(target=lambda: calculate_if_valid(
-                    S[i], plateau_initial, explored, frontiere, grilles_frontiere
-                ))
-                calculating_threads[i].start()
-
-            for i in range(len(S)):
-                calculating_threads[i].join()
-
-        explored.add(tuple(plateau))
-
-        nombre_etats_explo = len(frontiere)
-
-        if should_quit:
-            return None
-    return None
-
-
-def get_poids_tuile(k: int, i: int):
-    if i > NOMBRE_TUILES:
-        return 0
-    if DIM_GRILLE != 3:
-        return 1
-    return POIDS_TUILES[(k - 1) * NOMBRE_TUILES + i]
-
-
-def distance_elem(position: tuple[int, int], i: int):
-    return abs(position[1] - i // DIM_GRILLE) + abs(position[0] - i % DIM_GRILLE)
+    return etat.cout + len(etat.liste_deplacement)
 
 
 # l'heuristique sera une distance de Manhattan pondéré.
@@ -213,12 +108,6 @@ def distance_elem(position: tuple[int, int], i: int):
 def heuristique(k: int, etat_courant: list[int], use_wd: bool = True):
     if use_wd and DIM_GRILLE == 4:
         return wd.walking_distance(np.array(etat_courant))
-    resultat = 0
-    for i in range(0, NOMBRE_CASES):
-        if etat_courant[i] != -1:
-            resultat += get_poids_tuile(k, etat_courant[i]) * distance_elem(
-                (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
-    return resultat
 
 
 # la fonction swap permet de  calculer le nouveau plateau en fonction des de la direction qu'on aura trouver dans le deplacement sans les cas limites.
@@ -387,7 +276,4 @@ if __name__ == '__main__':
     if solvable(plateau):
         beg = time.time_ns()
         res = ida_star(plateau)
-        print(time.time_ns() - beg, res)
-        beg = time.time_ns()
-        res = astar(plateau)
         print(time.time_ns() - beg, res)
