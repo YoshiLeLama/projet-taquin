@@ -161,7 +161,7 @@ def pa_db():
 
 def generer_grille_resolue():
     n = DIM_GRILLE
-    grille = [i % (n*n) for i in range(0, n*n)]
+    grille = [i % (n*n) for i in range(0, n*n-1)]
     grille.append(-1)
     return grille
 
@@ -242,7 +242,6 @@ if __name__ == '__main__':
     #            11, 9, 7, 13,
     #            0, 10, 3, 2,
     #            4, 8, 14, 6]
-    plateau = [14, 13, 0, 5, 8, 10, 3, 11, -1, 9, 6, 2, 12, 7, 4, 1]
     solver = IDA_star(pa_db(), deplacement(DIM_GRILLE))
     print(plateau)
     if solvable(plateau):
