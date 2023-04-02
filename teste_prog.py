@@ -64,6 +64,30 @@ def graphe_3d(file, n: list[int]):
     plt.show()
 
 
+def graphe_3d_sans_color_bar(file):
+    r = pd.read_csv(file)
+    r.drop('Unnamed: 0', axis=1, inplace=True)
+    fig = plt.figure(figsize=(16, 9))
+    ax = plt.axes(projection="3d")
+    x = r.nb_de_coup
+    y = r.nb_etat_frontiere
+    z = r.nb_etats_generer
+    ax.grid(b=True, color=0,
+            linestyle='-.', linewidth=0.3,
+            alpha=0.2)
+    my_cmap = plt.get_cmap('Dark2')
+    ax.set_xlabel('nombre de coup à faire', fontweight='bold')
+    ax.set_ylabel('nb etat generer', fontweight='bold')
+    ax.set_zlabel('nb etat frontiere', fontweight='bold')
+    ctt = ax.scatter3D(x, y, z,
+                       alpha=0.8,
+                       c=r.nb_de_coup,
+                       cmap=my_cmap,
+                       marker='.')
+    plt.title("Taquin 3x3 graphe 3D")
+    plt.show()
+
+
 # n=le nombre de graphe considéré (en fct du poids)
 # X valeurs utilisées en absisse
 # Y valeurs utilisées en ordonnée
@@ -83,10 +107,19 @@ def multi_graphe(file, n: list[int], X, Y, k, subtitle):
     fig.suptitle(
         subtitle, fontsize=16, y=0.1)
     for i in range(0, len(n)):
-        print(df[i])
         ax.append(fig.add_subplot(3, 1, i+1))
         df[i].plot(x=X, y=Y, alpha=1,
                    kind=k, title="categorie de poids "+str(n[i]) if n[i] != 0 else "poids max", ax=ax[i])
+    plt.show()
+
+
+def graphe(file,  X, Y, k, subtitle):
+    r = pd.read_csv(file)
+    matplotlib.style.use('Solarize_Light2')
+    r.drop('Unnamed: 0', axis=1, inplace=True)
+    fig = plt.figure()
+    r.plot(x=X, y=Y, alpha=1,
+           kind=k, title=subtitle)
     plt.show()
 
 

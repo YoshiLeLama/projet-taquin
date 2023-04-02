@@ -1,3 +1,7 @@
+import gc
+import os
+import psutil
+import teste_prog as tp
 import math
 import threading
 import time
@@ -8,12 +12,21 @@ import random
 
 import numpy as np
 
+
+# ********** Variable globale pour la partie exp du prog********
 import walking_distance as wd
 import sqlite3
 from sqlite3 import Error
+nombre_etats_explo = 0
+nb_etat_genere = 0
+nb_etat_max_ds_frontiere = 0
+# **************************************************************
+
 DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
+writing_in_frontiere_semaphore = threading.Semaphore(1)
+should_quit = False
 
 
 def set_dim_grille(new_dim: int):
@@ -21,18 +34,6 @@ def set_dim_grille(new_dim: int):
     DIM_GRILLE = new_dim
     NOMBRE_TUILES = DIM_GRILLE ** 2 - 1
     NOMBRE_CASES = NOMBRE_TUILES + 1
-
-
-set_dim_grille(3)
-
-
-K = 6
-
-nombre_etats_explo = 0
-
-writing_in_frontiere_semaphore = threading.Semaphore(1)
-
-should_quit = False
 
 
 def reset_solving():
@@ -261,12 +262,9 @@ def ida_star(plateau_initial):
         print(bound)
 
 
-num_nodes = 0
-
-
 def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
-    global num_nodes
-    num_nodes += 1
+    global nombre_etats_explo, nb_etat_genere, nb_etat_max_ds_frontiere
+    nombre_etats_explo += 1
     node = path[-1]
     # on utilise walking distance pour calculer l'heuristique et non la dm pondérée.
     h = heuristique(deplacement(node.liste_deplacement, plateau_initial))
@@ -284,6 +282,11 @@ def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: in
             grilles_rencontrees.append(depl)
             t = search(path, grilles_rencontrees,
                        g + 1, bound, plateau_initial)
+            # variable pour le teste*******************
+            nb_etat_genere += 1
+            nb_etat_max_ds_frontiere = len(path) if len(
+                path) > nb_etat_max_ds_frontiere else nb_etat_max_ds_frontiere
+            # *********************************
             if t == -1:
                 return -1
             if t < min_val:
@@ -291,6 +294,39 @@ def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: in
             path.pop()
             grilles_rencontrees.pop()
     return min_val
+
+
+def experimet(n) -> None:
+    global nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo
+    tp.init_bd_data(tp.file)
+    poids = [8]
+    for _ in range(n):
+        plateau = generer_grille_aleatoire()
+        while not solvable(plateau):
+            plateau = generer_grille_aleatoire()
+        # gc est le garbage collector. Il permettrait clear la ram
+        gc.collect()
+        nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo = 0
+        res = ida_star(plateau)
+        tp.panda_data(tp.file,
+                      nb_etat_genere,
+                      res[0].cout,
+                      0,
+                      0,
+                      nb_etat_max_ds_frontiere,
+                      nombre_etats_explo,
+                      0)
+    tp.graphe_3d_sans_color_bar(tp.file3)
+    tp.graphe(tp.file3,  'nb_etat_frontiere', 'nb_etats_explorer',
+              'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_de_coup', 'nb_etats_generer',
+              'scatter', "nb d'états générés en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_de_coup', 'nb_etat_frontiere',
+              'scatter', "nb d'état max dans la frontière en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_de_coup', 'nb_etats_explorer',
+              'scatter', "nb d'état exploré en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_etats_generer', 'nb_etats_explorer',
+              'scatter', "nb d'état exploré en fonction du nombre d'états générés en utilisant l'heuristique conflit linéaire pour 50 taquins")
 
 
 # main
@@ -309,3 +345,5 @@ if __name__ == '__main__':
         beg = time.time_ns()
         res = ida_star(plateau)
         print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
+
+    experimet(50)

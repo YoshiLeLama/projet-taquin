@@ -13,12 +13,13 @@ from bisect import insort
 from enum import Enum
 import random
 import numpy as np
-import teste_prog as tp
 
+
+# ********** Ce qui est nécessaire à la partie exp du prog********
+import teste_prog as tp
 import psutil
 import os
 import gc
-# ********** Variable globale pour la partie exp du prog********
 nombre_etats_explo = 0
 nb_etat_genere = 0
 utilisation_CPU = 0
@@ -428,7 +429,9 @@ def generer_grille_aleatoire(resolvable: bool = False):
 # n est le nombre de taquin à résoudre
 
 
-def experimet(poids: list[int], n) -> None:
+def experiment(poids: list[int], n) -> None:
+    global nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo, utilisation_RAM
+    nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo, utilisation_RAM = 0
     tp.init_bd_data(tp.file)
     poids = [8]
     for _ in range(n):
