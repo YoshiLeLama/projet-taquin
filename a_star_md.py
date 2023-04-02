@@ -142,14 +142,14 @@ def f(etat: Etat):
 
 
 def inserer_etat(file_etat: list[Etat], etat: Etat):
-    global nb_etat_genere
+    # global nb_etat_genere
     for i in range(0, len(file_etat)):
         if file_etat[i].cout > etat.cout:
             file_etat.insert(i, etat)
             return i
 
     file_etat.append(etat)
-    nb_etat_genere += 1
+    # nb_etat_genere += 1
     return -1
 
 
@@ -180,14 +180,13 @@ def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_
 
 
 def astar(plateau_initial) -> Etat | None:
-    global nombre_etats_explo, nb_etat_max_ds_frontiere, utilisation_RAM,  nb_etat_genere
-    nombre_etats_explo = 0
-    nb_etat_max_ds_frontiere = 0
-    utilisation_RAM = 0
-    nb_etat_genere = 0
-    # n est la taille du taquin
-    # frontiere = [Etat(liste_deplacement=[],
-    #                   cout=heuristique(K, plateau_initial))]
+    # # var pour  la partie exp
+    # global nombre_etats_explo, nb_etat_max_ds_frontiere, utilisation_RAM,  nb_etat_genere
+    # nombre_etats_explo = 0
+    # nb_etat_max_ds_frontiere = 0
+    # utilisation_RAM = 0
+    # nb_etat_genere = 0
+    # # ****************************
     frontiere = deque()
     frontiere.append(Etat(liste_deplacement=[],
                           cout=heuristique(K, plateau_initial) if not LINEAR_CONFLICT else linear_conflict(plateau_initial)))
@@ -203,8 +202,8 @@ def astar(plateau_initial) -> Etat | None:
         plateau = deplacement(etat_choisi.liste_deplacement, plateau_initial)
         if tuple(plateau) not in explored:
             if heuristique(K, plateau) == 0:
-                utilisation_RAM = (psutil.Process(
-                    os.getpid()).memory_info().rss) / 1024 ** 2
+                # utilisation_RAM = (psutil.Process(
+                #     os.getpid()).memory_info().rss) / 1024 ** 2
                 return etat_choisi
                 # ici on retroune la solution. Faire une fct qui calcul la solution si besoins.
             else:
@@ -220,11 +219,11 @@ def astar(plateau_initial) -> Etat | None:
                     calculating_threads[i].join()
 
             explored.add(tuple(plateau))
-
-            nombre_etats_explo += 1
-            nb_etat_max_ds_frontiere = nb_etat_max_ds_frontiere if nb_etat_max_ds_frontiere > len(
-                frontiere) else len(frontiere)
-
+            # # var pour la partie exp ***
+            # nombre_etats_explo += 1
+            # nb_etat_max_ds_frontiere = nb_etat_max_ds_frontiere if nb_etat_max_ds_frontiere > len(
+            #     frontiere) else len(frontiere)
+            # # *************************
         if should_quit:
             return None
     return None

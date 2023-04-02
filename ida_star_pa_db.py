@@ -25,8 +25,15 @@ nb_etat_max_ds_frontiere = 0
 DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
+# PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
+PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
+GRILLE_FINALE = tuple([0, 1, 2, 3,
+                       4, 5, 6, 7,
+                       8, 9, 10, 11,
+                       12, 13, 14, -1])
 writing_in_frontiere_semaphore = threading.Semaphore(1)
 should_quit = False
+etat_type = [('liste_deplacement', list[int]), ('cout', int)]
 
 
 def set_dim_grille(new_dim: int):
@@ -51,9 +58,6 @@ class Card(Enum):
     SUD = 1
     OUEST = 2
     EST = 3
-
-
-# COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
 
 
 # Nous représentons un état comme étant un objet. Il stoquera la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
@@ -86,6 +90,9 @@ def etat_ne(self: Etat, x: Etat):
     return self.cout != x.cout
 
 
+# *********************************************************************************************
+#                              fct d'expansion
+# *********************************************************************************************
 # la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
     result: list[Etat] = []
@@ -100,15 +107,11 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
     return result
 
 
+# *********************************************************************************************
+#                              calcul de l'heuristique
+# *********************************************************************************************
 def f(etat: Etat):
     return etat.cout + len(etat.liste_deplacement)
-
-
-# l'heuristique sera une distance de Manhattan pondéré.
-
-# PATERN = [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]
-
-PATERN = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
 
 
 def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
@@ -138,6 +141,9 @@ def heuristique(etat_courant: list[int]):
     return result
 
 
+# *********************************************************************************************
+#                              déplacement de la case vide
+# *********************************************************************************************
 # la fonction swap permet de  calculer le nouveau plateau en fonction des de la direction qu'on aura trouver dans le deplacement sans les cas limites.
 # i : la position de la case vide
 # j : la position de la case à changer.
@@ -182,6 +188,80 @@ def deplacement(directions, plateau_initial):
     return plateau
 
 
+# *********************************************************************************************
+#                                   IDA*
+# *********************************************************************************************
+
+
+def is_goal(node: Etat, plateau_initial: list[int]):
+    return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
+
+
+def successors(node: Etat, plateau_initial: list[int]):
+    global nb_etat_genere
+    values = expanse(plateau_initial, node)
+
+    for i in range(len(values)):
+        x = values[i]
+        j = i
+        while j > 0 and values[j - 1].cout > x.cout:
+            values[j] = values[j - 1]
+            j = j - 1
+        values[j] = x
+    nb_etat_genere += len(values)
+    return values
+
+
+def ida_star(plateau_initial):
+    bound = heuristique(plateau_initial)
+    path = [Etat([], bound)]
+    grilles_rencontrees = [tuple(plateau_initial)]
+    while True:
+        t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
+        if t == -1:
+            return path[-1], bound
+        print(t)
+        if t == math.inf:
+            return -1
+        bound = t
+        print(bound)
+
+
+def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
+    global nombre_etats_explo, nb_etat_max_ds_frontiere
+    nombre_etats_explo += 1
+    node = path[-1]
+    # on utilise walking distance pour calculer l'heuristique et non la dm pondérée.
+    h = heuristique(deplacement(node.liste_deplacement, plateau_initial))
+    f_value = g + h
+    # on impose un limite sur la profondeur de calcul.
+    if f_value > bound:
+        return f_value
+    if h == 0:
+        return -1
+    min_val = math.inf
+    for succ in successors(node, plateau_initial):
+        depl = tuple(deplacement(succ.liste_deplacement, plateau_initial))
+        if depl not in grilles_rencontrees:
+            path.append(succ)
+            grilles_rencontrees.append(depl)
+            t = search(path, grilles_rencontrees,
+                       g + 1, bound, plateau_initial)
+            # variable pour le teste*******************
+            nb_etat_max_ds_frontiere = len(path) if len(
+                path) > nb_etat_max_ds_frontiere else nb_etat_max_ds_frontiere
+            # *********************************
+            if t == -1:
+                return -1
+            if t < min_val:
+                min_val = t
+            path.pop()
+            grilles_rencontrees.pop()
+    return min_val
+
+# *********************************************************************************************
+#                              vérif de la solvabilité d'un plateau
+# *********************************************************************************************
 # permet de savoir si un taquin est sovlable.
 # Si il est non solvable la fonction retournera false.
 
@@ -203,6 +283,10 @@ def solvable(plateau_initial):
     i = plateau_initial.index(-1)
     return nb_permutations % 2 == (DIM_GRILLE - (i % DIM_GRILLE) + DIM_GRILLE - (i // DIM_GRILLE) - 2) % 2
 
+# *********************************************************************************************
+#                              génération d'une grille résolue
+# *********************************************************************************************
+
 
 def generer_grille_resolue():
     grille = []
@@ -212,6 +296,9 @@ def generer_grille_resolue():
     return grille
 
 
+# *********************************************************************************************
+#                              génération d'une grille aleatoire
+# *********************************************************************************************
 def generer_grille_aleatoire(resolvable: bool = False):
     grille = generer_grille_resolue()
     while True:
@@ -219,94 +306,23 @@ def generer_grille_aleatoire(resolvable: bool = False):
         if not resolvable or solvable(grille):
             return grille
 
-
-GRILLE_FINALE = tuple([0, 1, 2, 3,
-                       4, 5, 6, 7,
-                       8, 9, 10, 11,
-                       12, 13, 14, -1])
-
-
-def is_goal(node: Etat, plateau_initial: list[int]):
-    return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
-
-
-etat_type = [('liste_deplacement', list[int]), ('cout', int)]
-
-
-def successors(node: Etat, plateau_initial: list[int]):
-    values = expanse(plateau_initial, node)
-
-    for i in range(len(values)):
-        x = values[i]
-        j = i
-        while j > 0 and values[j - 1].cout > x.cout:
-            values[j] = values[j - 1]
-            j = j - 1
-        values[j] = x
-
-    return values
-
-
-def ida_star(plateau_initial):
-    bound = heuristique(plateau_initial)
-    path = [Etat([], bound)]
-    grilles_rencontrees = [tuple(plateau_initial)]
-    while True:
-        t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
-        if t == -1:
-            return path[-1], bound
-        print(t)
-        if t == math.inf:
-            return -1
-        bound = t
-        print(bound)
-
-
-def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
-    global nombre_etats_explo, nb_etat_genere, nb_etat_max_ds_frontiere
-    nombre_etats_explo += 1
-    node = path[-1]
-    # on utilise walking distance pour calculer l'heuristique et non la dm pondérée.
-    h = heuristique(deplacement(node.liste_deplacement, plateau_initial))
-    f_value = g + h
-    # on impose un limite sur la profondeur de calcul.
-    if f_value > bound:
-        return f_value
-    if h == 0:
-        return -1
-    min_val = math.inf
-    for succ in successors(node, plateau_initial):
-        depl = tuple(deplacement(succ.liste_deplacement, plateau_initial))
-        if depl not in grilles_rencontrees:
-            path.append(succ)
-            grilles_rencontrees.append(depl)
-            t = search(path, grilles_rencontrees,
-                       g + 1, bound, plateau_initial)
-            # variable pour le teste*******************
-            nb_etat_genere += 1
-            nb_etat_max_ds_frontiere = len(path) if len(
-                path) > nb_etat_max_ds_frontiere else nb_etat_max_ds_frontiere
-            # *********************************
-            if t == -1:
-                return -1
-            if t < min_val:
-                min_val = t
-            path.pop()
-            grilles_rencontrees.pop()
-    return min_val
+# *********************************************************************************************
+#                              fct pour la partie expérimentation
+# *********************************************************************************************
 
 
 def experimet(n) -> None:
     global nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo
     tp.init_bd_data(tp.file)
-    poids = [8]
     for _ in range(n):
         plateau = generer_grille_aleatoire()
         while not solvable(plateau):
             plateau = generer_grille_aleatoire()
         # gc est le garbage collector. Il permettrait clear la ram
         gc.collect()
-        nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo = 0
+        nb_etat_genere = 0
+        nb_etat_max_ds_frontiere = 0
+        nombre_etats_explo = 0
         res = ida_star(plateau)
         tp.panda_data(tp.file,
                       nb_etat_genere,
@@ -327,23 +343,23 @@ def experimet(n) -> None:
               'scatter', "nb d'état exploré en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
     tp.graphe(tp.file3,  'nb_etats_generer', 'nb_etats_explorer',
               'scatter', "nb d'état exploré en fonction du nombre d'états générés en utilisant l'heuristique conflit linéaire pour 50 taquins")
+# ********************************************************************************************
 
 
 # main
 if __name__ == '__main__':
-    K = 0
     set_dim_grille(4)
-    plateau = generer_grille_aleatoire()
-    while not solvable(plateau):
-        plateau = generer_grille_aleatoire()
-    plateau = [12, 1, -1, 5,
-               11, 9, 7, 13,
-               0, 10, 3, 2,
-               4, 8, 14, 6]
-    print(plateau)
-    if solvable(plateau):
-        beg = time.time_ns()
-        res = ida_star(plateau)
-        print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
+    # plateau = generer_grille_aleatoire()
+    # while not solvable(plateau):
+    #     plateau = generer_grille_aleatoire()
+    # plateau = [12, 1, -1, 5,
+    #            11, 9, 7, 13,
+    #            0, 10, 3, 2,
+    #            4, 8, 14, 6]
+    # print(plateau)
+    # if solvable(plateau):
+    #     beg = time.time_ns()
+    #     res = ida_star(plateau)
+    #     print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
     experimet(50)
