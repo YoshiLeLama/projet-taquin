@@ -6,8 +6,15 @@ from collections import namedtuple
 from bisect import insort
 from enum import Enum
 import random
-
 import numpy as np
+
+
+# ********** Variable globale pour la partie exp du prog********
+import teste_prog as tp
+nombre_etats_explo = 0
+nb_etat_genere = 0
+nb_etat_max_ds_frontiere = 0
+# **************************************************************
 
 
 def set_dim_grille(new_dim: int):
@@ -31,6 +38,7 @@ class IDA_star:
         while True:
             t = self.search(0, bound)
             if t == -1:
+                print(self.nb_noeud_explo)
                 return self.path[-1], bound
             print(t)
             if t == math.inf:
@@ -39,6 +47,7 @@ class IDA_star:
             print(bound)
 
     def successors(self, node):
+        global nb_etat_genere
         values = self.deplacement(node)
         for i in range(len(values)):
             x = values[i]
@@ -47,10 +56,14 @@ class IDA_star:
                 values[j] = values[j - 1]
                 j = j - 1
                 values[j] = x
+        nb_etat_genere += len(values)
         return values
 
     def search(self, g, bound):
+        # var pour le teste *******************************
+        global nombre_etats_explo, nb_etat_max_ds_frontiere
         self.nb_noeud_explo += 1
+        # **************************************************
         node = self.path[-1]
         h = self.h(list(node))
         f = g + h
@@ -65,6 +78,10 @@ class IDA_star:
                 self.grilles_rencontrees.add(tuple(succ[0]))
                 self.chemin.append(succ[1])
                 t = self.search(g+1, bound)
+                # variable pour le teste*******************
+                nb_etat_max_ds_frontiere = len(self.path) if len(
+                    self.path) > nb_etat_max_ds_frontiere else nb_etat_max_ds_frontiere
+                # *********************************
                 if t == -1:
                     return -1
                 if t < min_val:
@@ -178,6 +195,41 @@ def generer_grille_aleatoire(resolvable: bool = False):
             return grille
 
 
+def experimet(n) -> None:
+    global nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo
+    tp.init_bd_data(tp.file)
+    for _ in range(n):
+        plateau = generer_grille_aleatoire()
+        while not solvable(plateau):
+            plateau = generer_grille_aleatoire()
+        # gc est le garbage collector. Il permettrait clear la ram
+        gc.collect()
+        nb_etat_genere = 0
+        nb_etat_max_ds_frontiere = 0
+        nombre_etats_explo = 0
+        res = ida_star(plateau)
+        tp.panda_data(tp.file,
+                      nb_etat_genere,
+                      res[0].cout,
+                      0,
+                      0,
+                      nb_etat_max_ds_frontiere,
+                      nombre_etats_explo,
+                      0)
+    tp.graphe_3d_sans_color_bar(tp.file3)
+    tp.graphe(tp.file3,  'nb_etat_frontiere', 'nb_etats_explorer',
+              'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_de_coup', 'nb_etats_generer',
+              'scatter', "nb d'états générés en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_de_coup', 'nb_etat_frontiere',
+              'scatter', "nb d'état max dans la frontière en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_de_coup', 'nb_etats_explorer',
+              'scatter', "nb d'état exploré en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+    tp.graphe(tp.file3,  'nb_etats_generer', 'nb_etats_explorer',
+              'scatter', "nb d'état exploré en fonction du nombre d'états générés en utilisant l'heuristique conflit linéaire pour 50 taquins")
+# ********************************************************************************************
+
+
 # main
 if __name__ == '__main__':
     set_dim_grille(4)
@@ -188,10 +240,7 @@ if __name__ == '__main__':
     #            11, 9, 7, 13,
     #            0, 10, 3, 2,
     #            4, 8, 14, 6]
-    plateau = [12, 1, -1, 5,
-               11, 9, 7, 13,
-               0, 10, 3, 2,
-               4, 8, 14, 6]
+    plateau = [14, 13, 0, 5, 8, 10, 3, 11, -1, 9, 6, 2, 12, 7, 4, 1]
     solver = IDA_star(pa_db(), deplacement(DIM_GRILLE))
     print(plateau)
     if solvable(plateau):
@@ -199,4 +248,4 @@ if __name__ == '__main__':
         res = solver.ida_star(plateau)
         print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
-    # experimet(50)
+    experimet(50)
