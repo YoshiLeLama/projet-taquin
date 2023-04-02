@@ -40,25 +40,12 @@ class IDA_star:
             t = self.search(0, bound)
             if t == -1:
                 print(self.nb_noeud_explo)
-                return self.path[-1], bound
+                return bound, tuple(self.chemin)
             print(t)
             if t == math.inf:
                 return -1
             bound = t
             print(bound)
-
-    def successors(self, node):
-        global nb_etat_genere
-        values = self.deplacement(node)
-        for i in range(len(values)):
-            x = values[i]
-            j = i
-            while j > 0 and self.h(list(values[j - 1][0])) > self.h(list(x[0])):
-                values[j] = values[j - 1]
-                j = j - 1
-                values[j] = x
-        nb_etat_genere += len(values)
-        return values
 
     def search(self, g, bound):
         # var pour le teste *******************************
@@ -87,9 +74,24 @@ class IDA_star:
                     return -1
                 if t < min_val:
                     min_val = t
+                # On supprime les valeurs trouver car ce n'est pas le bon noeuds. On remonte donc dans l'arbre
                 self.path.pop()
+                self.chemin.pop()
                 self.grilles_rencontrees.pop()
         return min_val
+
+    def successors(self, node):
+        global nb_etat_genere
+        values = self.deplacement(node)
+        for i in range(len(values)):
+            x = values[i]
+            j = i
+            while j > 0 and self.h(list(values[j - 1][0])) > self.h(list(x[0])):
+                values[j] = values[j - 1]
+                j = j - 1
+                values[j] = x
+        nb_etat_genere += len(values)
+        return values
 
 
 def deplacement(n):
@@ -212,7 +214,7 @@ def experimet(n) -> None:
         res = solver.ida_star(plateau)
         tp.panda_data(tp.file,
                       nb_etat_genere,
-                      res[0].cout,
+                      res[1],
                       0,
                       0,
                       nb_etat_max_ds_frontiere,
@@ -247,6 +249,7 @@ if __name__ == '__main__':
     if solvable(plateau):
         beg = time.time_ns()
         res = solver.ida_star(plateau)
+        print(len(res[1]))
         print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
     experimet(50)
