@@ -349,17 +349,17 @@ def experimet(n) -> None:
 # main
 if __name__ == '__main__':
     set_dim_grille(4)
-    # plateau = generer_grille_aleatoire()
-    # while not solvable(plateau):
-    #     plateau = generer_grille_aleatoire()
+    plateau = generer_grille_aleatoire()
+    while not solvable(plateau):
+        plateau = generer_grille_aleatoire()
     # plateau = [12, 1, -1, 5,
     #            11, 9, 7, 13,
     #            0, 10, 3, 2,
     #            4, 8, 14, 6]
-    # print(plateau)
-    # if solvable(plateau):
-    #     beg = time.time_ns()
-    #     res = ida_star(plateau)
-    #     print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
+    print(plateau)
+    if solvable(plateau):
+        beg = time.time_ns()
+        res = ida_star(plateau)
+        print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
-    experimet(50)
+    # experimet(50)
