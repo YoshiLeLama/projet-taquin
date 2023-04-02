@@ -5,7 +5,12 @@ from sklearn.linear_model import LinearRegression
 
 # ajoute les données dans la bd à utiliser cette fct après avoir initialisé la bd
 # Attention la Ram est exprimé en MiB et le GPU en %
+# pour ma
 file = './bd_graphe_test_prg/data.csv'
+# pour linear conflict
+file2 = './bd_graphe_test_prg/dataLC.csv'
+# pour pa db
+file3 = './bd_graphe_test_prg/dataPaDB.csv'
 
 
 def panda_data(file, nb_etats_generer, nb_de_coup, utilisation_CPU, utilisation_RAM, nb_etat_frontiere, nb_etats_explorer, poids):
@@ -22,11 +27,11 @@ def panda_data(file, nb_etats_generer, nb_de_coup, utilisation_CPU, utilisation_
 
     df.to_csv(file, mode='a',  header=False)
 
-    # r = pd.read_csv(file)
-    # r.drop('Unnamed: 0', axis=1, inplace=True)
-    # # r.drop(df.filter(regex="Unnamed"), axis=1, inplace=True)
-    # r.to_csv(file)
-    # print(r)
+    r = pd.read_csv(file)
+    r.drop('Unnamed: 0', axis=1, inplace=True)
+    # r.drop(df.filter(regex="Unnamed"), axis=1, inplace=True)
+    r.to_csv(file)
+    print(r)
 
 # permet de faire un graphe en 3 dimention
 # on pourrait mettre x,y,z et paramètre et faire r[x] avec x,y,z des strings.

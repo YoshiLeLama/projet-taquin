@@ -29,6 +29,7 @@ nb_etat_max_ds_frontiere = 0
 DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
+LINEAR_CONFLICT: bool
 
 
 def set_dim_grille(new_dim: int):
@@ -128,7 +129,7 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
             result.append(Etat(liste_deplacement=nouveaux_deplacements,
-                               cout=len(nouveaux_deplacements) + heuristique(K, depl)))
+                               cout=len(nouveaux_deplacements) + (heuristique(K, depl) if not LINEAR_CONFLICT else linear_conflict(depl))))
     return result
 
 
@@ -178,7 +179,7 @@ def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_
 
 
 def astar(plateau_initial) -> Etat | None:
-    global nombre_etats_explo, nb_etat_max_ds_frontiere, utilisation_RAM, nb_etat_genere
+    global nombre_etats_explo, nb_etat_max_ds_frontiere, utilisation_RAM,  nb_etat_genere
     nombre_etats_explo = 0
     nb_etat_max_ds_frontiere = 0
     utilisation_RAM = 0
@@ -188,7 +189,7 @@ def astar(plateau_initial) -> Etat | None:
     #                   cout=heuristique(K, plateau_initial))]
     frontiere = deque()
     frontiere.append(Etat(liste_deplacement=[],
-                          cout=heuristique(K, plateau_initial)))
+                          cout=heuristique(K, plateau_initial) if not LINEAR_CONFLICT else linear_conflict(plateau_initial)))
     # stocke les grilles déjà trouvés synchronisé avec la frontière.
     grilles_frontiere = [tuple(plateau_initial[:])]
     explored = set()
@@ -254,12 +255,13 @@ def heuristique(k: int, etat_courant: list[int]):
     resultat = 0
     res_final = 0
     if k == 0:
-        for i in range(0, NOMBRE_CASES):
-            if etat_courant[i] != -1:
-                resultat += get_poids_tuile(k, etat_courant[i]) * distance_elem(
-                    (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
-            res_final = resultat//COEF_NORM[k -
-                                            1] if resultat//COEF_NORM[k-1] > res_final else res_final
+        for poids in range(0, 6):
+            for i in range(0, NOMBRE_CASES):
+                if etat_courant[i] != -1:
+                    resultat += get_poids_tuile(poids, etat_courant[i]) * distance_elem(
+                        (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
+            res_final = resultat//COEF_NORM[poids -
+                                            1] if resultat//COEF_NORM[poids-1] > res_final else res_final
         return res_final
 
     for i in range(0, NOMBRE_CASES):
@@ -422,15 +424,58 @@ def generer_grille_aleatoire(resolvable: bool = False):
         if not resolvable or solvable(grille):
             return grille
 
+# pour la partie expérimentation du programme *******************************
+# n est le nombre de taquin à résoudre
+
+
+def experimet(poids: list[int], n) -> None:
+    tp.init_bd_data(tp.file)
+    poids = [8]
+    for _ in range(n):
+        plateau = generer_grille_aleatoire()
+        while not solvable(plateau):
+            plateau = generer_grille_aleatoire()
+        for k in poids:
+            # gc est le garbage collector. Il permettrait clear la ram
+            gc.collect()
+            utilisation_CPU = psutil.cpu_percent(None)
+            res = astar(plateau)
+            utilisation_CPU = (utilisation_CPU+psutil.cpu_percent(None))//2
+            tp.panda_data(tp.file,
+                          nb_etat_genere,
+                          res.cout,
+                          utilisation_CPU,
+                          utilisation_RAM,
+                          nb_etat_max_ds_frontiere,
+                          nombre_etats_explo,
+                          k)
+
+    tp.linear_reg(tp.file, poids)
+    tp.multi_graphe(tp.file, poids, 'nb_etat_frontiere', 'nb_etats_explorer',
+                    'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière en utilisant l'heuristique conflit linéaire pour 500 taquins")
+    tp.multi_graphe(tp.file, poids, 'nb_etats_generer', 'utilisation_CPU',
+                    'scatter', "Utilisation CPU (en %) en fonction du nombre d'état générer en utilisant l'heuristique conflit linéaire pour 500 taquins")
+    tp.multi_graphe(tp.file, poids, 'nb_etats_generer', 'utilisation_RAM',
+                    'scatter', "Utilisation RAM (en MiB) en fonction du nombre d'état généré en utilisant l'heuristique conflit linéaire pour 500 taquins")
+    tp.multi_graphe(tp.file, poids, 'nb_de_coup', 'nb_etats_generer',
+                    'scatter', "nb d'états générés en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 500 taquins")
+    tp.multi_graphe(tp.file, poids, 'nb_de_coup', 'nb_etat_frontiere',
+                    'scatter', "nb d'état max dans la frontière en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 500 taquins")
+    tp.multi_graphe(tp.file, poids, 'nb_de_coup', 'nb_etats_explorer',
+                    'scatter', "nb d'état exploré en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 500 taquins")
+    tp.multi_graphe(tp.file, poids, 'nb_etats_generer', 'nb_etats_explorer',
+                    'scatter', "nb d'état exploré en fonction du nombre d'états générés en utilisant l'heuristique conflit linéaire pour 500 taquins")
+
 
 # main
 if __name__ == '__main__':
-    K = 0
+    K = 6
+    LINEAR_CONFLICT = True
     set_dim_grille(3)
-    plateau = [12, 1, -1, 5,
-               11, 9, 7, 13,
-               0, 10, 3, 2,
-               4, 8, 14, 6]
+    # plateau = [12, 1, -1, 5,
+    #            11, 9, 7, 13,
+    #            0, 10, 3, 2,
+    #            4, 8, 14, 6]
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
@@ -441,35 +486,3 @@ if __name__ == '__main__':
         beg = time.time_ns()
         res = astar(plateau)
         print(time.time_ns() - beg, '\n', res)
-
-    # pour la partie expérimentation du programme *******************************
-    # tp.init_bd_data(tp.file)
-
-    # for _ in range(500):
-    #     plateau = generer_grille_aleatoire()
-    #     while not solvable(plateau):
-    #         plateau = generer_grille_aleatoire()
-    #     for k in (0, 6):
-    #         gc.collect()
-    #         utilisation_CPU = psutil.cpu_percent(None)
-    #         res = astar(plateau)
-    #         utilisation_CPU = (utilisation_CPU+psutil.cpu_percent(None))//2
-    #         tp.panda_data(tp.file,
-    #                       nb_etat_genere,
-    #                       res.cout,
-    #                       utilisation_CPU,
-    #                       utilisation_RAM,
-    #                       nb_etat_max_ds_frontiere,
-    #                       nombre_etats_explo,
-    #                       k)
-    #         print(nb_etat_genere,
-    #               res.cout,
-    #               utilisation_CPU,
-    #               utilisation_RAM,
-    #               nb_etat_max_ds_frontiere,
-    #               nombre_etats_explo,
-    #               k)
-
-    # tp.linear_reg(tp.file, [0, 6])
-    # tp.multi_graphe(tp.file, [0, 6], 'nb_etat_frontiere', 'nb_etats_explorer',
-    #                 'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière  pour 500 taquins")
