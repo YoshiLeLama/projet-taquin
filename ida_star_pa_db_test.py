@@ -31,6 +31,7 @@ class IDA_star:
         self.deplacement = deplacement
 
     def ida_star(self, root):
+        global nombre_etats_explo
         self.path = [root]
         self.grilles_rencontrees = {tuple(root)}
         self.nb_noeud_explo = 0
@@ -39,6 +40,7 @@ class IDA_star:
         while True:
             t = self.search(0, bound)
             if t == -1:
+                nombre_etats_explo = self.nb_noeud_explo
                 return tuple(self.chemin), bound
             print(t)
             if t == math.inf:
@@ -48,7 +50,7 @@ class IDA_star:
 
     def search(self, g, bound):
         # var pour le teste *******************************
-        global nombre_etats_explo, nb_etat_max_ds_frontiere
+        global nb_etat_max_ds_frontiere
         self.nb_noeud_explo += 1
         # **************************************************
         node = self.path[-1]
