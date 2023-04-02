@@ -110,7 +110,7 @@ Les différents sets de poids ainsi que les coefficients de normalisation sont s
 La distance de Manhattan sous-estime beaucoup le nombre de mouvements à effectuer pour atteindre la position finale, car elle ne tient pas compte des contraintes du jeu du taquin avec notamment le fait que pour déplacer une case, il faut qu'elle soit adjacente à la case vide.
 
 On est donc loin d'une très bonne heuristique, ce qui peut s'avérer être un problème lorsqu'on veut résoudre des taquins de grande taille.
-Il est possible d'optimiser le calcul de Manhattan. On peut remarquer que pour chaque déplacement seul une tuile à changé. On peut donc déduire la distance de Manhattan Ce qui réduirais ça complexité de $\mathcal{O}(n^{2})$ à $\mathcal{O}(1)$
+Il est possible d'optimiser le calcul de Manhattan. On peut remarquer que pour chaque déplacement seul une tuile à changé. On peut donc déduire la distance de Manhattan Ce qui réduirais ça complexité de $\mathcal{O}(n^{2})$ à $\mathcal{O}(1)$ (si on considère qu'un taquin à une taille de $n \times n$).
 
 \subsection{Expérimentation}
 
@@ -159,7 +159,7 @@ On a donc dans le pire cas une complexité en temps de $ \mathcal{O}(n^3)$. Pour
 Même si celle ci améliore l'estmation de l'heuristique elle augmente le temps de calcul du programme pour des taquins de grandes taille. En explorant quelque centaines de milliers d'états par seconde il serait possible de résoudre des taquins 4x4 mais pas au dessus.
 
 \subsection{amélioration possible de l'heuristique}
-Il est possible d'améliorer la complexité temporel de ce programme en réalisant quelques modifications. On peut remarquer que déplacer une tuile le long d'une ligne ne résoud aucun conflit linéaire sur la ligne (de même sur la colonne). En conséquence, on peut résuire les vérification uniquement au ligne et colone affecté et donc passer de $\mathcal{O}(n^{3})$ à $\mathcal{O}(n^{2})$. De plus on peut aussi optimiser le calcul de Manhattan. On peut remarquer que pour chaque déplacement seul une tuile à changé. On peut donc déduire la distance de Manhattan Ce qui réduirais ça complexité de $\mathcal{O}(n^{2})$ à $\mathcal{O}(1)$.
+Il est possible d'améliorer la complexité temporel de ce programme en réalisant quelques modifications. On peut remarquer que déplacer une tuile le long d'une ligne ne résoud aucun conflit linéaire sur la ligne (de même sur la colonne). En conséquence, on peut résuire les vérification uniquement au ligne et colone affecté et donc passer de $\mathcal{O}(n^{3})$ à $\mathcal{O}(n^{2})$.
 On peut aussi combiner d'autre heuristique avec celle de la distance de Manhattan comme "Corner Tile Heuristic" ou encore "Last Tile Heuristic", ... que nous ne développerons pas ici.
 \subsection{Heuristique: Walking distance}
 

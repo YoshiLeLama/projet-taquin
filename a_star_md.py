@@ -12,10 +12,19 @@ from collections import deque
 from bisect import insort
 from enum import Enum
 import random
-
 import numpy as np
+import teste_prog as tp
 
-import walking_distance as wd
+import psutil
+import os
+import gc
+# ********** Variable globale pour la partie exp du prog********
+nombre_etats_explo = 0
+nb_etat_genere = 0
+utilisation_CPU = 0
+utilisation_RAM = 0
+nb_etat_max_ds_frontiere = 0
+# **************************************************************
 
 DIM_GRILLE: int
 NOMBRE_TUILES: int
@@ -42,7 +51,6 @@ POIDS_TUILES = [
 
 K = 6
 COEF_NORM = [4, 1, 4, 1, 4, 1]
-nombre_etats_explo = 0
 
 writing_in_frontiere_semaphore = threading.Semaphore(1)
 
@@ -132,12 +140,14 @@ def f(etat: Etat):
 
 
 def inserer_etat(file_etat: list[Etat], etat: Etat):
+    global nb_etat_genere
     for i in range(0, len(file_etat)):
         if file_etat[i].cout > etat.cout:
             file_etat.insert(i, etat)
             return i
 
     file_etat.append(etat)
+    nb_etat_genere += 1
     return -1
 
 
@@ -167,9 +177,12 @@ def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_
         writing_in_frontiere_semaphore.release()
 
 
-def astar(plateau_initial):
-    global nombre_etats_explo
+def astar(plateau_initial) -> Etat | None:
+    global nombre_etats_explo, nb_etat_max_ds_frontiere, utilisation_RAM, nb_etat_genere
     nombre_etats_explo = 0
+    nb_etat_max_ds_frontiere = 0
+    utilisation_RAM = 0
+    nb_etat_genere = 0
     # n est la taille du taquin
     # frontiere = [Etat(liste_deplacement=[],
     #                   cout=heuristique(K, plateau_initial))]
@@ -188,6 +201,8 @@ def astar(plateau_initial):
         plateau = deplacement(etat_choisi.liste_deplacement, plateau_initial)
         if tuple(plateau) not in explored:
             if heuristique(K, plateau) == 0:
+                utilisation_RAM = (psutil.Process(
+                    os.getpid()).memory_info().rss) / 1024 ** 2
                 return etat_choisi
                 # ici on retroune la solution. Faire une fct qui calcul la solution si besoins.
             else:
@@ -204,7 +219,9 @@ def astar(plateau_initial):
 
             explored.add(tuple(plateau))
 
-            nombre_etats_explo = len(frontiere)
+            nombre_etats_explo += 1
+            nb_etat_max_ds_frontiere = nb_etat_max_ds_frontiere if nb_etat_max_ds_frontiere > len(
+                frontiere) else len(frontiere)
 
         if should_quit:
             return None
@@ -235,6 +252,16 @@ def distance_elem(position: tuple[int, int], i: int):
 
 def heuristique(k: int, etat_courant: list[int]):
     resultat = 0
+    res_final = 0
+    if k == 0:
+        for i in range(0, NOMBRE_CASES):
+            if etat_courant[i] != -1:
+                resultat += get_poids_tuile(k, etat_courant[i]) * distance_elem(
+                    (i % DIM_GRILLE, i // DIM_GRILLE), etat_courant[i])
+            res_final = resultat//COEF_NORM[k -
+                                            1] if resultat//COEF_NORM[k-1] > res_final else res_final
+        return res_final
+
     for i in range(0, NOMBRE_CASES):
         if etat_courant[i] != -1:
             resultat += get_poids_tuile(k, etat_courant[i]) * distance_elem(
@@ -400,10 +427,10 @@ def generer_grille_aleatoire(resolvable: bool = False):
 if __name__ == '__main__':
     K = 0
     set_dim_grille(3)
-    # plateau = [12, 1, -1, 5,
-    #            11, 9, 7, 13,
-    #            0, 10, 3, 2,
-    #            4, 8, 14, 6]
+    plateau = [12, 1, -1, 5,
+               11, 9, 7, 13,
+               0, 10, 3, 2,
+               4, 8, 14, 6]
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
@@ -414,3 +441,35 @@ if __name__ == '__main__':
         beg = time.time_ns()
         res = astar(plateau)
         print(time.time_ns() - beg, '\n', res)
+
+    # pour la partie expérimentation du programme *******************************
+    # tp.init_bd_data(tp.file)
+
+    # for _ in range(500):
+    #     plateau = generer_grille_aleatoire()
+    #     while not solvable(plateau):
+    #         plateau = generer_grille_aleatoire()
+    #     for k in (0, 6):
+    #         gc.collect()
+    #         utilisation_CPU = psutil.cpu_percent(None)
+    #         res = astar(plateau)
+    #         utilisation_CPU = (utilisation_CPU+psutil.cpu_percent(None))//2
+    #         tp.panda_data(tp.file,
+    #                       nb_etat_genere,
+    #                       res.cout,
+    #                       utilisation_CPU,
+    #                       utilisation_RAM,
+    #                       nb_etat_max_ds_frontiere,
+    #                       nombre_etats_explo,
+    #                       k)
+    #         print(nb_etat_genere,
+    #               res.cout,
+    #               utilisation_CPU,
+    #               utilisation_RAM,
+    #               nb_etat_max_ds_frontiere,
+    #               nombre_etats_explo,
+    #               k)
+
+    # tp.linear_reg(tp.file, [0, 6])
+    # tp.multi_graphe(tp.file, [0, 6], 'nb_etat_frontiere', 'nb_etats_explorer',
+    #                 'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière  pour 500 taquins")

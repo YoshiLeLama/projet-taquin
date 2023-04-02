@@ -1,6 +1,6 @@
-PWD c:\Users\leofl\OneDrive\Bureau\prjt taquin\projet-taquin
+PWD c:\Users\leofl\OneDrive\Bureau\projet-taquin
 INPUT C:\Users\leofl\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\leofl\OneDrive\Bureau\prjt taquin\projet-taquin\rapport.tex
+INPUT c:\Users\leofl\OneDrive\Bureau\projet-taquin\rapport.tex
 OUTPUT rapport.log
 INPUT C:\Users\leofl\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
 INPUT C:\Users\leofl\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
