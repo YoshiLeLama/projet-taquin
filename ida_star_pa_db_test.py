@@ -11,6 +11,7 @@ import numpy as np
 
 # ********** Variable globale pour la partie exp du prog********
 import teste_prog as tp
+import gc
 nombre_etats_explo = 0
 nb_etat_genere = 0
 nb_etat_max_ds_frontiere = 0
@@ -207,7 +208,8 @@ def experimet(n) -> None:
         nb_etat_genere = 0
         nb_etat_max_ds_frontiere = 0
         nombre_etats_explo = 0
-        res = ida_star(plateau)
+        solver = IDA_star(pa_db(), deplacement(DIM_GRILLE))
+        res = solver.ida_star(plateau)
         tp.panda_data(tp.file,
                       nb_etat_genere,
                       res[0].cout,
