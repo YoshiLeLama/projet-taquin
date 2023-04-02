@@ -198,8 +198,7 @@ def deplacement(directions, plateau_initial):
 # *********************************************************************************************
 
 
-def is_goal(node: Etat, plateau_initial: list[int]):
-    return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
+# trie les successeur par ordre de cout
 
 
 def successors(node: Etat, plateau_initial: list[int], h):
@@ -295,9 +294,8 @@ def solvable(plateau_initial):
 
 
 def generer_grille_resolue():
-    grille = []
-    for i in range(0, DIM_GRILLE * DIM_GRILLE - 1):
-        grille.append(i)
+    n = DIM_GRILLE
+    grille = [i % (n*n) for i in range(0, n*n)]
     grille.append(-1)
     return grille
 
