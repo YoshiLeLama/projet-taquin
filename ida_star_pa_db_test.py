@@ -39,8 +39,7 @@ class IDA_star:
         while True:
             t = self.search(0, bound)
             if t == -1:
-                print(self.nb_noeud_explo)
-                return bound, tuple(self.chemin)
+                return tuple(self.chemin), bound
             print(t)
             if t == math.inf:
                 return -1
@@ -249,7 +248,6 @@ if __name__ == '__main__':
     if solvable(plateau):
         beg = time.time_ns()
         res = solver.ida_star(plateau)
-        print(len(res[1]))
         print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
     experimet(50)
