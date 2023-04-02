@@ -105,8 +105,12 @@ def set_weight_set(new_value):
     if K == 0:
         K = 6
 
-
+# **************************************************
+#                       Algo A*                    #
+# **************************************************
 # la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
+
+
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
     result: list[Etat] = []
 
@@ -206,7 +210,14 @@ def astar(plateau_initial):
             return None
     return None
 
+# **************************************************
+#                                                  #
+# **************************************************
 
+
+# **************************************************
+#                       Heuristique                #
+# **************************************************
 def get_poids_tuile(k: int, i: int):
     if i > NOMBRE_TUILES:
         return 0
@@ -273,6 +284,14 @@ def linear_conflict(plateau_courant):
         res += col_conflict(plateau_courant[i:NOMBRE_CASES:DIM_GRILLE], i)
     return heuristique(6, plateau_courant) + 2*res
 
+# **************************************************
+#                                                  #
+# **************************************************
+
+
+# **************************************************
+#             Deplacement de la case vide           #
+# **************************************************
 
 # la fonction swap permet de  calculer le nouveau plateau en fonction des de la direction qu'on aura trouver dans le deplacement sans les cas limites.
 # i : la position de la case vide
@@ -315,7 +334,14 @@ def deplacement(directions, plateau_initial):
                 swap(plateau, pos_case_vide, pos_case_vide + 1)
     return plateau
 
+# **************************************************
+#                                                  #
+# **************************************************
 
+
+# **************************************************
+#    Verification de la solvabilité d'un plateau   #
+# **************************************************
 # permet de savoir si un taquin est sovlable.
 # Si il est non solvable la fonction retournera false.
 
@@ -338,12 +364,28 @@ def solvable(plateau_initial):
     return nb_permutations % 2 == (DIM_GRILLE - (i % DIM_GRILLE) + DIM_GRILLE - (i // DIM_GRILLE) - 2) % 2
 
 
+# **************************************************
+#                                                  #
+# **************************************************
+
+# **************************************************
+#                Grille résolue                    #
+# **************************************************
+
 def generer_grille_resolue():
     grille = []
     for i in range(0, DIM_GRILLE * DIM_GRILLE - 1):
         grille.append(i)
     grille.append(-1)
     return grille
+
+# **************************************************
+#                                                  #
+# **************************************************
+
+# **************************************************
+#                  Gille aléatoire                 #
+# **************************************************
 
 
 def generer_grille_aleatoire(resolvable: bool = False):
