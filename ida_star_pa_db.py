@@ -9,14 +9,13 @@ from collections import namedtuple
 from bisect import insort
 from enum import Enum
 import random
+import sqlite3
+from sqlite3 import Error
 
 import numpy as np
 
 
 # ********** Variable globale pour la partie exp du prog********
-import walking_distance as wd
-import sqlite3
-from sqlite3 import Error
 nombre_etats_explo = 0
 nb_etat_genere = 0
 nb_etat_max_ds_frontiere = 0
@@ -94,7 +93,8 @@ def etat_ne(self: Etat, x: Etat):
 #                              fct d'expansion
 # *********************************************************************************************
 # la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
-def expanse(plateau_initial: list[int], etat_choisi: Etat):
+def expanse(plateau_initial: list[int], etat_choisi: Etat, h):
+
     result: list[Etat] = []
 
     for d in [Card.NORD, Card.SUD, Card.OUEST, Card.EST]:
@@ -103,7 +103,7 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
             result.append(Etat(liste_deplacement=nouveaux_deplacements,
-                               cout=len(nouveaux_deplacements) + heuristique(depl)))
+                               cout=len(nouveaux_deplacements) + h(depl)))
     return result
 
 
@@ -114,31 +114,36 @@ def f(etat: Etat):
     return etat.cout + len(etat.liste_deplacement)
 
 
-def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
-    tab_pattern = grille_resolue[:]
-    for i in range(0, NOMBRE_CASES):
-        if tab_pattern[i] not in pattern:
-            tab_pattern[i] = -1
-    return tuple(tab_pattern)
-
-
-def heuristique(etat_courant: list[int]):
-    result = 0
+def pa_db():
+    db = dict()
     try:
         databases = sqlite3.connect("pa5-5-5_db.db")
     except Error as e:
         print(e)
     cur = databases.cursor()
-    for i in PATERN:
-        cur.execute(
-            "SELECT cout FROM paterne WHERE table_id =?", (str(
-                pattern_study(etat_courant, i)),))
-        rows = cur.fetchall()
-        for row in rows:
-            result += row[0]
 
-    databases.close()
-    return result
+    cur.execute(
+        "SELECT * FROM paterne ")
+    rows = cur.fetchall()
+    for row in rows:
+        db.update({row[0]: row[1]})
+
+    def pattern_study(grille_resolue: list[int], pattern: list[int]) -> list[int]:
+        tab_pattern = grille_resolue[:]
+        for i in range(0, 16):
+            if tab_pattern[i] not in pattern:
+                tab_pattern[i] = -1
+        return tuple(tab_pattern)
+
+    def heuristique(etat_courant: list[int]):
+        template = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
+        result = 0
+        for i in template:
+            teste = pattern_study(etat_courant, i)
+            result += db.get(str(teste))
+        databases.close()
+        return result
+    return heuristique
 
 
 # *********************************************************************************************
@@ -197,9 +202,9 @@ def is_goal(node: Etat, plateau_initial: list[int]):
     return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
 
 
-def successors(node: Etat, plateau_initial: list[int]):
+def successors(node: Etat, plateau_initial: list[int], h):
     global nb_etat_genere
-    values = expanse(plateau_initial, node)
+    values = expanse(plateau_initial, node, h)
 
     for i in range(len(values)):
         x = values[i]
@@ -212,12 +217,13 @@ def successors(node: Etat, plateau_initial: list[int]):
     return values
 
 
-def ida_star(plateau_initial):
-    bound = heuristique(plateau_initial)
+def ida_star(plateau_initial, h):
+    bound = h(plateau_initial)
     path = [Etat([], bound)]
     grilles_rencontrees = [tuple(plateau_initial)]
     while True:
-        t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
+        t = search(path, grilles_rencontrees, 0,
+                   bound, plateau_initial, h)
         if t == -1:
             return path[-1], bound
         print(t)
@@ -227,12 +233,12 @@ def ida_star(plateau_initial):
         print(bound)
 
 
-def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
+def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int], he):
     global nombre_etats_explo, nb_etat_max_ds_frontiere
     nombre_etats_explo += 1
     node = path[-1]
     # on utilise walking distance pour calculer l'heuristique et non la dm pondérée.
-    h = heuristique(deplacement(node.liste_deplacement, plateau_initial))
+    h = he(deplacement(node.liste_deplacement, plateau_initial))
     f_value = g + h
     # on impose un limite sur la profondeur de calcul.
     if f_value > bound:
@@ -240,13 +246,13 @@ def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: in
     if h == 0:
         return -1
     min_val = math.inf
-    for succ in successors(node, plateau_initial):
+    for succ in successors(node, plateau_initial, he):
         depl = tuple(deplacement(succ.liste_deplacement, plateau_initial))
         if depl not in grilles_rencontrees:
             path.append(succ)
             grilles_rencontrees.append(depl)
             t = search(path, grilles_rencontrees,
-                       g + 1, bound, plateau_initial)
+                       g + 1, bound, plateau_initial, he)
             # variable pour le teste*******************
             nb_etat_max_ds_frontiere = len(path) if len(
                 path) > nb_etat_max_ds_frontiere else nb_etat_max_ds_frontiere
@@ -356,10 +362,11 @@ if __name__ == '__main__':
     #            11, 9, 7, 13,
     #            0, 10, 3, 2,
     #            4, 8, 14, 6]
+    plateau = [14, 13, 0, 5, 8, 10, 3, 11, -1, 9, 6, 2, 12, 7, 4, 1]
     print(plateau)
     if solvable(plateau):
         beg = time.time_ns()
-        res = ida_star(plateau)
+        res = ida_star(plateau, pa_db())
         print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
     # experimet(50)
