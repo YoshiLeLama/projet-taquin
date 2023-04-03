@@ -37,7 +37,7 @@ class IDA_star:
         self.grilles_rencontrees = {tuple(root)}
         self.nb_noeud_explo = 0
         self.chemin = []
-        bound = self.h(list(root))
+        bound = self.h(np.array(root))
         while True:
             t = self.search(0, bound)
             if t == -1:
@@ -55,7 +55,7 @@ class IDA_star:
         self.nb_noeud_explo += 1
         # **************************************************
         node = self.path[-1]
-        h = self.h(list(node))
+        h = self.h(np.array(node))
         f = g + h
         if f > bound:
             return f
@@ -88,7 +88,7 @@ class IDA_star:
         for i in range(len(values)):
             x = values[i]
             j = i
-            while j > 0 and self.h(list(values[j - 1][0])) > self.h(list(x[0])):
+            while j > 0 and self.h(np.array(values[j - 1][0])) > self.h(np.array(x[0])):
                 values[j] = values[j - 1]
                 j = j - 1
                 values[j] = x
@@ -133,9 +133,39 @@ def deplacement(n):
 
 def pa_db():
 
-    def heuristique(etat_courant: list[int]):
-        if DIM_GRILLE == 4:
-            return wd.walking_distance(np.array(etat_courant))
+    table_dict = wd.table_dict.copy()
+    u64 = np.ulonglong
+    U64_SEVEN = u64(7)
+    U64_THREE = u64(3)
+    U64_EIGHT = u64(8)
+
+    def heuristique(table: np.ndarray):
+        if len(table) != 16:
+            return -1
+
+        table = table.reshape((4, 4))
+
+        rows = np.zeros((4, 4), dtype=u64)
+        columns = np.zeros((4, 4), dtype=u64)
+
+        for i in range(0, 4):
+            for j in range(0, 4):
+                val = table[i][j]
+                if val != -1:
+                    rows[i][val // 4] += u64(1)
+                val = table[j][i]
+                if val != -1:
+                    columns[i][val % 4] += u64(1)
+
+        table_ids = np.zeros(2, dtype=u64)
+        for i in range(0, 4):
+            for j in range(0, 4):
+                table_ids = np.bitwise_or(
+                    np.left_shift(table_ids, U64_THREE), np.array([rows[i][j], columns[i][j]]))
+
+        return table_dict[table_ids[0]] + table_dict[table_ids[1]]
+
+    return heuristique
 
     return heuristique
 
