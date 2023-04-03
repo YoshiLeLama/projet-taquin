@@ -309,15 +309,13 @@ if __name__ == '__main__':
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
-    plateau = [12, 1, -1, 5,
-               11, 9, 7, 13,
-               0, 10, 3, 2,
-               4, 8, 14, 6]
+    plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
     solver = IDA_star(pa_db(), deplacement(DIM_GRILLE))
     print(plateau)
     if solvable(plateau):
         beg = time.time_ns()
         res = solver.ida_star(plateau)
+        print(nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo)
         print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
     # experimet(50)

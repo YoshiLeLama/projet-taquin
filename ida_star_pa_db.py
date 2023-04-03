@@ -360,7 +360,7 @@ if __name__ == '__main__':
     #            11, 9, 7, 13,
     #            0, 10, 3, 2,
     #            4, 8, 14, 6]
-    plateau = [14, 13, 0, 5, 8, 10, 3, 11, -1, 9, 6, 2, 12, 7, 4, 1]
+    plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
     print(plateau)
     if solvable(plateau):
         beg = time.time_ns()
