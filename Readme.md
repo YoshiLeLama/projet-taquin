@@ -1,20 +1,15 @@
 # Taquin 3D 2023
 
-Le nouveau jeu qui permet de résoudre ou voir se résoudre des taquins (3x3 pour le moment).
+Le nouveau jeu qui permet de résoudre ou voir se résoudre des taquins (3x3 et 4x4).
 
 ## Installation
 
-Pour lancer le jeu, il faut avoir au préalable installé Raylib et Pandas :
+Pour lancer le programme, il faut avoir au préalable installé Raylib et Pandas :
 
 ```commandline
 python3 -m pip install --upgrade pip
 python3 -m pip install raylib
 python3 -m pip install pandas
-```
-
-Pour la partie teste il faut avoir au préalable installé mathplotlib et sklearn :
-
-```commandline
 python3 -m pip install -U scikit-learn
 python3 -m pip install matplotlib
 ```

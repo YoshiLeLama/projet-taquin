@@ -3,8 +3,6 @@
 # resolveur taquin 3x3 utilisant A* et l'heuristique distance de Manhattan pondéré.
 #
 # *************************
-
-import math
 import threading
 import time
 from collections import namedtuple
@@ -73,36 +71,6 @@ def quit_solving():
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
 
 
-# Nous représentons un état comme étant un objet. Il stoquera la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
-Etat = namedtuple('Etat', ['liste_deplacement', 'cout'])
-Etat.__annotations__ = {
-    'liste_deplacement': list[str], 'cout': int}
-
-
-def etat_le(self: Etat, x: Etat):
-    return self.cout <= x.cout
-
-
-def etat_ge(self: Etat, x: Etat):
-    return self.cout >= x.cout
-
-
-def etat_gt(self: Etat, x: Etat):
-    return self.cout > x.cout
-
-
-def etat_lt(self: Etat, x: Etat):
-    return self.cout < x.cout
-
-
-def etat_eq(self: Etat, x: Etat):
-    return self.cout == x.cout
-
-
-def etat_ne(self: Etat, x: Etat):
-    return self.cout != x.cout
-
-
 def set_weight_set(new_value):
     global K
     K = new_value % (len(POIDS_TUILES) // NOMBRE_TUILES)
@@ -115,15 +83,15 @@ def set_weight_set(new_value):
 # la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
 
 
-def expanse(plateau_initial: list[int], etat_choisi: Etat):
-    result: list[Etat] = []
+def expanse(plateau_initial: list[int], etat_choisi: tq.Etat):
+    result: list[tq.Etat] = []
 
     for d in [tq.Card.NORD, tq.Card.SUD, tq.Card.OUEST, tq.Card.EST]:
         nouveaux_deplacements = etat_choisi.liste_deplacement[:]
         nouveaux_deplacements.append(d)
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
-            result.append(Etat(liste_deplacement=nouveaux_deplacements,
+            result.append(tq.Etat(liste_deplacement=nouveaux_deplacements,
                                cout=len(nouveaux_deplacements) + (heuristique(K, depl) if not LINEAR_CONFLICT else linear_conflict(depl))))
     return result
 
@@ -131,11 +99,11 @@ def expanse(plateau_initial: list[int], etat_choisi: Etat):
 # permet d'inserer les états trié en fonction de leurs coûts.
 
 
-def f(etat: Etat):
+def f(etat: tq.Etat):
     return etat.cout + len(etat.liste_deplacement)
 
 
-def inserer_etat(file_etat: list[Etat], etat: Etat):
+def inserer_etat(file_etat: list[tq.Etat], etat: tq.Etat):
     # global nb_etat_genere
     for i in range(0, len(file_etat)):
         if file_etat[i].cout > etat.cout:
@@ -173,7 +141,7 @@ def calculate_if_valid(etat_cree, plateau_initial, explored, frontiere, grilles_
         writing_in_frontiere_semaphore.release()
 
 
-def astar(plateau_initial) -> Etat | None:
+def astar(plateau_initial) -> tq.Etat | None:
     # # var pour  la partie exp
     # global nombre_etats_explo, nb_etat_max_ds_frontiere, utilisation_RAM,  nb_etat_genere
     # nombre_etats_explo = 0
@@ -182,7 +150,7 @@ def astar(plateau_initial) -> Etat | None:
     # nb_etat_genere = 0
     # # ****************************
     frontiere = deque()
-    frontiere.append(Etat(liste_deplacement=[],
+    frontiere.append(tq.Etat(liste_deplacement=[],
                           cout=heuristique(K, plateau_initial) if not LINEAR_CONFLICT else linear_conflict(plateau_initial)))
     # stocke les grilles déjà trouvés synchronisé avec la frontière.
     grilles_frontiere = [tuple(plateau_initial[:])]
@@ -467,11 +435,6 @@ def experiment(poids: list[int], n) -> None:
 if __name__ == '__main__':
     K = 6
     LINEAR_CONFLICT = True
-    set_dim_grille(3)
-    # plateau = [12, 1, -1, 5,
-    #            11, 9, 7, 13,
-    #            0, 10, 3, 2,
-    #            4, 8, 14, 6]
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()

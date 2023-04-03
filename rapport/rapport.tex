@@ -6,7 +6,8 @@
 \usepackage{graphicx}
 \usepackage[T1]{fontenc}
 \usepackage{listings}
-
+\usepackage{float}
+\graphicspath{ {./images/} }
 \lstdefinestyle{mystyle}{
     basicstyle=\ttfamily\footnotesize,
     breaklines=true,
@@ -85,7 +86,7 @@ Afin de tester si une grille a déjà été rencontrée dans la frontière, on m
 
 Pour vérifier qu'un état trouver à l'aide de la fonction d'expension est "valide" nous avons décidés d'untiliser 4 threads pour faire cette vérification de manière parallèle pour optimiser le temps de calcul.
 
-\subsubsection{Difficulté}
+\subsubsection{Inconvénients}
 
 Le temps de résolution de l'algorithme A* augmente de manière exponentielle à mesure qu'on augmente la taille de la grille.
 
@@ -113,6 +114,89 @@ On est donc loin d'une très bonne heuristique, ce qui peut s'avérer être un p
 Il est possible d'optimiser le calcul de Manhattan. On peut remarquer que pour chaque déplacement seul une tuile à changé. On peut donc déduire la distance de Manhattan Ce qui réduirais ça complexité de $\mathcal{O}(n^{2})$ à $\mathcal{O}(1)$ (si on considère qu'un taquin à une taille de $n \times n$).
 
 \subsection{Expérimentation}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3(1)}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3(2)}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3(3)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de coups}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb d etat explorer sans coef}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb de coups}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation CPU en fct du nb d'etat generer}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation RAM en fct du nb d'etat generer}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3xnb etat dans la frontiere en fct du nb de coups}
+\end{figure}
+
+On observer que les solutions avec une heuristique sans coefficiant de normalisation tend à surrestimer le nombre de coups pour résoudre le taquin.  Le fait de faire le maximum des heuristiques ne change pas le nombr d'état à expanser pour résoudre le taquin 3x3. On peut donc conclure que pour un taquin d ecette taille il est inutile de faire le maximum des heuristiques. Cela n'augmente que le temps de calcul.
 
 \section{Solutions proposées}
 
@@ -139,31 +223,66 @@ L'implémentation de IDA* se base sur deux fonctions :
           Si \lstinline{search} trouve une solution, \lstinline{ida_star} renvoie la liste des états parcourus pour trouver la solution, sinon -1 si \lstinline{search} renvoie $\infty$.
 \end{enumerate}
 
-\subsubsection{Difficulté}
+\subsubsection{Inconvénients}
 
-\subsection{Heuristique: conflit linéaire}
+\subsection{Heuristique : conflit linéaire}
 
 
 \subsubsection{Étude de l'heuristique}
 
-Le principe de l'heuristique du conflit linéaire est le suivant: 2 tuiles 'a' et 'b' sont en conflit linéaire si elle sont dans la même ligne ou la même colonne, que leur position final est aussi dans la même ligne ou colonne et que au moins l'une des tuile est bloqué par la seconde pour arriver à sa position finale sans considérer la case vide.
-Le calcul de cette heuristique sera égale à $2 \times nblc + Md$ où nblc est égale au nombre de conflit linéaire sur chaque lignes + le nombre de conflit linéaire sur chaque colone et Md est la distance de Manhattan. Cette fonction est donc une faible amélioration de la distance de Manhattan. De plus on doit utiliser un poid de 1 pour chaque tuile pour ne pas surestimer le coût pour atteindre l'état final.
+Le principe de l'heuristique du conflit linéaire est le suivant: 2 tuiles 'a' et 'b' sont en conflit linéaire si elles sont dans la même ligne ou la même colonne, que leur position finale est aussi dans la même ligne ou colonne et qu'au moins l'une des tuile est bloquée par la seconde pour arriver à sa position finale sans considérer la case vide.
+Le calcul de cette heuristique sera égale à $2 \times nblc + Md$, où $nblc$ est égal au nombre de conflits linéaires sur chaque ligne + le nombre de conflits linéaires sur chaque colonne, et Md est la distance de Manhattan. Cette fonction est donc une faible amélioration de la distance de Manhattan. De plus, on doit utiliser un poids de 1 pour chaque tuile pour ne pas surestimer le coût pour atteindre l'état final.
 
 \subsubsection{Implémentation}
 
-Pour calculer les conflits linéaires Nous avons réalisés 3 fonctions: une fonction principale pour calculer l'heuristique final, une pour calculer le conflit linéaire pour les lignes et une pou les colones. Pour cela si on possède une taquin de taille $n \times n$ on devra donc faire $2 \times (n^2*(n-1))$ opérations pour calculer les conflits linéaire (sans prendre en compte le calcul de la distance de Manhattan).
+Pour calculer les conflits linéaires, nous avons réalisé 3 fonctions : une fonction principale pour calculer l'heuristique finale, une pour calculer le conflit linéaire pour les lignes et une pour les colonnes. Pour cela si on a un taquin de taille $n \times n$, on devra donc faire $2 \times (n^2*(n-1))$ opérations pour calculer les conflits linéaires (sans prendre en compte le calcul de la distance de Manhattan).
 On a donc dans le pire cas une complexité en temps de $ \mathcal{O}(n^3)$. Pour calculer le conflit linéaire.
 
-\subsubsection{Inconvénient}
+\subsubsection{Inconvénients}
 
-Même si celle ci améliore l'estmation de l'heuristique elle augmente le temps de calcul du programme pour des taquins de grandes taille. En explorant quelque centaines de milliers d'états par seconde il serait possible de résoudre des taquins 4x4 mais pas au dessus.
+Même si celle ci améliore l'estimation du coût de la solution, elle augmente le temps de calcul du programme pour des taquins de grande taille. 
+En explorant quelques centaines de milliers d'états par seconde, il serait possible de résoudre des taquins 4x4 mais pas au dessus.
 
-\subsection{amélioration possible de l'heuristique}
-Il est possible d'améliorer la complexité temporel de ce programme en réalisant quelques modifications. On peut remarquer que déplacer une tuile le long d'une ligne ne résoud aucun conflit linéaire sur la ligne (de même sur la colonne). En conséquence, on peut résuire les vérification uniquement au ligne et colone affecté et donc passer de $\mathcal{O}(n^{3})$ à $\mathcal{O}(n^{2})$.
-On peut aussi combiner d'autre heuristique avec celle de la distance de Manhattan comme "Corner Tile Heuristic" ou encore "Last Tile Heuristic", ... que nous ne développerons pas ici.
-\subsection{Heuristique: Walking distance}
+\subsection{Amélioration possible de l'heuristique}
+Il est possible d'améliorer la complexité temporelle de ce programme en réalisant quelques modifications. On peut remarquer que déplacer une tuile le long d'une ligne ne résout aucun conflit linéaire sur la ligne (de même sur la colonne). En conséquence, on peut réduire les vérifications uniquement aux lignes et colonnes affectées et donc passer de $\mathcal{O}(n^{3})$ à $\mathcal{O}(n^{2})$.
+On peut aussi combiner d'autre heuristiques avec celle de la distance de Manhattan comme "Corner Tile Heuristic" ou encore "Last Tile Heuristic",... Nous ne les développerons toutefois pas ici.
+
+\subsection{Expérimentation}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'état dans la frontiereen fct du nb du nb de coups linear conflict}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'état explorer en fct du nb de coups linear conflict}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de detat generer linear conflict}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb de coups linear conflict}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation CPU en fct du nb d'etat generer linear conflict}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict}
+\end{figure}
+
+On peut observe que linear conflict ne fait qu'augmenter le temps de calcul pour les taquins de taille $3 \times 3$. 
+\subsection{Heuristique : Walking distance}
 
 \subsubsection{Étude de l'heuristique}
+
+L'heuristique Walking Distance a été créée dans les années 2000 par le programmeur Ken'ichiro Takahashi, alias takaken.
 
 Le principe de la walking distance est d'attribuer à chaque case une lettre correspondant à sa ligne finale (A pour la 1ère, B pour la 2e, ...), de placer les cases d'une même ligne dans une "boîte", et de calculer combien de mouvements d'une case d'une boîte à une autre boîte adjacente faut-il faire pour que chaque boîte ne contienne que les cases qui correspondent à sa ligne (les A dans la boîte 1, les B dans la boîte 2, ...).
 On fait de même sur les colonnes et on fait la somme avec le résultat sur les lignes, et on obtient finalement la valeur de la walking distance pour une grille qui correspondrait à ce schéma.
@@ -196,26 +315,88 @@ La recherche dans un dictionnaire étant très rapide, on peut calculer de mani�
 Malgré sa meilleure efficacité, cette méthode nécessite tout de calculer énormément d'états, et donc pour les grilles les plus difficiles le calcul de la solution reste très long.
 Il existe des solutions pour optimiser au maximum la résolution avec walking distance, mais elles sont assez complexes et difficiles à mettre en place dans le cadre de ce projet.
 
-\subsection{Heuristique: Patternes databases (additif)}
+\subsubsection{Améliorations possibles}
+
+Il existe plusieurs programmes trouvables sur Internet, notamment un par le créateur de cette heuristique, qui résolvent un taquin complexe en quelques secondes avec Walking Distance, mais nous n'avons pas réussi à atteindre leur niveau de performances.
+
+Il serait possible de combiner la walking distance avec d'autres heuristiques pour estimer encore mieux le coût, mais nous n'avons pas pu mettre ça en place d'une bonne manière.
+
+\subsection{Heuristique : Pattern Databases (additif)}
 
 
 \subsubsection{Étude de l'heuristique}
-Le principe d'utiliser un base de donnée à l'aide de patterne est de pouvoir générer une heuristique casi parfaite. Des taquins de taille superieur à $3 \times 3$ ayant beaucoup trop d'état pour être stoquée entièrement soqué ou même généré, nous allons générés plusieurs patterne pour diminuer le nombre d'état à stoqué dans la mémoire. Pour un taquin de taille $N = n \times n$ le nombre d'état à stoqué ne sera plus que de $\frac{N!}{(N-t)!}$ (où t est la nombre de tuiles dans le patterne), comme on plus que t tuiles à considérer. Grâce à ça on pourra avoir une heuristique très proche de la réalitée comme le coût prendra maintenant en compte le déplacement de la case avec la case vide pour arriver de son état actuelle à sa position final. Enfin pour faire cela on par de l'état final pour généré toutes les disposition possibles.
-Il existe plusieurs type de patternes databases comme par exemple celle que nous avons décider d'utiliser qui est ditre \lstinline{Static Additive Pattern Database} ou \lstinline{Dynamically partitioned Additive Pattern Database} qui prend en compte la valeur de la parité des distance et la distance de Manhattan (il peut aussi être utiliser pair+triple+quadruple). Ceci a pour avantage de rendre la génération de la base de donnée plus rapide et bien moin lourde. En contre partie celle-ci prendra plus de temps pour résoudre les taquins car stoquant moins de cas. Dans notre cas on utilise un base de données satatic. Il exites aussi des heuristiques qui n'utilise qu'un seul patterne pour calculer celle-ci. Pour cela nous allons généré des patternes tel que toutes valeurs en dehors d'un patterne est ignorées et un esemble de patternes est admissible si et seulement si pour tous les patternes on a :$P_{i} \cap P_{j} = \emptyset$ avec $i \neq j$ car on ne veut pas compter 2 fois une ou plusieurs tuiles. Ensuite pour chaque patternes nous devons générer toutes les combinaisons possible associé à leur coût. Pour faire ça, nous déplaçons la case vide et lorsque celle-ci est intervertie avec un case comprise dans le patterne étudié on rajoute 1 à son coût. Nous n'enregistrons au final les positions associé à leur coût sans prendre en compte la position de la case vide. Cependant, pour pouvoir générer toutes les positions possibles, il faut prendre en considération de la case vide. On devra donc généré au total $\frac{N!}{(N-t+1)!}$ états pour pouvoir générer notre base de données.
-Un fois que notre base de donées est générée, celle-ci est réutilisable à l'infini pour les taquins de tailles souhaités. Il nous suffira plus qu'à récupérer le coût des différents patternes de notre état que nous sommes entrain d'étudier dans notre recherche pour arriver à l'état final pour optenir l'heuristique d'une patternes databases.
+
+Inventé par Culberson et Schaeffer (1994), son principe est d'utiliser un base de données à l'aide de patterns et de pouvoir générer une heuristique quasi parfaite. Elle est garantie d'être consistante, d'être inférieure au coût de la solution du plus court chemin et plus le pattern est grand mieux c'est. Des taquins de taille supérieure à $3 \times 3$ ayant beaucoup trop d'états pour être stockés entièrement ou même générés, nous allons générer plusieurs patterns pour diminuer le nombre d'états à stocker dans la mémoire. 
+Pour un taquin de taille $N = n \times n$, le nombre d'états à stocker ne sera plus que de $\frac{N!}{(N-t)!}$ (où t est le nombre de tuiles dans le pattern), comme on plus que t tuiles à considérer. Grâce à ça, on pourra avoir une heuristique très proche de la réalité comme le coût prendra maintenant en compte le déplacement de la case avec la case vide pour arriver de son état actuel à sa position finale. 
+Enfin pour faire cela on part de l'état final pour générer toutes les dispositions possibles.
+Il existe plusieurs types de patterns databases comme par exemple celle que nous avons décidé d'utiliser qui est dite \lstinline{Static Additive Pattern Database} ou \lstinline{Dynamically partitioned Additive Pattern Database} qui prend en compte la valeur de la parité des distance et la distance de Manhattan (il peut aussi être utilisé pair+triple+quadruple). Ceci a pour avantage de rendre la génération de la base de données plus rapide et bien moins lourde. 
+En contre partie, celle-ci prendra plus de temps pour résoudre les taquins car stockant moins de cas. Dans notre cas, on utilise une base de données static. Il existe aussi des heuristiques qui n'utilisent qu'un seul pattern pour calculer celle-ci. 
+Pour cela nous allons générer des patterns tels que toutes valeurs en dehors d'un pattern sont ignorées et un ensemble de patterns est admissible si et seulement si pour tous les patterns on a :$P_{i} \cap P_{j} = \emptyset$ avec $i \neq j$ car on ne veut pas compter 2 fois une ou plusieurs tuiles. Ensuite pour chaque pattern nous devons générer toutes les combinaisons possibles associées à leur coût. Pour faire ça, nous déplaçons la case vide et lorsque celle-ci est permutée avec une case comprise dans le pattern étudié, on rajoute 1 à son coût. 
+Nous enregistrons au final les positions associées à leur coût sans prendre en compte la position de la case vide. Cependant, pour pouvoir générer toutes les positions possibles, il faut prendre en considération la case vide. On devra donc générer au total $\frac{N!}{(N-t+1)!}$ états pour pouvoir générer notre base de données.
+Une fois que notre base de données est générée, celle-ci est réutilisable à l'infini pour les taquins de tailles souhaités. Il nous suffira plus qu'à récupérer le coût des différents patterns de notre état que nous sommes entrain d'étudier dans notre recherche pour arriver à l'état final pour obtenir l'heuristique d'un Pattern Database.
 
 \subsubsection{Implémentation}
 Pour générer toutes les configurations possible nous utiliserons une stratégie de largeur dabord avec une complexité en temps et en espace de $\mathcal{O}(b^{d})$ où b est le facteur de branchement (nombre de successeurs en moyenne à un état) et d la profondeur de la solution.
 
-Un état est représenté dans un dictionnaire où la clef est la disposition des tuile en tant que tuple et la valeur étant le coût. Notre file sera représenter par un \lstinline{OrderdDict} venat de collection en python. Le dictionnaire ordonnée nous permet de garder en mémoire l'odre d'arriver de chaque dictionnaire dans la file. Ce qui nous permettra de réaliser la recherche en largeur dabord. De plus un dictionnaire se base aussi sur une table de hachage, le temps d'accès pour savoir si une clef est déjà présente est donc de $\mathcal{O}(1)$ (de même pour utiliser pop ou retourner la clef ou la valeur) et pour insérer un élément sa complexité moyenne est aussi de $\mathcal{O}(1)$.
-    Pour générer les différents patternes dans notre ensemble de patternes nous avons décider de le faire en exécution parallèle à l'aide de threads. Pour des patternes de même taille ils termineront donc plus ou moins en même temps. Notre ensemble de patternes sera une liste de liste global qui contiendra nos patternes.
-    Enfin pour la représentation mémoire, pour stoqué les données on utiliser sqlite qui est déjà implémenter dans python 3 avec 2 tables : le vecteur de la table et son coût.
-    Nous avons décidés de généré 2 patternes databases: une 4-4-4-3: [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]. et une 5-5-5 :[[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]. Pour le patterne 5 par exemple nous devrons généré environ 5,7 millions d'état pour n'en stoquer que 524'160. On devra donc stoquer que environ 1,5 millions d'états contre $10^{13}$ sans patternes.
-    \subsubsection{Difficulté}
-    Malgré que la table est réutilisable à l'infini, ça génération prend du temps. Plus le patterne est grand plus le nombre d'état à explorer est grand même si plus ces patternes sont grands plus le temps de calcul pour trouver la solution pour le plus court chemin sera rapide. Pour générer de manière plus rapide un paterne databases on pourrait utiliser une une stratégie dynamic ajoutant des conditions sur l'ajout d'un état dans notre liste enregistrer.
-    Il est aussi important de souligné qu'il est totalement inutile d'utiliser des patternes databases pour les taquins de taille $3 \times 3$ est inferieur, comme nous pouvons facilement stoqués les plus de 100'000 configurations possibles dans un ordinateur.
+Un état est représenté dans un dictionnaire où la clef est la disposition des tuiles en tant que tuple et la valeur étant le coût. Notre file sera représentée par un \lstinline{OrderdDict} venant de \lstinline{collections} en Python. Le dictionnaire ordonnée nous permet de garder en mémoire l'ordre d'arrivée de chaque dictionnaire dans la file. Ce qui nous permettra de réaliser la recherche en largeur d'abord. 
+De plus un dictionnaire se base aussi sur une table de hachage, le temps d'accès pour savoir si une clef est déjà présente est donc de $\mathcal{O}(1)$ (de même pour utiliser pop ou retourner la clef ou la valeur) et pour insérer un élément sa complexité moyenne est aussi de $\mathcal{O}(1)$.
+Pour générer les différents patterns dans notre ensemble de patterns nous avons décidé de le faire en exécution parallèle à l'aide de threads. Pour des patterns de même taille ils termineront donc plus ou moins en même temps. Notre ensemble de patterns sera une liste de liste global qui contiendra nos patterns.
+Enfin pour la représentation mémoire, pour stocker les données on utilise sqlite qui est déjà implémenté dans python 3 avec 2 tables : le vecteur de la table et son coût.
+Nous avons décidé de générer 2 patterns databases: une 4-4-4-3: [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]. et une 5-5-5 :[[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]. Pour le pattern 5 par exemple nous devrons générer environ 5,7 millions d'états pour n'en stocker que 524'160. On ne devra donc stocker qu'environ 1,5 millions d'états contre $10^{13}$ sans patterns.    
+\subsubsection{Inconvénients}
+Malgré le fait que la table soit réutilisable à l'infini, sa génération prend du temps. Plus le pattern est grand, plus le nombre d'états à explorer est grand, même si plus ces patterns sont grands, plus le temps de calcul pour trouver la solution pour le plus court chemin sera rapide. Pour générer de manière plus rapide un Pattern Database, on pourrait utiliser une stratégie dynamique en ajoutant des conditions sur l'ajout d'un état dans notre liste enregistrée.
+Il est aussi important de souligner qu'il est totalement inutile d'utiliser des Pattern Database pour les taquins de taille $3 \times 3$ et inférieur, comme nous pouvons facilement stocker les plus de 100'000 configurations possibles dans un ordinateur.
+
+\subsection{Expérimentation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 4x4 pa_db graphe 3d}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 4x4 pa_db nb de noeud exploere en fonction du nombre de coups}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 4x4 pa_db nb de noeud explorer en fct du nb detat generer}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 4x4 pa_db nb de noeud explorer en fonction du nombre detat dans la frontiere}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 4x4 pa_db nb de noeud noeud generer en fonction du nombre dede coups}
+\end{figure}
+
+\begin{tabular}{|l|l|l|}
+    \hline 
+    & utilisation de pattern & utilisation de wd \\
+    nombre de n\oe uds générés &  2559 & 2'996'255 \\
+    taille max de la frontière & 47 & 47 \\
+    nombre de n\oe uds explorés & 1893 & 2'199'469 \\
+    temps pour trouver la solution & 0.17 s & 765.45 s \\
+    nombre de coups à réaliser & 46 & 46 \\
+\end{tabular}
 
 \section{Conclusion}
+On a pu voir au cours de notre expérimentation que si l'heuristique distance de Manhattan est suffisante pour résoudre facilement des taquins $3 \times 3$, pour des taquins de taille supérieure, cela ne suffisait plus, car l'estimation du coût est peu fiable.
 
+Nous avons donc cherché d'autres heuristiques plus performantes, et nous avons finalement retenu la Walking Distance et le Pattern Database, en combinaison avec l'utilisation de l'algorithme IDA*.
+
+Les deux requièrent de générer en amont une base de données donnant le coût estimé en fonction du schéma de la grille de taquin. Ces bases de données font de quelques Mo pour la Walking distance jusqu'à plusieurs centaines de Mo pour le Pattern Database.
+
+La Walking distance permet d'estimer d'une meilleure manière le coût pour arriver à la solution, en prenant en compte notamment la position de la case vide pour coller au mieux au jeu du taquin. Cette heuristique nous permet de résoudre plus rapidement et plutôt efficacement les taquins $4 \times 4$.
+
+Le Pattern database quant à lui se base sur une bien plus grande collection de patterns de grille pour estimer très précisément le coût pour arriver à la solution de manière très efficace. Avec cette technique, on peut résoudre des taquins difficiles en quelques minutes seulement.
+
+\section{Listing}
+
+Pour des raisons évidentes de papier, tout le code de notre projet est trouvable sur Github : \textbf{https://github.com/YoshiLeLama/projet-taquin}
 
 \end{document}

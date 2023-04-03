@@ -44,52 +44,21 @@ def quit_solving():
 
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
 
-
-# Nous représentons un état comme étant un objet. Il stoquera la liste des déplacement à faire atteindre l'état final et son coût: le coût f(E)= g(E)+h(E) où g(E) et la profondeur de l'état actuelle et h(E) et l'heuristique calculée.
-Etat = namedtuple('Etat', ['liste_deplacement', 'cout'])
-Etat.__annotations__ = {
-    'liste_deplacement': list[str], 'cout': int}
-
-
-def etat_le(self: Etat, x: Etat):
-    return self.cout <= x.cout
-
-
-def etat_ge(self: Etat, x: Etat):
-    return self.cout >= x.cout
-
-
-def etat_gt(self: Etat, x: Etat):
-    return self.cout > x.cout
-
-
-def etat_lt(self: Etat, x: Etat):
-    return self.cout < x.cout
-
-
-def etat_eq(self: Etat, x: Etat):
-    return self.cout == x.cout
-
-
-def etat_ne(self: Etat, x: Etat):
-    return self.cout != x.cout
-
-
 # la fonction expanse permettra de calculer toutes les directions possible et les coûts à partir de l'état choisi.
-def expanse(plateau_initial: list[int], etat_choisi: Etat):
-    result: list[Etat] = []
+def expanse(plateau_initial: list[int], etat_choisi: tq.Etat):
+    result: list[tq.Etat] = []
 
     for d in [tq.Card.NORD, tq.Card.SUD, tq.Card.OUEST, tq.Card.EST]:
         nouveaux_deplacements = etat_choisi.liste_deplacement[:]
         nouveaux_deplacements.append(d)
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
-            result.append(Etat(liste_deplacement=nouveaux_deplacements,
+            result.append(tq.Etat(liste_deplacement=nouveaux_deplacements,
                                cout=len(nouveaux_deplacements) + heuristique(0, depl)))
     return result
 
 
-def f(etat: Etat):
+def f(etat: tq.Etat):
     return etat.cout + len(etat.liste_deplacement)
 
 
@@ -187,14 +156,14 @@ GRILLE_FINALE = tuple([0, 1, 2, 3,
                        12, 13, 14, -1])
 
 
-def is_goal(node: Etat, plateau_initial: list[int]):
+def is_goal(node: tq.Etat, plateau_initial: list[int]):
     return tuple(deplacement(node.liste_deplacement, plateau_initial)) == GRILLE_FINALE
 
 
 etat_type = [('liste_deplacement', list[int]), ('cout', int)]
 
 
-def successors(node: Etat, plateau_initial: list[int]):
+def successors(node: tq.Etat, plateau_initial: list[int]):
     values = expanse(plateau_initial, node)
 
     for i in range(len(values)):
@@ -210,7 +179,7 @@ def successors(node: Etat, plateau_initial: list[int]):
 
 def ida_star(plateau_initial):
     bound = wd.walking_distance(np.array(plateau_initial))
-    path = [Etat([], bound)]
+    path = [tq.Etat([], bound)]
     grilles_rencontrees = [tuple(plateau_initial)]
     while True:
         t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
@@ -226,7 +195,7 @@ def ida_star(plateau_initial):
 num_nodes = 0
 
 
-def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
+def search(path: list[tq.Etat], grilles_rencontrees: list[tuple], g: int, bound: int, plateau_initial: list[int]):
     global num_nodes
     num_nodes += 1
     node = path[-1]
