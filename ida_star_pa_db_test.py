@@ -27,11 +27,11 @@ def set_dim_grille(new_dim: int):
 
 class IDA_star:
     def __init__(self, heuristique, deplacement) -> None:
-        """On définit l'environnement que vas utiliser notre agent. Il pourra bouger: la fct déplacement et une fonction pour calculer l'heuristique.
+        """On définit des fct qu'aura besoin notre algo pour fonctionner. 
 
         Args:
             heuristique (liste[int]): retourne le cout de l'état courant. 
-            deplacement (list[int]): retourne une liste de tuple avec (noeud généré, déplacement réalisé)
+            deplacement (list[int]): retourne une liste de tuple avec (nouvelle disposition des tuiles, déplacement réalisé)
         """
         self.h = heuristique
         self.deplacement = deplacement
@@ -66,7 +66,7 @@ class IDA_star:
         """fonction réccursive Search pour chercher le meilleur noeud à expenser 
 
         Args:
-            g (int): cout du déplacement du noeud u vers v (actuellement +1)
+            g (int): cout du déplacement du noeud u vers v (actuellement +1 (ce qui correspond à la profondeur))
             bound (_type_): profondeur limite
 
         Returns:
@@ -105,7 +105,7 @@ class IDA_star:
         return min_val
 
     def successors(self, node):
-        """successors permet de trié par ordre de coût les noeuds trouver lors de l'expansion
+        """successors permet de trier par ordre de coût les noeuds trouvés lors de l'expansion du noeud étudié
 
         Args:
             node (list[int]): plateau courant
@@ -127,12 +127,12 @@ class IDA_star:
 
 
 def deplacement(n):
-    """deplacement permet de genenrer une liste des déplacement possible de la case vide puis retourne la fonction qui permet de la déplacer.
+    """deplacement permet de genenrer une liste des déplacements possibles de la case vide puis retourne la fonction qui permet de la déplacer.
     Args:
         n (int): taille du taquin (n x n)
 
     Returns:
-        function : la fonction depl pour généré tous les déplacement possible de la case vide
+        function : la fonction depl pour générer tous les déplacements possibles de la case vide
     """
     liste_deplacement = (1, -1, n, -n)
 
@@ -140,10 +140,10 @@ def deplacement(n):
         l[i], l[j] = l[j], l[i]
 
     def depl(plateau_courant):
-        """depl permet de genenrer une liste de tuple pour tous les deplacement(N,S,E,O) possible de la case vide.
+        """depl permet de genenrer une liste de tuple pour tous les deplacements(N,S,E,O) possibles de la case vide.
 
         Args:
-            plateau_courant (list[int]): disposition des tuile du noeud étudié
+            plateau_courant (list[int]): disposition des tuiles du noeud étudié
 
         Returns:
             list(list[int],str): (nouvelle disposition des tuiles, déplacement)
@@ -176,7 +176,7 @@ def deplacement(n):
 
 
 def pa_db():
-    """permet de généner la base de donées du paterne étudié dans un dictionnaire pour ensuite retourner la foction pour utiliser ce dictionnaire. 
+    """permet de généner la base de donées du groupe de paternes étudiés dans un dictionnaire pour ensuite retourner la foction pour utiliser ce dictionnaire. 
 
     Returns:
         function: fonction qui calcul l'heuristique de la disposition des tuile du noeud étudié.
@@ -195,14 +195,14 @@ def pa_db():
         db.update({row[0]: row[1]})
 
     def pattern_study(grille_etudier: list[int], pattern: list[int]) -> list[int]:
-        """dans le dictionnaire toutes les tuiles en dehors du paternes ne sont pas étudiés (même la case vide). Dans la bd un tuile non étudié est égale à -1
+        """dans le dictionnaire toutes les tuiles en dehors du paterne ne sont pas étudiées (même la case vide). Dans la bd une tuile non étudiée est égale à -1
 
         Args:
-            grille_etudier (list[int]): disposition des tuiles du noeuds étudié.
+            grille_etudier (list[int]): disposition des tuiles du noeud étudié.
             pattern (list[int]): le paterne qu'on étudie
 
         Returns:
-            list[int]: notre plateau avec seulement les tuiles présentes dans le paterne avec le reste mis à -1
+            list[int]: notre plateau avec seulement les tuiles présentent dans le paterne avec le reste mis à -1
         """
         tab_pattern = grille_etudier[:]
         for i in range(0, NOMBRE_CASES):
@@ -211,13 +211,13 @@ def pa_db():
         return tuple(tab_pattern)
 
     def heuristique(etat_courant: list[int]):
-        """calcul l'heuristique de la disposition des tuiles du noeud étudié
+        """calcul l'heuristique de la disposition des tuiles du noeud étudié à l'aide d'une bd de paterne statique et additif. 
 
         Args:
-            etat_courant (list[int]): disposition des tuiles du noeuds étudié.
+            etat_courant (list[int]): disposition des tuiles du noeud étudié.
 
         Returns:
-            int: la valeur de l'heuristique calculé.
+            int: la valeur de l'heuristique calculée.
         """
         template = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
         result = 0
