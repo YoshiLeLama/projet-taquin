@@ -753,11 +753,14 @@ def load_solution():
         elif chosen_method == SolvingMethods.PDB:
             solver = ida.IDA_star(ida.pa_db("bd_resolver/pa5-5-5_db.db"), ida.deplacement(tq.DIM_GRILLE))
             solution = solver.ida_star(grille_actuelle)
+            if solution is not None and chosen_method == SolvingMethods.WD:
+                liste_deplacements_initiale = solution[0][:]
+                deplacements = collections.deque(liste_deplacements_initiale)
     else:
         solution = ast.astar(grille_actuelle)
         print(solution)
 
-    if solution is not None:
+    if solution is not None and chosen_method == SolvingMethods.WD:
         liste_deplacements_initiale = solution.liste_deplacement[:]
         deplacements = collections.deque(liste_deplacements_initiale)
 
