@@ -175,15 +175,16 @@ def deplacement(n):
     return depl
 
 
-def pa_db():
+def pa_db(file):
     """permet de généner la base de donées du groupe de paternes étudiés dans un dictionnaire pour ensuite retourner la foction pour utiliser ce dictionnaire. 
-
+    Args:
+        file (str) : le chein de la bd
     Returns:
         function: fonction qui calcul l'heuristique de la disposition des tuile du noeud étudié.
     """
     db = dict()
     try:
-        databases = sqlite3.connect("pa5-5-5_db.db")
+        databases = sqlite3.connect(file)
     except sqlite3.Error as e:
         print(e)
     cur = databases.cursor()
@@ -310,7 +311,8 @@ if __name__ == '__main__':
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
     plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
-    solver = IDA_star(pa_db(), deplacement(DIM_GRILLE))
+    solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
+                      deplacement(DIM_GRILLE))
     print(plateau)
     if solvable(plateau):
         beg = time.time_ns()

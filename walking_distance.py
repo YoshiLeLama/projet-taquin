@@ -37,11 +37,12 @@ def write_disk():
     k: int
     table: u64
 
-    con = sql.connect("walking_distance.db")
+    con = sql.connect("bd_resolver/walking_distance.db")
     con.isolation_level = None
     cur = con.cursor()
     cur.execute("DROP TABLE IF EXISTS distances;")
-    cur.execute("CREATE TABLE distances(table_id TEXT PRIMARY KEY , cout INTEGER, wdlnk1 INTEGER, wdlnk2 INTEGER);")
+    cur.execute(
+        "CREATE TABLE distances(table_id TEXT PRIMARY KEY , cout INTEGER, wdlnk1 INTEGER, wdlnk2 INTEGER);")
 
     cur.execute("BEGIN TRANSACTION;")
 
@@ -71,7 +72,8 @@ def write_table(count: int, vect: int, group: int):
 
     for i in range(0, 4):
         for j in range(0, 4):
-            table = u64(np.bitwise_or(u64(np.left_shift(table, U64_THREE)), u64(TABLE[i][j])))
+            table = u64(np.bitwise_or(
+                u64(np.left_shift(table, U64_THREE)), u64(TABLE[i][j])))
 
     result: np.int64 = np.where(np.equal(WDPTN, table))[0]
     if len(result) == 0:
@@ -113,7 +115,8 @@ def simulation():
 
     for i in range(0, 4):
         for j in range(0, 4):
-            table = u64(np.bitwise_or(u64(np.left_shift(table, U64_THREE)), u64(TABLE[i][j])))
+            table = u64(np.bitwise_or(
+                u64(np.left_shift(table, U64_THREE)), u64(TABLE[i][j])))
 
     # la première valeur de WPDTN est def comme étant table, t celle de WDTBL comme étant 0
     WDPTN[0] = table
@@ -151,7 +154,7 @@ def simulation():
                 piece += TABLE[i][j]
             if piece == 3:
                 space = i
-        # Déplacer la pièce vers le haut 
+        # Déplacer la pièce vers le haut
         # piece = bloc de 4 en dessous de la case vide
         piece = space + 1
         if piece < 4:
@@ -200,7 +203,7 @@ def init_db():
     global wd_db_con, wd_db_cur, table_dict
     table_dict = dict()
     wdlnk_dict = dict()
-    wd_db_con = sqlite3.connect("walking_distance.db")
+    wd_db_con = sqlite3.connect("bd_resolver/walking_distance.db")
     wd_db_cur = wd_db_con.cursor()
     wd_db_cur.execute("SELECT * FROM distances;")
     factor = 2 ** 16 - 1
@@ -245,7 +248,7 @@ def walking_distance(table: np.ndarray):
     return table_dict[table_ids[0]] + table_dict[table_ids[1]]
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     print("making")
     simulation()
     print("finish")
