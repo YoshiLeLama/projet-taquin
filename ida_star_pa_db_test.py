@@ -27,10 +27,24 @@ def set_dim_grille(new_dim: int):
 
 class IDA_star:
     def __init__(self, heuristique, deplacement) -> None:
+        """On définit l'environnement que vas utiliser notre agent. Il pourra bouger: la fct déplacement et une fonction pour calculer l'heuristique.
+
+        Args:
+            heuristique (liste[int]): retourne le cout de l'état courant. 
+            deplacement (list[int]): retourne une liste de tuple avec (noeud généré, déplacement réalisé)
+        """
         self.h = heuristique
         self.deplacement = deplacement
 
     def ida_star(self, root):
+        """ida_star est la fonction mère de l'ago ida*. Il est mis en applicaion pour résoudre le jeu du taquin. 
+
+        Args:
+            root (list[int]): Racine de l'arbre
+
+        Returns:
+            tuple(list[str],bound): retourne le plus cort chemein de la racine à l'état final. 
+        """
         global nombre_etats_explo
         self.path = [root]
         self.grilles_rencontrees = {tuple(root)}
@@ -49,6 +63,15 @@ class IDA_star:
             print(bound)
 
     def search(self, g, bound):
+        """fonction réccursive Search pour chercher le meilleur noeud à expenser 
+
+        Args:
+            g (int): cout du déplacement du noeud u vers v (actuellement +1)
+            bound (_type_): profondeur limite
+
+        Returns:
+            int: le prochain coût minimal pour résoudre le taquin.
+        """
         # var pour le teste *******************************
         global nb_etat_max_ds_frontiere
         self.nb_noeud_explo += 1
@@ -82,6 +105,14 @@ class IDA_star:
         return min_val
 
     def successors(self, node):
+        """successors permet de trié par ordre de coût les noeuds trouver lors de l'expansion
+
+        Args:
+            node (list[int]): plateau courant
+
+        Returns:
+            _type_: liste de tuple (plateau, déplacement) trié par ordre de coût.
+        """
         global nb_etat_genere
         values = self.deplacement(node)
         for i in range(len(values)):
@@ -96,41 +127,60 @@ class IDA_star:
 
 
 def deplacement(n):
-    """n correspond à la taille du tableau : nxn. Pour un tableau 3x3 n=3"""
+    """deplacement permet de genenrer une liste des déplacement possible de la case vide puis retourne la fonction qui permet de la déplacer.
+    Args:
+        n (int): taille du taquin (n x n)
+
+    Returns:
+        function : la fonction depl pour généré tous les déplacement possible de la case vide
+    """
     liste_deplacement = (1, -1, n, -n)
 
     def swap(l, i, j):
         l[i], l[j] = l[j], l[i]
 
     def depl(plateau_courant):
-        exansion = []
+        """depl permet de genenrer une liste de tuple pour tous les deplacement(N,S,E,O) possible de la case vide.
+
+        Args:
+            plateau_courant (list[int]): disposition des tuile du noeud étudié
+
+        Returns:
+            list(list[int],str): (nouvelle disposition des tuiles, déplacement)
+        """
+        expansion = []
         pos_case_vide = plateau_courant.index(-1)
         for d in liste_deplacement:
             plateau = plateau_courant[:]
             if d == -n:
                 if not (0 <= pos_case_vide < n):
                     swap(plateau, pos_case_vide, pos_case_vide - n)
-                    exansion.append((plateau, 'N'))
+                    expansion.append((plateau, 'N'))
             elif d == n:
                 if not (n * n - n <= pos_case_vide < n * n):
                     swap(plateau, pos_case_vide, pos_case_vide + n)
-                    exansion.append((plateau, 'S'))
+                    expansion.append((plateau, 'S'))
             elif d == -1:
                 if not (pos_case_vide in [x for x in range(0, n * n, n)]):
                     # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
                     swap(plateau, pos_case_vide, pos_case_vide - 1)
-                    exansion.append((plateau, 'O'))
+                    expansion.append((plateau, 'O'))
             elif d == 1:
                 if not (pos_case_vide in [x for x in range(n - 1, n * n, n)]):
                     # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]
                     swap(plateau, pos_case_vide, pos_case_vide + 1)
-                    exansion.append((plateau, 'E'))
-        return exansion
+                    expansion.append((plateau, 'E'))
+        return expansion
 
     return depl
 
 
 def pa_db():
+    """permet de généner la base de donées du paterne étudié dans un dictionnaire pour ensuite retourner la foction pour utiliser ce dictionnaire. 
+
+    Returns:
+        function: fonction qui calcul l'heuristique de la disposition des tuile du noeud étudié.
+    """
     db = dict()
     try:
         databases = sqlite3.connect("pa5-5-5_db.db")
@@ -145,6 +195,15 @@ def pa_db():
         db.update({row[0]: row[1]})
 
     def pattern_study(grille_etudier: list[int], pattern: list[int]) -> list[int]:
+        """dans le dictionnaire toutes les tuiles en dehors du paternes ne sont pas étudiés (même la case vide). Dans la bd un tuile non étudié est égale à -1
+
+        Args:
+            grille_etudier (list[int]): disposition des tuiles du noeuds étudié.
+            pattern (list[int]): le paterne qu'on étudie
+
+        Returns:
+            list[int]: notre plateau avec seulement les tuiles présentes dans le paterne avec le reste mis à -1
+        """
         tab_pattern = grille_etudier[:]
         for i in range(0, NOMBRE_CASES):
             if tab_pattern[i] not in pattern:
@@ -152,6 +211,14 @@ def pa_db():
         return tuple(tab_pattern)
 
     def heuristique(etat_courant: list[int]):
+        """calcul l'heuristique de la disposition des tuiles du noeud étudié
+
+        Args:
+            etat_courant (list[int]): disposition des tuiles du noeuds étudié.
+
+        Returns:
+            int: la valeur de l'heuristique calculé.
+        """
         template = [[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]
         result = 0
         for i in template:
@@ -159,6 +226,7 @@ def pa_db():
             result += db.get(str(teste))
         databases.close()
         return result
+
     return heuristique
 
 
