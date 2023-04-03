@@ -40,7 +40,7 @@ On s'intéresse dans un premier temps à la résolution de la variante du jeu da
 Chaque plateau peut être décrit par un vecteur de 9 cases indiqueant le contenu de chaque case. La première case peut avoir un chiffre entre 0 et n-2, la seconde un des n-1 chiffres sauf le premier, ...
 Il y a donc $(n \times n)!$ positions possibles, mais seules la moitié d'entre elles sont résolubles.
 Donc le nombre de positions des cases à partir desquelles on peut résoudre est de $\frac{(n\times n)!}{2}$.
-
+Sa résolution pour trouver le plus court chemin pour arriver à la solution est interessant informatiquement du fait de ça complexité $\mathcal{NP}hard$. (preuve : https://cdn.aaai.org/AAAI/1986/AAAI86-027.pdf)
 \subsubsection{Condition de résolvabilité}
 Un taquin est résolvable si et seulement si le nombre de permutations de cases nécessaires pour arriver à la position finale est de même parité que le nombre de mouvements nécessaires à la case vide pour arriver en bas à droite de la grille.
 La complexité de l'algorithme pour savoir s'il existe une configuration est polynomiale ($\mathcal{O}(n-1)$) où n est le nombre de case du taquin.
