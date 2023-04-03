@@ -167,8 +167,6 @@ def pa_db():
 
     return heuristique
 
-    return heuristique
-
 
 def generer_grille_resolue():
     n = DIM_GRILLE
