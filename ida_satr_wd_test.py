@@ -131,7 +131,7 @@ def deplacement(n):
     return depl
 
 
-def pa_db():
+def wd_db():
 
     table_dict = wd.table_dict.copy()
     u64 = np.ulonglong

@@ -22,10 +22,7 @@ def set_dim_grille(new_dim: int):
     NOMBRE_CASES = NOMBRE_TUILES + 1
 
 
-set_dim_grille(3)
-
-
-K = 6
+set_dim_grille(4)
 
 nombre_etats_explo = 0
 
@@ -266,8 +263,6 @@ def search(path: list[Etat], grilles_rencontrees: list[tuple], g: int, bound: in
 
 # main
 if __name__ == '__main__':
-    K = 0
-    set_dim_grille(4)
     plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
     print(solvable(plateau))
     if solvable(plateau):

@@ -64,6 +64,14 @@ settings_texture: pr.Texture
 reload_texture: pr.Texture
 
 
+class SolvingMethods(Enum):
+    WD = 1
+    PDB = 2
+
+
+chosen_method: SolvingMethods = SolvingMethods.WD
+
+
 def generate_base_positions():
     global POSITIONS, positions
     POSITIONS = []
@@ -687,6 +695,27 @@ def render_solving_settings():
         elif pr.get_mouse_wheel_move_v().y < 0:
             tq.set_weight_set(tq.K - 1)
 
+    global chosen_method
+    if tq.DIM_GRILLE == 4:
+        heuristique_str: str
+        if chosen_method == SolvingMethods.WD:
+            heuristique_str = "walking distance"
+        else:
+            heuristique_str = "Pattern DB"
+
+        text = "Heuristique " + heuristique_str
+        font_size = 30
+        text_width = pr.measure_text(text, font_size)
+
+        pr.draw_text(text, int((pr.get_screen_width() - text_width) / 2),
+                     pr.get_screen_height() - font_size - 10, font_size, pr.BLACK)
+        
+        if pr.get_mouse_wheel_move_v().y != 0:
+            if chosen_method == SolvingMethods.WD:
+                chosen_method = SolvingMethods.PDB
+            else:
+                chosen_method = SolvingMethods.WD
+
     if hovered_case != -1:
         tooltip = "poids = " + str(tq.get_poids_tuile(tq.K, hovered_case))
         pr.draw_rectangle(int(pr.get_mouse_position().x + 18), int(pr.get_mouse_position().y),
@@ -699,9 +728,23 @@ def render_solving_settings():
     pr.end_drawing()
 
 
+import ida_star_wd as iwd
+import ida_star as ida
+import a_star_md as ast
+
+
 def load_solution():
-    global deplacements, solution, liste_deplacements_initiale
-    solution = tq.astar(grille_actuelle)
+    global deplacements, solution, liste_deplacements_initiale, chosen_method
+
+    if tq.DIM_GRILLE == 4:
+        if chosen_method == SolvingMethods.WD:
+            solution = iwd.ida_star(grille_actuelle)
+        elif chosen_method == SolvingMethods.PDB:
+            solver = ida.IDA_star(ida.pa_db("bd_resolver/pa5-5-5_db.db"), ida.deplacement(ida.DIM_GRILLE))
+            solution = solver.ida_star(grille_actuelle)
+    else:
+        solution = ast.astar(grille_actuelle)
+
     if solution is not None:
         liste_deplacements_initiale = solution.liste_deplacement[:]
         deplacements = collections.deque(liste_deplacements_initiale)

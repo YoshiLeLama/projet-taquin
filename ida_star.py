@@ -7,7 +7,7 @@ from bisect import insort
 from enum import Enum
 import random
 import numpy as np
-
+import walking_distance as wd
 
 # ********** Variable globale pour la partie exp du prog********
 import teste_prog as tp
@@ -17,7 +17,7 @@ nb_etat_genere = 0
 nb_etat_max_ds_frontiere = 0
 # **************************************************************
 
-
+WD = False
 def set_dim_grille(new_dim: int):
     global DIM_GRILLE, NOMBRE_TUILES, NOMBRE_CASES
     DIM_GRILLE = new_dim
@@ -176,7 +176,7 @@ def deplacement(n):
 
 
 def pa_db(file):
-    """permet de généner la base de donées du groupe de paternes étudiés dans un dictionnaire pour ensuite retourner la foction pour utiliser ce dictionnaire. 
+    """permet de récupérer la base de donées du groupe de paternes étudiés dans un dictionnaire pour ensuite retourner la foction pour utiliser ce dictionnaire. 
     Args:
         file (str) : le chein de la bd
     Returns:
@@ -229,6 +229,45 @@ def pa_db(file):
         return result
 
     return heuristique
+
+
+def wd_db():
+    """ permet de récup la bd de walking distance et de retourner la fonction permettant de retourner l'heuristique en utilisant wd """
+    table_dict = wd.table_dict.copy()
+    u64 = np.ulonglong
+    U64_SEVEN = u64(7)
+    U64_THREE = u64(3)
+    U64_EIGHT = u64(8)
+
+    def heuristique(t):
+        t =np.ndarray(t[:])
+        if len(table) != 16:
+            return -1
+
+        table = table.reshape((4, 4))
+
+        rows = np.zeros((4, 4), dtype=u64)
+        columns = np.zeros((4, 4), dtype=u64)
+
+        for i in range(0, 4):
+            for j in range(0, 4):
+                val = table[i][j]
+                if val != -1:
+                    rows[i][val // 4] += u64(1)
+                val = table[j][i]
+                if val != -1:
+                    columns[i][val % 4] += u64(1)
+
+        table_ids = np.zeros(2, dtype=u64)
+        for i in range(0, 4):
+            for j in range(0, 4):
+                table_ids = np.bitwise_or(
+                    np.left_shift(table_ids, U64_THREE), np.array([rows[i][j], columns[i][j]]))
+
+        return table_dict[table_ids[0]] + table_dict[table_ids[1]]
+
+    return heuristique
+
 
 
 def generer_grille_resolue():
@@ -311,7 +350,7 @@ if __name__ == '__main__':
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
     plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
-    solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
+    solver = IDA_star(wd_db() if WD else pa_db("bd_resolver/pa5-5-5_db.db"),
                       deplacement(DIM_GRILLE))
     print(plateau)
     if solvable(plateau):
