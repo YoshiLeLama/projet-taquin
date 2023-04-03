@@ -12,7 +12,7 @@ python3 -m pip install raylib
 python3 -m pip install pandas
 ```
 
-Pour ka partie teste il faut avoir au préalable installé mathplotlib et sklearn :
+Pour la partie teste il faut avoir au préalable installé mathplotlib et sklearn :
 
 ```commandline
 python3 -m pip install -U scikit-learn
