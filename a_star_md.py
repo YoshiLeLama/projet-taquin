@@ -13,6 +13,7 @@ from bisect import insort
 from enum import Enum
 import random
 import numpy as np
+import taquin as tq
 
 
 # ********** Ce qui est nécessaire à la partie exp du prog********
@@ -30,7 +31,7 @@ nb_etat_max_ds_frontiere = 0
 DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int
-LINEAR_CONFLICT: bool
+LINEAR_CONFLICT = False
 
 
 def set_dim_grille(new_dim: int):
@@ -67,13 +68,6 @@ def reset_solving():
 def quit_solving():
     global should_quit
     should_quit = True
-
-
-class Card(Enum):
-    NORD = 0
-    SUD = 1
-    OUEST = 2
-    EST = 3
 
 
 # COEFF_NORMAL = [4, 1, 4, 1, 4, 1]
@@ -124,7 +118,7 @@ def set_weight_set(new_value):
 def expanse(plateau_initial: list[int], etat_choisi: Etat):
     result: list[Etat] = []
 
-    for d in [Card.NORD, Card.SUD, Card.OUEST, Card.EST]:
+    for d in [tq.Card.NORD, tq.Card.SUD, tq.Card.OUEST, tq.Card.EST]:
         nouveaux_deplacements = etat_choisi.liste_deplacement[:]
         nouveaux_deplacements.append(d)
         depl = deplacement(nouveaux_deplacements, plateau_initial)
@@ -339,23 +333,23 @@ def deplacement(directions, plateau_initial):
     plateau = plateau_initial[:]
     for dir in directions:
         pos_case_vide = plateau.index(-1)
-        if dir == Card.NORD:
+        if dir == tq.Card.NORD:
             if 0 <= pos_case_vide < n:
                 return None
             else:
                 swap(plateau, pos_case_vide, pos_case_vide - n)
-        elif dir == Card.SUD:
+        elif dir == tq.Card.SUD:
             if n * n - n <= pos_case_vide < n * n:
                 return None
             else:
                 swap(plateau, pos_case_vide, pos_case_vide + n)
-        elif dir == Card.OUEST:
+        elif dir == tq.Card.OUEST:
             if pos_case_vide in [x for x in range(0, n * n, n)]:
                 return None
                 # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
             else:
                 swap(plateau, pos_case_vide, pos_case_vide - 1)
-        elif dir == Card.EST:
+        elif dir == tq.Card.EST:
             if pos_case_vide in [x for x in range(n - 1, n * n, n)]:
                 return None
                 # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]

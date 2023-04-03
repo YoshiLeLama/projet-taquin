@@ -8,6 +8,7 @@ from enum import Enum
 import random
 import numpy as np
 import walking_distance as wd
+import taquin as tq
 
 # ********** Variable globale pour la partie exp du prog********
 import teste_prog as tp
@@ -17,13 +18,12 @@ nb_etat_genere = 0
 nb_etat_max_ds_frontiere = 0
 # **************************************************************
 
-WD = False
+
 def set_dim_grille(new_dim: int):
     global DIM_GRILLE, NOMBRE_TUILES, NOMBRE_CASES
     DIM_GRILLE = new_dim
     NOMBRE_TUILES = DIM_GRILLE ** 2 - 1
     NOMBRE_CASES = NOMBRE_TUILES + 1
-
 
 class IDA_star:
     def __init__(self, heuristique, deplacement) -> None:
@@ -146,7 +146,7 @@ def deplacement(n):
             plateau_courant (list[int]): disposition des tuiles du noeud étudié
 
         Returns:
-            list(list[int],str): (nouvelle disposition des tuiles, déplacement)
+            list(list[int],Card): (nouvelle disposition des tuiles, déplacement)
         """
         expansion = []
         pos_case_vide = plateau_courant.index(-1)
@@ -155,21 +155,21 @@ def deplacement(n):
             if d == -n:
                 if not (0 <= pos_case_vide < n):
                     swap(plateau, pos_case_vide, pos_case_vide - n)
-                    expansion.append((plateau, 'N'))
+                    expansion.append((plateau, tq.Card.NORD))
             elif d == n:
                 if not (n * n - n <= pos_case_vide < n * n):
                     swap(plateau, pos_case_vide, pos_case_vide + n)
-                    expansion.append((plateau, 'S'))
+                    expansion.append((plateau, tq.Card.SUD))
             elif d == -1:
                 if not (pos_case_vide in [x for x in range(0, n * n, n)]):
                     # [x for x in range(0, n*n, n)] -> permet de créer une liste par palier de n si n =3 on aura: [0,3,6]
                     swap(plateau, pos_case_vide, pos_case_vide - 1)
-                    expansion.append((plateau, 'O'))
+                    expansion.append((plateau, tq.Card.OUEST))
             elif d == 1:
                 if not (pos_case_vide in [x for x in range(n - 1, n * n, n)]):
                     # [x for x in range(n-1, n*n, n)] -> permet de créer une liste par palier de n en commençant par n-1 : si n =3 on aura: [2,5,8]
                     swap(plateau, pos_case_vide, pos_case_vide + 1)
-                    expansion.append((plateau, 'E'))
+                    expansion.append((plateau, tq.Card.EST))
         return expansion
 
     return depl
@@ -183,14 +183,15 @@ def pa_db(file):
         function: fonction qui calcul l'heuristique de la disposition des tuile du noeud étudié.
     """
     db = dict()
-    try:
-        databases = sqlite3.connect(file)
-    except sqlite3.Error as e:
-        print(e)
+    
+    databases = sqlite3.connect(file)
+    print(databases)
     cur = databases.cursor()
 
-    cur.execute(
-        "SELECT * FROM paterne ")
+    cur.execute("SELECT * FROM paterne;")
+    
+    print("yo")
+
     rows = cur.fetchall()
     for row in rows:
         db.update({row[0]: row[1]})
@@ -343,14 +344,15 @@ def experimet(n) -> None:
 # ********************************************************************************************
 
 
+set_dim_grille(4)
+
 # main
 if __name__ == '__main__':
-    set_dim_grille(4)
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
     plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
-    solver = IDA_star(wd_db() if WD else pa_db("bd_resolver/pa5-5-5_db.db"),
+    solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
                       deplacement(DIM_GRILLE))
     print(plateau)
     if solvable(plateau):

@@ -137,8 +137,6 @@ def generate_cubes():
 
         blocks_models.append(model)
 
-    return
-
 
 def init():
     global camera, font, num_textures, blocks_models, grille_actuelle, deplacements
@@ -171,6 +169,7 @@ def init():
 
 
 def get_case(grille: list[int], ligne: int, colonne: int):
+    print(ligne, colonne, tq.DIM_GRILLE)
     return grille[ligne * tq.DIM_GRILLE + colonne]
 
 
@@ -179,6 +178,7 @@ def set_case(grille: list[int], ligne: int, colonne: int, valeur: int):
 
 
 def swap_cases(grille: list[int], ligne_1: int, colonne_1: int, ligne_2: int, colonne_2: int):
+    print("swap")
     val_1 = get_case(grille, ligne_1, colonne_1)
     val_2 = get_case(grille, ligne_2, colonne_2)
     set_case(grille, ligne_2, colonne_2, val_1)
@@ -273,9 +273,14 @@ def process_move():
     elif deplacement == tq.Card.EST:
         nouvelle_pos_vide = PositionCase(
             case_vide.ligne, case_vide.colonne + 1)
+        
+
+    print(case_vide, nouvelle_pos_vide)
 
     swap_cases(grille_actuelle, case_vide.ligne, case_vide.colonne,
                nouvelle_pos_vide.ligne, nouvelle_pos_vide.colonne)
+    
+    print(grille_actuelle)
     nombre_deplacements += 1
     animating = True
     bloc_depart = nouvelle_pos_vide
@@ -472,6 +477,8 @@ def process_title_screen_moves():
     global deplacements, nombre_deplacements
     if len(deplacements) != 0:
         process_move()
+        return
+    
     pos_case_vide = grille_actuelle.index(-1)
     depl = tq.Card(random.randint(0, 3))
 
@@ -572,10 +579,8 @@ def draw_scroll_setting(height: int, setting_name: str, unit_name: str, current_
 
 def render_settings():
     global settings_duree_animation, settings_taille_grille, settings_color_set
-    process_title_screen_moves()
 
     pr.begin_drawing()
-    render_grid()
 
     pr.draw_rectangle(SETTINGS_PANEL_MARGIN, SETTINGS_PANEL_MARGIN,
                       pr.get_screen_width() - SETTINGS_PANEL_MARGIN * 2,
@@ -583,7 +588,11 @@ def render_settings():
 
     settings_duree_animation = draw_scroll_setting(0, "Durée d'animation", "s", settings_duree_animation, 0.2, 1.5, 0.1)
 
+    old_taille_grille = settings_taille_grille
     settings_taille_grille = int(draw_scroll_setting(1, "Taille grille", "", settings_taille_grille, 3, 5, 1))
+
+    if old_taille_grille != settings_taille_grille:
+        reset_animation()
 
     old_settings_color_set = settings_color_set
     settings_color_set = int(draw_scroll_setting(2, "Couleurs blocs", "", settings_color_set, 1, 3, 1))
@@ -729,21 +738,24 @@ def render_solving_settings():
 
 
 import ida_star_wd as iwd
-import ida_star as ida
+import ida_star_pa_db as ida
 import a_star_md as ast
 
 
 def load_solution():
     global deplacements, solution, liste_deplacements_initiale, chosen_method
 
+    deplacements = []
+
     if tq.DIM_GRILLE == 4:
         if chosen_method == SolvingMethods.WD:
             solution = iwd.ida_star(grille_actuelle)
         elif chosen_method == SolvingMethods.PDB:
-            solver = ida.IDA_star(ida.pa_db("bd_resolver/pa5-5-5_db.db"), ida.deplacement(ida.DIM_GRILLE))
+            solver = ida.IDA_star(ida.pa_db("bd_resolver/pa5-5-5_db.db"), ida.deplacement(tq.DIM_GRILLE))
             solution = solver.ida_star(grille_actuelle)
     else:
         solution = ast.astar(grille_actuelle)
+        print(solution)
 
     if solution is not None:
         liste_deplacements_initiale = solution.liste_deplacement[:]
@@ -783,7 +795,8 @@ def run():
             render_title_screen()
         elif state == State.SETTINGS:
             if state != last_state:
-                ...
+                deplacements = collections.deque([])
+                reset_animation()
 
             render_settings()
         elif state == State.GAME:
