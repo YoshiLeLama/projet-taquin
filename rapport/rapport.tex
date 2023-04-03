@@ -32,7 +32,7 @@ Le jeu du taquin consiste en une grille carrée de taille $n\times n$ avec $(n\t
 Les cases sont positionnées de manière aléatoire sur la grille et le but est de les remettre dans l'ordre croissant, avec dans notre cas la case vide en bas à droite.
 
 
-On s'intéresse dans un premier temps à la résolution la variante du jeu dans le cas où la grille est de taille $3 \times 3$, puis dans un deuxième temps à la variante avec une grille de taille $4 \times 4$ (et plus).
+On s'intéresse dans un premier temps à la résolution de la variante du jeu dans le cas où la grille est de taille $3 \times 3$, puis dans un deuxième temps à la variante avec une grille de taille $4 \times 4$ (et plus).
 
 \subsection{Étude préliminaire du problème}
 
@@ -42,8 +42,8 @@ Il y a donc $(n \times n)!$ positions possibles, mais seules la moitié d'entre 
 Donc le nombre de positions des cases à partir desquelles on peut résoudre est de $\frac{(n\times n)!}{2}$.
 
 \subsubsection{Condition de résolvabilité}
-Une position est résoluble si et seulement si le nombre de permutations de cases nécessaires pour arriver à la position finale est de même parité que le nombre de mouvements nécessaires à la case vide pour arriver en bas à droite de la grille.
-La complexité de l'algorithme pour savoir s'il existe une configuration est polynomiale ($\mathcal{O}(n-1)$) où n est la taille du taquin.
+Un taquin est résolvable si et seulement si le nombre de permutations de cases nécessaires pour arriver à la position finale est de même parité que le nombre de mouvements nécessaires à la case vide pour arriver en bas à droite de la grille.
+La complexité de l'algorithme pour savoir s'il existe une configuration est polynomiale ($\mathcal{O}(n-1)$) où n est le nombre de case du taquin.
 
 \subsubsection{Réprésentation des états}
 On définit un état par la position initiale de la grille, la liste des déplacements de la case vide depuis cette position pour arriver à cet état et son coût. Ces déplacements peuvent être : Nord (N), Sud (S), Ouest (O) et Est (E).
@@ -78,7 +78,7 @@ On stocke la grille initiale pour toute la durée de l'algorithme.
 Pour représenter un état, on utilise un \lstinline{namedtuple} avec comme champ la liste des déplacements de la case vide depuis l'état initial, ces déplacements étant représentés par un \lstinline{enum}, ainsi que le coût pour aller de l'état initial à cet état.
 
 Pour représenter la frontière nous avons utilise un \lstinline{deque} en Python. Celle-ci ayant la la complexité en temps d'ajout et de pop en début et de fin de $\mathcal{O}(1)$. A la différence d'une liste ayant une complexité de $\mathcal{O}(n)$.
-    Pour représenter les états déjà explorés nous avons décidé de hashé le vecteur qui représente le plateau à l'état n en utilisant la collection \lstinline{set} de python. Set permet de savoir en temps $\mathcal{O}(1)$ si un élément est dans le set et n'accepte pas les doublons. N'ayant pas besoin de trié les éléments le fait que set ne les tries pas n'est pas un problème.
+    Pour représenter les états déjà explorés nous avons décidé de hasher le vecteur qui représente le plateau à l'état n en utilisant la collection \lstinline{set} de python. Set permet de savoir en temps $\mathcal{O}(1)$ si un élément est dans le set et n'accepte pas les doublons. N'ayant pas besoin de trié les éléments le fait que set ne les tries pas n'est pas un problème.
 
 
 Afin de tester si une grille a déjà été rencontrée dans la frontière, on maintient une liste de \lstinline{tuple} (un tuple est un collection qui pertmet de créer un liste ordonnée de plusieurs élement non modifiable) des positions de chaque état de la frontière, qu'on synchronise à chaque itération avec la frontière.
@@ -111,37 +111,33 @@ Les différents sets de poids ainsi que les coefficients de normalisation sont s
 La distance de Manhattan sous-estime beaucoup le nombre de mouvements à effectuer pour atteindre la position finale, car elle ne tient pas compte des contraintes du jeu du taquin avec notamment le fait que pour déplacer une case, il faut qu'elle soit adjacente à la case vide.
 
 On est donc loin d'une très bonne heuristique, ce qui peut s'avérer être un problème lorsqu'on veut résoudre des taquins de grande taille.
-Il est possible d'optimiser le calcul de Manhattan. On peut remarquer que pour chaque déplacement seul une tuile à changé. On peut donc déduire la distance de Manhattan Ce qui réduirais ça complexité de $\mathcal{O}(n^{2})$ à $\mathcal{O}(1)$ (si on considère qu'un taquin à une taille de $n \times n$).
+Il est possible d'optimiser le calcul de Manhattan. On peut remarquer que pour chaque déplacement seul une tuile à changé. On peut donc déduire la distance de Manhattan Ce qui réduirais ça complexité de $\mathcal{O}(n)$ à $\mathcal{O}(1)$ (avec n le nombre de case du taquin).
 
 \subsection{Expérimentation}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3}
+    \caption{\underline{Sans coefficiant de normalisation}}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3(1)}
+    \caption{\underline{Sans coefficiant de normalisation}}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3(2)}
+    \caption{\underline{Sans coefficiant de normalisation}}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{graphe 3d Taquin 3x3(3)}
+    \caption{\underline{Sans coefficiant de normalisation}}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de coups}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere}
 \end{figure}
 
 \begin{figure}[H]
@@ -151,24 +147,19 @@ Il est possible d'optimiser le calcul de Manhattan. On peut remarquer que pour c
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb de coups}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere}
-\end{figure}
-\begin{figure}[H]
-    \centering
     \includegraphics[width=\textwidth]{Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation}
 \end{figure}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation}
 \end{figure}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation}
 \end{figure}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation}
@@ -176,21 +167,39 @@ Il est possible d'optimiser le calcul de Manhattan. On peut remarquer que pour c
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation CPU en fct du nb d'etat generer}
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef}
 \end{figure}
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire}
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de coups}
 \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb de coups}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation CPU en fct du nb d'etat generer}
+\end{figure}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Taquin 3x3 utilisation RAM en fct du nb d'etat generer}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef}
-\end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Taquin 3xnb etat dans la frontiere en fct du nb de coups}
@@ -240,7 +249,7 @@ On a donc dans le pire cas une complexité en temps de $ \mathcal{O}(n^3)$. Pour
 
 \subsubsection{Inconvénients}
 
-Même si celle ci améliore l'estimation du coût de la solution, elle augmente le temps de calcul du programme pour des taquins de grande taille. 
+Même si celle ci améliore l'estimation du coût de la solution, elle augmente le temps de calcul du programme pour des taquins de grande taille.
 En explorant quelques centaines de milliers d'états par seconde, il serait possible de résoudre des taquins 4x4 mais pas au dessus.
 
 \subsection{Amélioration possible de l'heuristique}
@@ -277,7 +286,12 @@ On peut aussi combiner d'autre heuristiques avec celle de la distance de Manhatt
     \includegraphics[width=\textwidth]{Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict}
 \end{figure}
 
-On peut observe que linear conflict ne fait qu'augmenter le temps de calcul pour les taquins de taille $3 \times 3$. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire}
+\end{figure}
+
+On peut observe que linear conflict ne fait qu'augmenter le temps de calcul pour les taquins de taille $3 \times 3$.
 \subsection{Heuristique : Walking distance}
 
 \subsubsection{Étude de l'heuristique}
@@ -326,23 +340,26 @@ Il serait possible de combiner la walking distance avec d'autres heuristiques po
 
 \subsubsection{Étude de l'heuristique}
 
-Inventé par Culberson et Schaeffer (1994), son principe est d'utiliser un base de données à l'aide de patterns et de pouvoir générer une heuristique quasi parfaite. Elle est garantie d'être consistante, d'être inférieure au coût de la solution du plus court chemin et plus le pattern est grand mieux c'est. Des taquins de taille supérieure à $3 \times 3$ ayant beaucoup trop d'états pour être stockés entièrement ou même générés, nous allons générer plusieurs patterns pour diminuer le nombre d'états à stocker dans la mémoire. 
-Pour un taquin de taille $N = n \times n$, le nombre d'états à stocker ne sera plus que de $\frac{N!}{(N-t)!}$ (où t est le nombre de tuiles dans le pattern), comme on plus que t tuiles à considérer. Grâce à ça, on pourra avoir une heuristique très proche de la réalité comme le coût prendra maintenant en compte le déplacement de la case avec la case vide pour arriver de son état actuel à sa position finale. 
+Inventé par Culberson et Schaeffer (1994), son principe est d'utiliser un base de données à l'aide de patterns et de pouvoir générer une heuristique quasi parfaite. Elle est garantie d'être consistante, d'être inférieure au coût de la solution du plus court chemin et plus le pattern est grand mieux c'est. Des taquins de taille supérieure à $3 \times 3$ ayant beaucoup trop d'états pour être stockés entièrement ou même générés, nous allons générer plusieurs patterns pour diminuer le nombre d'états à stocker dans la mémoire.
+Pour un taquin de taille $N = n \times n$, le nombre d'états à stocker ne sera plus que de $\frac{N!}{(N-t)!}$ (où t est le nombre de tuiles dans le pattern), comme on plus que t tuiles à considérer. Grâce à ça, on pourra avoir une heuristique très proche de la réalité comme le coût prendra maintenant en compte le déplacement de la case avec la case vide pour arriver de son état actuel à sa position finale.
 Enfin pour faire cela on part de l'état final pour générer toutes les dispositions possibles.
-Il existe plusieurs types de patterns databases comme par exemple celle que nous avons décidé d'utiliser qui est dite \lstinline{Static Additive Pattern Database} ou \lstinline{Dynamically partitioned Additive Pattern Database} qui prend en compte la valeur de la parité des distance et la distance de Manhattan (il peut aussi être utilisé pair+triple+quadruple). Ceci a pour avantage de rendre la génération de la base de données plus rapide et bien moins lourde. 
-En contre partie, celle-ci prendra plus de temps pour résoudre les taquins car stockant moins de cas. Dans notre cas, on utilise une base de données static. Il existe aussi des heuristiques qui n'utilisent qu'un seul pattern pour calculer celle-ci. 
-Pour cela nous allons générer des patterns tels que toutes valeurs en dehors d'un pattern sont ignorées et un ensemble de patterns est admissible si et seulement si pour tous les patterns on a :$P_{i} \cap P_{j} = \emptyset$ avec $i \neq j$ car on ne veut pas compter 2 fois une ou plusieurs tuiles. Ensuite pour chaque pattern nous devons générer toutes les combinaisons possibles associées à leur coût. Pour faire ça, nous déplaçons la case vide et lorsque celle-ci est permutée avec une case comprise dans le pattern étudié, on rajoute 1 à son coût. 
+Il existe plusieurs types de patterns databases comme par exemple celle que nous avons décidé d'utiliser qui est dite \lstinline{Static Additive Pattern Database} ou \lstinline{Dynamically partitioned Additive Pattern Database} qui prend en compte la valeur de la parité des distance et la distance de Manhattan (il peut aussi être utilisé pair+triple+quadruple). Ceci a pour avantage de rendre la génération de la base de données plus rapide et bien moins lourde.
+En contre partie, celle-ci prendra plus de temps pour résoudre les taquins car stockant moins de cas. Dans notre cas, on utilise une base de données static. Il existe aussi des heuristiques qui n'utilisent qu'un seul pattern pour calculer celle-ci.
+Pour cela nous allons générer des patterns tels que toutes valeurs en dehors d'un pattern sont ignorées et un ensemble de patterns est admissible si et seulement si pour tous les patterns on a :$P_{i} \cap P_{j} = \emptyset$ avec $i \neq j$ car on ne veut pas compter 2 fois une ou plusieurs tuiles. Ensuite pour chaque pattern nous devons générer toutes les combinaisons possibles associées à leur coût. Pour faire ça, nous déplaçons la case vide et lorsque celle-ci est permutée avec une case comprise dans le pattern étudié, on rajoute 1 à son coût.
 Nous enregistrons au final les positions associées à leur coût sans prendre en compte la position de la case vide. Cependant, pour pouvoir générer toutes les positions possibles, il faut prendre en considération la case vide. On devra donc générer au total $\frac{N!}{(N-t+1)!}$ états pour pouvoir générer notre base de données.
 Une fois que notre base de données est générée, celle-ci est réutilisable à l'infini pour les taquins de tailles souhaités. Il nous suffira plus qu'à récupérer le coût des différents patterns de notre état que nous sommes entrain d'étudier dans notre recherche pour arriver à l'état final pour obtenir l'heuristique d'un Pattern Database.
 
 \subsubsection{Implémentation}
 Pour générer toutes les configurations possible nous utiliserons une stratégie de largeur dabord avec une complexité en temps et en espace de $\mathcal{O}(b^{d})$ où b est le facteur de branchement (nombre de successeurs en moyenne à un état) et d la profondeur de la solution.
 
-Un état est représenté dans un dictionnaire où la clef est la disposition des tuiles en tant que tuple et la valeur étant le coût. Notre file sera représentée par un \lstinline{OrderdDict} venant de \lstinline{collections} en Python. Le dictionnaire ordonnée nous permet de garder en mémoire l'ordre d'arrivée de chaque dictionnaire dans la file. Ce qui nous permettra de réaliser la recherche en largeur d'abord. 
+Un état est représenté dans un dictionnaire où la clef est la disposition des tuiles en tant que tuple et la valeur étant le coût. Notre file sera représentée par un \lstinline{OrderdDict} venant de \lstinline{collections} en Python. Le dictionnaire ordonnée nous permet de garder en mémoire l'ordre d'arrivée de chaque dictionnaire dans la file. Ce qui nous permettra de réaliser la recherche en largeur d'abord.
 De plus un dictionnaire se base aussi sur une table de hachage, le temps d'accès pour savoir si une clef est déjà présente est donc de $\mathcal{O}(1)$ (de même pour utiliser pop ou retourner la clef ou la valeur) et pour insérer un élément sa complexité moyenne est aussi de $\mathcal{O}(1)$.
 Pour générer les différents patterns dans notre ensemble de patterns nous avons décidé de le faire en exécution parallèle à l'aide de threads. Pour des patterns de même taille ils termineront donc plus ou moins en même temps. Notre ensemble de patterns sera une liste de liste global qui contiendra nos patterns.
 Enfin pour la représentation mémoire, pour stocker les données on utilise sqlite qui est déjà implémenté dans python 3 avec 2 tables : le vecteur de la table et son coût.
-Nous avons décidé de générer 2 patterns databases: une 4-4-4-3: [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]. et une 5-5-5 :[[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]. Pour le pattern 5 par exemple nous devrons générer environ 5,7 millions d'états pour n'en stocker que 524'160. On ne devra donc stocker qu'environ 1,5 millions d'états contre $10^{13}$ sans patterns.    
+Nous avons décidé de générer 2 patterns databases: une 4-4-4-3: [[0, 1, 4, 5], [2, 3, 6, 7], [8, 9, 12, 13], [10, 11, 14]]. et une 5-5-5 :[[0, 1, 2, 4, 5], [3, 6, 7, 10, 11], [8, 9, 12, 13, 14]]. Pour le pattern 5 par exemple nous devrons générer environ 5,7 millions d'états pour n'en stocker que 524'160. On ne devra donc stocker qu'environ 1,5 millions d'états contre $10^{13}$ sans patterns.
+
+\subsubsection{Amelioration sur l'implémentation}
+Pour rendre le calcul plus rapide, nous avons décidé de tout passer en objet ce qui permet une très net augmentation des performances en utilisant cet heuristique. En effet grâce à ça on arrive à explorer beaucoups plus d'états par seconde. Un état est maintenant représenté par une liste de déplacement et le plateau qu'on est en train d'étudier. Le fait que l'on soit dans un objter permet de réduire le temps de cacul en évitant de devoir réaliser des opérations inutile (comme devoir recalculer la disposition des tuiles à chaque fois). Pour le reste leur représentation reste la même. On ne l'a pas fait pour le walking distance car les performances entre l'amélioration et l'ancien étaient négligeable.
 \subsubsection{Inconvénients}
 Malgré le fait que la table soit réutilisable à l'infini, sa génération prend du temps. Plus le pattern est grand, plus le nombre d'états à explorer est grand, même si plus ces patterns sont grands, plus le temps de calcul pour trouver la solution pour le plus court chemin sera rapide. Pour générer de manière plus rapide un Pattern Database, on pourrait utiliser une stratégie dynamique en ajoutant des conditions sur l'ajout d'un état dans notre liste enregistrée.
 Il est aussi important de souligner qu'il est totalement inutile d'utiliser des Pattern Database pour les taquins de taille $3 \times 3$ et inférieur, comme nous pouvons facilement stocker les plus de 100'000 configurations possibles dans un ordinateur.
@@ -375,13 +392,19 @@ Il est aussi important de souligner qu'il est totalement inutile d'utiliser des 
 \end{figure}
 
 \begin{tabular}{|l|l|l|}
-    \hline 
-    & utilisation de pattern & utilisation de wd \\
-    nombre de n\oe uds générés &  2559 & 2'996'255 \\
-    taille max de la frontière & 47 & 47 \\
-    nombre de n\oe uds explorés & 1893 & 2'199'469 \\
-    temps pour trouver la solution & 0.17 s & 765.45 s \\
-    nombre de coups à réaliser & 46 & 46 \\
+    \hline
+                                   & utilisation de pattern & utilisation de wd \\
+    \hline
+    nombre de n\oe uds générés     & 2'559                  & 2'996'255         \\
+    \hline
+    taille max de la frontière     & 47                     & 47                \\
+    \hline
+    nombre de n\oe uds explorés    & 1893                   & 2'199'469         \\
+    \hline
+    temps pour trouver la solution & 0.17 s                 & 765.45 s          \\
+    \hline
+    nombre de coups à réaliser     & 46                     & 46                \\
+    \hline
 \end{tabular}
 
 \section{Conclusion}
