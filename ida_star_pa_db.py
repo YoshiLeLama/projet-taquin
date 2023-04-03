@@ -1,10 +1,6 @@
 import math
 import sqlite3
-import threading
 import time
-from collections import namedtuple
-from bisect import insort
-from enum import Enum
 import random
 import numpy as np
 import walking_distance as wd
@@ -24,6 +20,7 @@ def set_dim_grille(new_dim: int):
     DIM_GRILLE = new_dim
     NOMBRE_TUILES = DIM_GRILLE ** 2 - 1
     NOMBRE_CASES = NOMBRE_TUILES + 1
+
 
 class IDA_star:
     def __init__(self, heuristique, deplacement) -> None:
@@ -183,13 +180,13 @@ def pa_db(file):
         function: fonction qui calcul l'heuristique de la disposition des tuile du noeud étudié.
     """
     db = dict()
-    
+
     databases = sqlite3.connect(file)
     print(databases)
     cur = databases.cursor()
 
     cur.execute("SELECT * FROM paterne;")
-    
+
     print("yo")
 
     rows = cur.fetchall()
@@ -241,7 +238,7 @@ def wd_db():
     U64_EIGHT = u64(8)
 
     def heuristique(t):
-        t =np.ndarray(t[:])
+        t = np.ndarray(t[:])
         if len(table) != 16:
             return -1
 
@@ -268,7 +265,6 @@ def wd_db():
         return table_dict[table_ids[0]] + table_dict[table_ids[1]]
 
     return heuristique
-
 
 
 def generer_grille_resolue():
