@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.11.25) (preloaded format=pdflatex 2022.12.8)  3 APR 2023 22:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.11.25) (preloaded format=pdflatex 2022.12.8)  3 APR 2023 22:46
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -341,186 +341,185 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <8> on input line 32.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 32.
- [1
-
-{C:/Users/leofl/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 75.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 44.
  (C:\Users\leofl\AppData\Local\Programs\MiKTeX\tex/latex/base\t1cmtt.fd
 File: t1cmtt.fd 2022/07/10 v2.5l Standard LaTeX font definitions
-) [2] [3]
-<./images//graphe 3d Taquin 3x3.png, id=196, 1156.32pt x 650.43pt>
+) [1
+
+{C:/Users/leofl/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}] [2] [3]
+<./images//graphe 3d Taquin 3x3.png, id=198, 1156.32pt x 650.43pt>
 File: ./images//graphe 3d Taquin 3x3.png Graphic file (type png)
 <use ./images//graphe 3d Taquin 3x3.png>
 Package pdftex.def Info: ./images//graphe 3d Taquin 3x3.png  used on input line 120.
 (pdftex.def)             Requested size: 418.25368pt x 235.26619pt.
-<./images//graphe 3d Taquin 3x3(1).png, id=198, 1156.32pt x 650.43pt>
+<./images//graphe 3d Taquin 3x3(1).png, id=200, 1156.32pt x 650.43pt>
 File: ./images//graphe 3d Taquin 3x3(1).png Graphic file (type png)
 <use ./images//graphe 3d Taquin 3x3(1).png>
 Package pdftex.def Info: ./images//graphe 3d Taquin 3x3(1).png  used on input line 125.
 (pdftex.def)             Requested size: 418.25368pt x 235.26619pt.
  [4]
-<./images//graphe 3d Taquin 3x3(2).png, id=203, 1156.32pt x 650.43pt>
+<./images//graphe 3d Taquin 3x3(2).png, id=205, 1156.32pt x 650.43pt>
 File: ./images//graphe 3d Taquin 3x3(2).png Graphic file (type png)
 <use ./images//graphe 3d Taquin 3x3(2).png>
 Package pdftex.def Info: ./images//graphe 3d Taquin 3x3(2).png  used on input line 130.
 (pdftex.def)             Requested size: 418.25368pt x 235.26619pt.
-<./images//graphe 3d Taquin 3x3(3).png, id=204, 1156.32pt x 650.43pt>
+<./images//graphe 3d Taquin 3x3(3).png, id=206, 1156.32pt x 650.43pt>
 File: ./images//graphe 3d Taquin 3x3(3).png Graphic file (type png)
 <use ./images//graphe 3d Taquin 3x3(3).png>
 Package pdftex.def Info: ./images//graphe 3d Taquin 3x3(3).png  used on input line 135.
 (pdftex.def)             Requested size: 418.25368pt x 235.26619pt.
  [5 <./images//graphe 3d Taquin 3x3.png> <./images//graphe 3d Taquin 3x3(1).png>]
-<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef.png, id=214, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef.png, id=216, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef.png  used on input line 141.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [6 <./images//graphe 3d Taquin 3x3(2).png> <./images//graphe 3d Taquin 3x3(3).png>]
-<./images//Taquin 3x3 nombre d'etats generer en fct du nb d etat explorer sans coef.png, id=223, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etats generer en fct du nb d etat explorer sans coef.png, id=225, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etats generer en fct du nb d etat explorer sans coef.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etats generer en fct du nb d etat explorer sans coef.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etats generer en fct du nb d etat explorer sans coef.png  used on input line 146.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation.png, id=224, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation.png, id=226, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation.png Graphic file (type png)
 <use ./images//Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation.png>
 Package pdftex.def Info: ./images//Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation.png  used on input line 151.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [7 <./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef.png> <./images//Taquin 3x3 nombre d'etats generer en fct du nb d etat explorer sans coef.png>]
-<./images//Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation.png, id=232, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation.png, id=234, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation.png Graphic file (type png)
 <use ./images//Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation.png>
 Package pdftex.def Info: ./images//Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation.png  used on input line 156.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation.png, id=233, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation.png, id=235, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation.png Graphic file (type png)
 <use ./images//Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation.png>
 Package pdftex.def Info: ./images//Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation.png  used on input line 161.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [8 <./images//Taquin 3x3 regression lineaire du nombre d'état dans la frontière max en fonction du nombre de coups sans coef de normalisation.png> <./images//Taquin 3x3 regression lineaire du nombre d'état explorer en fonction du nombre de coups sans coef de normalisation.png>]
-<./images//Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation.png, id=240, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation.png, id=242, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation.png Graphic file (type png)
 <use ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation.png>
 Package pdftex.def Info: ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation.png  used on input line 166.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef.png, id=241, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef.png, id=243, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef.png  used on input line 171.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [9 <./images//Taquin 3x3 regression lineaire du nombre d'état generer en fonction du nombre de coups sans coef de normalisation.png> <./images//Taquin 3x3 utilisation CPU en fct du nb d'etat explorer sans coef de normalisation.png>]
-<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups.png, id=248, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups.png, id=250, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups.png  used on input line 176.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere.png, id=249, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere.png, id=251, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere.png  used on input line 181.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [10 <./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere sans coef.png> <./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups.png>]
-<./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups.png, id=256, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups.png, id=258, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups.png  used on input line 186.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere.png, id=257, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere.png, id=259, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere.png  used on input line 191.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [11 <./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat dans la frontiere.png> <./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups.png>]
-<./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer.png, id=264, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer.png, id=266, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer.png Graphic file (type png)
 <use ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer.png>
 Package pdftex.def Info: ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer.png  used on input line 196.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer.png, id=265, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer.png, id=267, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer.png Graphic file (type png)
 <use ./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer.png>
 Package pdftex.def Info: ./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer.png  used on input line 201.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [12 <./images//Taquin 3x3 nombre d'etats generer en fct du nb max detat dans la frontiere.png> <./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer.png>]
-<./images//Taquin 3xnb etat dans la frontiere en fct du nb de coups.png, id=272, 1850.112pt x 993.7125pt>
+<./images//Taquin 3xnb etat dans la frontiere en fct du nb de coups.png, id=274, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3xnb etat dans la frontiere en fct du nb de coups.png Graphic file (type png)
 <use ./images//Taquin 3xnb etat dans la frontiere en fct du nb de coups.png>
 Package pdftex.def Info: ./images//Taquin 3xnb etat dans la frontiere en fct du nb de coups.png  used on input line 206.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [13 <./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer.png> <./images//Taquin 3xnb etat dans la frontiere en fct du nb de coups.png>] [14]
-<./images//Taquin 3x3 nombre d'état dans la frontiereen fct du nb du nb de coups linear conflict.png, id=286, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'état dans la frontiereen fct du nb du nb de coups linear conflict.png, id=288, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'état dans la frontiereen fct du nb du nb de coups linear conflict.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'état dans la frontiereen fct du nb du nb de coups linear conflict.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'état dans la frontiereen fct du nb du nb de coups linear conflict.png  used on input line 263.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 nombre d'état explorer en fct du nb de coups linear conflict.png, id=287, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'état explorer en fct du nb de coups linear conflict.png, id=289, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'état explorer en fct du nb de coups linear conflict.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'état explorer en fct du nb de coups linear conflict.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'état explorer en fct du nb de coups linear conflict.png  used on input line 267.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [15]
-<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict.png, id=292, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict.png, id=294, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict.png  used on input line 271.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat generer linear conflict.png, id=293, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat generer linear conflict.png, id=295, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat generer linear conflict.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat generer linear conflict.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat generer linear conflict.png  used on input line 275.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [16 <./images//Taquin 3x3 nombre d'état dans la frontiereen fct du nb du nb de coups linear conflict.png> <./images//Taquin 3x3 nombre d'état explorer en fct du nb de coups linear conflict.png>]
-<./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups linear conflict.png, id=300, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups linear conflict.png, id=302, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups linear conflict.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups linear conflict.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups linear conflict.png  used on input line 279.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer linear conflict.png, id=301, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer linear conflict.png, id=303, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer linear conflict.png Graphic file (type png)
 <use ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer linear conflict.png>
 Package pdftex.def Info: ./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer linear conflict.png  used on input line 283.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [17 <./images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict.png> <./images//Taquin 3x3 nombre d'etat explorer en fct du nb de detat generer linear conflict.png>]
-<./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict.png, id=308, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict.png, id=310, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict.png Graphic file (type png)
 <use ./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict.png>
 Package pdftex.def Info: ./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict.png  used on input line 287.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [18 <./images//Taquin 3x3 nombre d'etats generer en fct du nb de coups linear conflict.png> <./images//Taquin 3x3 utilisation CPU en fct du nb d'etat generer linear conflict.png>]
-<./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire.png, id=315, 1850.112pt x 993.7125pt>
+<./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire.png, id=317, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire.png Graphic file (type png)
 <use ./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire.png>
 Package pdftex.def Info: ./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire.png  used on input line 292.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [19 <./images//Taquin 3x3 nombre d'état explorer en fct du nb detat ds la frontiere linear conflict.png> <./images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire.png>] [20] [21] [22]
-<./images//Taquin 4x4 pa_db graphe 3d.png, id=335, 1850.112pt x 993.7125pt>
+<./images//Taquin 4x4 pa_db graphe 3d.png, id=337, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 4x4 pa_db graphe 3d.png Graphic file (type png)
 <use ./images//Taquin 4x4 pa_db graphe 3d.png>
 Package pdftex.def Info: ./images//Taquin 4x4 pa_db graphe 3d.png  used on input line 372.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups.png, id=336, 1850.112pt x 993.7125pt>
+<./images//Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups.png, id=338, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups.png Graphic file (type png)
 <use ./images//Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups.png>
 Package pdftex.def Info: ./images//Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups.png  used on input line 376.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [23]
-<./images//Taquin 4x4 pa_db nb de noeud exploere en fonction du nombre de coups.png, id=341, 1850.112pt x 993.7125pt>
+<./images//Taquin 4x4 pa_db nb de noeud exploere en fonction du nombre de coups.png, id=343, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 4x4 pa_db nb de noeud exploere en fonction du nombre de coups.png Graphic file (type png)
 <use ./images//Taquin 4x4 pa_db nb de noeud exploere en fonction du nombre de coups.png>
 Package pdftex.def Info: ./images//Taquin 4x4 pa_db nb de noeud exploere en fonction du nombre de coups.png  used on input line 380.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 4x4 pa_db nb de noeud explorer en fct du nb detat generer.png, id=342, 1850.112pt x 993.7125pt>
+<./images//Taquin 4x4 pa_db nb de noeud explorer en fct du nb detat generer.png, id=344, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 4x4 pa_db nb de noeud explorer en fct du nb detat generer.png Graphic file (type png)
 <use ./images//Taquin 4x4 pa_db nb de noeud explorer en fct du nb detat generer.png>
 Package pdftex.def Info: ./images//Taquin 4x4 pa_db nb de noeud explorer en fct du nb detat generer.png  used on input line 384.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
  [24 <./images//Taquin 4x4 pa_db graphe 3d.png> <./images//Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups.png>]
-<./images//Taquin 4x4 pa_db nb de noeud explorer en fonction du nombre detat dans la frontiere.png, id=349, 1850.112pt x 993.7125pt>
+<./images//Taquin 4x4 pa_db nb de noeud explorer en fonction du nombre detat dans la frontiere.png, id=351, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 4x4 pa_db nb de noeud explorer en fonction du nombre detat dans la frontiere.png Graphic file (type png)
 <use ./images//Taquin 4x4 pa_db nb de noeud explorer en fonction du nombre detat dans la frontiere.png>
 Package pdftex.def Info: ./images//Taquin 4x4 pa_db nb de noeud explorer en fonction du nombre detat dans la frontiere.png  used on input line 388.
 (pdftex.def)             Requested size: 418.25368pt x 224.63705pt.
-<./images//Taquin 4x4 pa_db nb de noeud noeud generer en fonction du nombre dede coups.png, id=350, 1850.112pt x 993.7125pt>
+<./images//Taquin 4x4 pa_db nb de noeud noeud generer en fonction du nombre dede coups.png, id=352, 1850.112pt x 993.7125pt>
 File: ./images//Taquin 4x4 pa_db nb de noeud noeud generer en fonction du nombre dede coups.png Graphic file (type png)
 <use ./images//Taquin 4x4 pa_db nb de noeud noeud generer en fonction du nombre dede coups.png>
 Package pdftex.def Info: ./images//Taquin 4x4 pa_db nb de noeud noeud generer en fonction du nombre dede coups.png  used on input line 392.
@@ -537,10 +536,10 @@ Here is how much of TeX's memory you used:
  479609 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  72i,6n,77p,817b,1158s stack positions out of 10000i,1000n,20000p,200000b,80000s
- <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1200.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1000.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1728.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1440.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm2074.pk><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on rapport.pdf (27 pages, 2724913 bytes).
+ <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1200.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1000.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1200.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1728.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1440.pk> <C:\Users\leofl\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm2074.pk><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/leofl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on rapport.pdf (27 pages, 2734112 bytes).
 PDF statistics:
- 716 PDF objects out of 1000 (max. 8388607)
+ 747 PDF objects out of 1000 (max. 8388607)
  77 named destinations out of 1000 (max. 500000)
  489 words of extra memory for PDF output out of 10000 (max. 10000000)
 
