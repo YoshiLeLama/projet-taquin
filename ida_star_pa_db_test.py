@@ -201,7 +201,7 @@ def generer_grille_aleatoire(resolvable: bool = False):
 
 def experimet(n) -> None:
     global nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo
-    tp.init_bd_data(tp.file)
+    tp.init_bd_data(tp.file3)
     for _ in range(n):
         plateau = generer_grille_aleatoire()
         while not solvable(plateau):
@@ -213,7 +213,7 @@ def experimet(n) -> None:
         nombre_etats_explo = 0
         solver = IDA_star(pa_db(), deplacement(DIM_GRILLE))
         res = solver.ida_star(plateau)
-        tp.panda_data(tp.file,
+        tp.panda_data(tp.file3,
                       nb_etat_genere,
                       res[1],
                       0,
@@ -221,17 +221,17 @@ def experimet(n) -> None:
                       nb_etat_max_ds_frontiere,
                       nombre_etats_explo,
                       0)
-    tp.graphe_3d_sans_color_bar(tp.file3)
+    tp.graphe_3d_sans_color_bar(tp.file3, "taquin 4x4 utilisant paterne db")
     tp.graphe(tp.file3,  'nb_etat_frontiere', 'nb_etats_explorer',
-              'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière en utilisant l'heuristique conflit linéaire pour 50 taquins")
+              'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière en utilisant l'heuristique paterne db pour 50 taquins")
     tp.graphe(tp.file3,  'nb_de_coup', 'nb_etats_generer',
-              'scatter', "nb d'états générés en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+              'scatter', "nb d'états générés en fonction du nombre de coups en utilisant l'heuristique paterne db pour 50 taquins")
     tp.graphe(tp.file3,  'nb_de_coup', 'nb_etat_frontiere',
-              'scatter', "nb d'état max dans la frontière en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+              'scatter', "nb d'état max dans la frontière en fonction du nombre de coups en utilisant l'heuristique paterne db pour 50 taquins")
     tp.graphe(tp.file3,  'nb_de_coup', 'nb_etats_explorer',
-              'scatter', "nb d'état exploré en fonction du nombre de coups en utilisant l'heuristique conflit linéaire pour 50 taquins")
+              'scatter', "nb d'état exploré en fonction du nombre de coups en utilisant l'heuristique paterne db pour 50 taquins")
     tp.graphe(tp.file3,  'nb_etats_generer', 'nb_etats_explorer',
-              'scatter', "nb d'état exploré en fonction du nombre d'états générés en utilisant l'heuristique conflit linéaire pour 50 taquins")
+              'scatter', "nb d'état exploré en fonction du nombre d'états générés en utilisant l'heuristique paterne db pour 50 taquins")
 # ********************************************************************************************
 
 
@@ -252,4 +252,4 @@ if __name__ == '__main__':
         res = solver.ida_star(plateau)
         print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
-    experimet(50)
+    # experimet(50)

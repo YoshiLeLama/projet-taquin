@@ -64,7 +64,7 @@ def graphe_3d(file, n: list[int]):
     plt.show()
 
 
-def graphe_3d_sans_color_bar(file):
+def graphe_3d_sans_color_bar(file, t):
     r = pd.read_csv(file)
     r.drop('Unnamed: 0', axis=1, inplace=True)
     fig = plt.figure(figsize=(16, 9))
@@ -84,7 +84,7 @@ def graphe_3d_sans_color_bar(file):
                        c=r.nb_de_coup,
                        cmap=my_cmap,
                        marker='.')
-    plt.title("Taquin 3x3 graphe 3D")
+    plt.title(t)
     plt.show()
 
 
