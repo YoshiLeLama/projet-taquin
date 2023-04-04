@@ -1,8 +1,12 @@
 import sqlite3
 import time
-
 import numpy as np
 import sqlite3 as sql
+
+
+# ###############################################################################
+# Permet de générer la base de données pour l'heuristique walking distance
+# ###############################################################################
 
 BOARD_WIDTH = 4
 WDTBL_SIZE = 24964

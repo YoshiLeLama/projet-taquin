@@ -6,10 +6,12 @@ from bisect import insort
 from enum import Enum
 import random
 import taquin as tq
-
 import numpy as np
-
 import walking_distance as wd
+
+# #################################################
+#  résolveur taquin 4x4 utilisant l'heuristique walking distance
+# #################################################
 
 DIM_GRILLE: int
 NOMBRE_TUILES: int
@@ -54,7 +56,7 @@ def expanse(plateau_initial: list[int], etat_choisi: tq.Etat):
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
             result.append(tq.Etat(liste_deplacement=nouveaux_deplacements,
-                               cout=len(nouveaux_deplacements) + heuristique(0, depl)))
+                                  cout=len(nouveaux_deplacements) + heuristique(0, depl)))
     return result
 
 

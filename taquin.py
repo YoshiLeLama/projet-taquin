@@ -10,6 +10,13 @@ import numpy as np
 
 import walking_distance as wd
 
+######################################################
+#
+#        Fichier pour tout centralier pour le render
+#
+######################################################
+
+
 DIM_GRILLE: int
 NOMBRE_TUILES: int
 NOMBRE_CASES: int

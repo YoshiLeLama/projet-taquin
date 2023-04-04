@@ -6,6 +6,10 @@ import numpy as np
 import walking_distance as wd
 import taquin as tq
 
+#########################################################
+# résolveur taquin 4x4 utilisant l'heuristique de pattern db additive.
+#########################################################
+
 # ********** Variable globale pour la partie exp du prog********
 import teste_prog as tp
 import gc

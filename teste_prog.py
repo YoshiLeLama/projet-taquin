@@ -2,6 +2,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+# ###############################################################################
+# fichier pour la partie expérimentale du projet
+# ###############################################################################
+
 
 # ajoute les données dans la bd à utiliser cette fct après avoir initialisé la bd
 # Attention la Ram est exprimé en MiB et le GPU en %

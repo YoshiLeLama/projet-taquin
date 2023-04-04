@@ -1,12 +1,18 @@
+import a_star_md as ast
+import ida_star_pa_db as ida
+import ida_star_wd as iwd
 import collections
 import random
 import threading
 from collections import namedtuple
 from enum import Enum
-
 import pyray as pr
-
 import taquin as tq
+
+# ###############################################################################
+# fichier pour l'affichage du jeu
+# ###############################################################################
+
 
 # types
 PositionCase = namedtuple("PositionCase", ["ligne", "colonne"])
@@ -107,9 +113,11 @@ def generate_cubes():
 
         bg_color: pr.Color
         if settings_color_set == 1:
-            bg_color = pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), 0, int(255 - (i / tq.NOMBRE_TUILES) * 155), 255)
+            bg_color = pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155),
+                                0, int(255 - (i / tq.NOMBRE_TUILES) * 155), 255)
         elif settings_color_set == 2:
-            bg_color = pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), 0, 0, 255)
+            bg_color = pr.Color(
+                int(0 + (i / tq.NOMBRE_TUILES) * 155), 0, 0, 255)
         else:
             bg_color = pr.Color(int(0 + (i / tq.NOMBRE_TUILES) * 155), int(0 + (i / tq.NOMBRE_TUILES) * 155),
                                 int(0 + (i / tq.NOMBRE_TUILES) * 155), 255)
@@ -140,7 +148,8 @@ def generate_cubes():
 
 def init():
     global camera, font, num_textures, blocks_models, grille_actuelle, deplacements
-    pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT | pr.ConfigFlags.FLAG_VSYNC_HINT)
+    pr.set_config_flags(pr.ConfigFlags.FLAG_MSAA_4X_HINT |
+                        pr.ConfigFlags.FLAG_VSYNC_HINT)
 
     pr.init_window(800, 450, "Taquin")
     pr.set_window_state(pr.ConfigFlags.FLAG_WINDOW_RESIZABLE)
@@ -273,13 +282,12 @@ def process_move():
     elif deplacement == tq.Card.EST:
         nouvelle_pos_vide = PositionCase(
             case_vide.ligne, case_vide.colonne + 1)
-        
 
     print(case_vide, nouvelle_pos_vide)
 
     swap_cases(grille_actuelle, case_vide.ligne, case_vide.colonne,
                nouvelle_pos_vide.ligne, nouvelle_pos_vide.colonne)
-    
+
     print(grille_actuelle)
     nombre_deplacements += 1
     animating = True
@@ -459,7 +467,8 @@ def draw_state_switch_button(texture: pr.Texture, position: pr.Vector2, size: in
     bg_color = BUTTON_BG
 
     if pr.check_collision_point_circle(pr.get_mouse_position(),
-                                       pr.Vector2(int(position.x + size / 2), int(position.y + size / 2)),
+                                       pr.Vector2(
+                                           int(position.x + size / 2), int(position.y + size / 2)),
                                        size / 2):
         bg_color = BUTTON_BG_HOVERED
         pr.set_mouse_cursor(pr.MouseCursor.MOUSE_CURSOR_POINTING_HAND)
@@ -478,7 +487,7 @@ def process_title_screen_moves():
     if len(deplacements) != 0:
         process_move()
         return
-    
+
     pos_case_vide = grille_actuelle.index(-1)
     depl = tq.Card(random.randint(0, 3))
 
@@ -586,16 +595,19 @@ def render_settings():
                       pr.get_screen_width() - SETTINGS_PANEL_MARGIN * 2,
                       pr.get_render_height() - SETTINGS_PANEL_MARGIN * 2, pr.Color(255, 255, 255, 220))
 
-    settings_duree_animation = draw_scroll_setting(0, "Durée d'animation", "s", settings_duree_animation, 0.2, 1.5, 0.1)
+    settings_duree_animation = draw_scroll_setting(
+        0, "Durée d'animation", "s", settings_duree_animation, 0.2, 1.5, 0.1)
 
     old_taille_grille = settings_taille_grille
-    settings_taille_grille = int(draw_scroll_setting(1, "Taille grille", "", settings_taille_grille, 3, 5, 1))
+    settings_taille_grille = int(draw_scroll_setting(
+        1, "Taille grille", "", settings_taille_grille, 3, 5, 1))
 
     if old_taille_grille != settings_taille_grille:
         reset_animation()
 
     old_settings_color_set = settings_color_set
-    settings_color_set = int(draw_scroll_setting(2, "Couleurs blocs", "", settings_color_set, 1, 3, 1))
+    settings_color_set = int(draw_scroll_setting(
+        2, "Couleurs blocs", "", settings_color_set, 1, 3, 1))
 
     draw_back_button(State.TITLE_SCREEN)
     pr.end_drawing()
@@ -634,7 +646,8 @@ def render_solving_settings():
         text = "Difficulté : " + str(tq.heuristique(tq.K, grille_actuelle))
         pr.draw_text(text, 10, 40, 30, pr.BLACK)
 
-    taille_case = (min(pr.get_screen_width(), pr.get_screen_height()) * 0.75) / tq.DIM_GRILLE
+    taille_case = (min(pr.get_screen_width(),
+                   pr.get_screen_height()) * 0.75) / tq.DIM_GRILLE
     case_scale = taille_case / num_textures_for_2d[0].width
 
     hovered_case = -1
@@ -718,7 +731,7 @@ def render_solving_settings():
 
         pr.draw_text(text, int((pr.get_screen_width() - text_width) / 2),
                      pr.get_screen_height() - font_size - 10, font_size, pr.BLACK)
-        
+
         if pr.get_mouse_wheel_move_v().y != 0:
             if chosen_method == SolvingMethods.WD:
                 chosen_method = SolvingMethods.PDB
@@ -737,11 +750,6 @@ def render_solving_settings():
     pr.end_drawing()
 
 
-import ida_star_wd as iwd
-import ida_star_pa_db as ida
-import a_star_md as ast
-
-
 def load_solution():
     global deplacements, solution, liste_deplacements_initiale, chosen_method
 
@@ -751,7 +759,8 @@ def load_solution():
         if chosen_method == SolvingMethods.WD:
             solution = iwd.ida_star(grille_actuelle)
         elif chosen_method == SolvingMethods.PDB:
-            solver = ida.IDA_star(ida.pa_db("bd_resolver/pa5-5-5_db.db"), ida.deplacement(tq.DIM_GRILLE))
+            solver = ida.IDA_star(
+                ida.pa_db("bd_resolver/pa5-5-5_db.db"), ida.deplacement(tq.DIM_GRILLE))
             solution = solver.ida_star(grille_actuelle)
             if solution is not None and chosen_method == SolvingMethods.WD:
                 liste_deplacements_initiale = solution[0][:]

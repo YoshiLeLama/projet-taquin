@@ -4,6 +4,10 @@ import sqlite3
 from sqlite3 import Error
 import threading
 
+# ###############################################################################
+# Permet de générer la base de données pour l'heuristique de patteerne additif de manière static
+# ###############################################################################
+
 
 def set_dim_grille(new_dim: int):
     global DIM_GRILLE, NOMBRE_TUILES, NOMBRE_CASES
