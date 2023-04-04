@@ -1,6 +1,6 @@
 # *************************
 #
-# resolveur taquin 3x3 utilisant A* et l'heuristique distance de Manhattan pondéré.
+# resolveur taquin 3x3 utilisant A* et l'heuristique distance de Manhattan pondéré et linear conflict.
 #
 # *************************
 import threading
@@ -92,7 +92,7 @@ def expanse(plateau_initial: list[int], etat_choisi: tq.Etat):
         depl = deplacement(nouveaux_deplacements, plateau_initial)
         if depl is not None:
             result.append(tq.Etat(liste_deplacement=nouveaux_deplacements,
-                               cout=len(nouveaux_deplacements) + (heuristique(K, depl) if not LINEAR_CONFLICT else linear_conflict(depl))))
+                                  cout=len(nouveaux_deplacements) + (heuristique(K, depl) if not LINEAR_CONFLICT else linear_conflict(depl))))
     return result
 
 
@@ -151,7 +151,7 @@ def astar(plateau_initial) -> tq.Etat | None:
     # # ****************************
     frontiere = deque()
     frontiere.append(tq.Etat(liste_deplacement=[],
-                          cout=heuristique(K, plateau_initial) if not LINEAR_CONFLICT else linear_conflict(plateau_initial)))
+                             cout=heuristique(K, plateau_initial) if not LINEAR_CONFLICT else linear_conflict(plateau_initial)))
     # stocke les grilles déjà trouvés synchronisé avec la frontière.
     grilles_frontiere = [tuple(plateau_initial[:])]
     explored = set()

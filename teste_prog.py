@@ -1,7 +1,9 @@
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LinearLocator
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+
 # ###############################################################################
 # fichier pour la partie expérimentale du projet
 # ###############################################################################
@@ -46,7 +48,7 @@ def panda_data(file, nb_etats_generer, nb_de_coup, utilisation_CPU, utilisation_
 def graphe_3d(file, n: list[int]):
     r = pd.read_csv(file)
     r.drop('Unnamed: 0', axis=1, inplace=True)
-    fig = plt.figure(figsize=(16, 9))
+    fig = plt.figure(figsize=(1, 1))
     ax = plt.axes(projection="3d")
     x = r.nb_de_coup
     y = r.nb_etat_frontiere
@@ -54,6 +56,7 @@ def graphe_3d(file, n: list[int]):
     ax.grid(b=True, color=0,
             linestyle='-.', linewidth=0.3,
             alpha=0.2)
+    plt.ticklabel_format(useOffset=False)
     my_cmap = plt.get_cmap('Dark2', len(n))
     ax.set_xlabel('nombre de coup à faire', fontweight='bold')
     ax.set_ylabel('nb etat generer', fontweight='bold')
@@ -71,23 +74,30 @@ def graphe_3d(file, n: list[int]):
 def graphe_3d_sans_color_bar(file, t):
     r = pd.read_csv(file)
     r.drop('Unnamed: 0', axis=1, inplace=True)
-    fig = plt.figure(figsize=(16, 9))
+    # fig = plt.figure(figsize=(16, 9))
     ax = plt.axes(projection="3d")
     x = r.nb_de_coup
     y = r.nb_etat_frontiere
     z = r.nb_etats_generer
+    print(z)
+    # print(x)
     ax.grid(b=True, color=0,
             linestyle='-.', linewidth=0.3,
             alpha=0.2)
-    my_cmap = plt.get_cmap('Dark2')
-    ax.set_xlabel('nombre de coup à faire', fontweight='bold')
-    ax.set_ylabel('nb etat generer', fontweight='bold')
-    ax.set_zlabel('nb etat frontiere', fontweight='bold')
+
+    my_cmap = plt.get_cmap('Dark2', len(x))
+    ax.set_xlabel('nombre de coup à faire')
+    ax.set_ylabel('nb etat generer')
+    ax.set_zlabel('nb etat frontiere')
     ctt = ax.scatter3D(x, y, z,
-                       alpha=0.8,
+                       alpha=1,
                        c=r.nb_de_coup,
                        cmap=my_cmap,
-                       marker='.')
+                       marker='.',)
+
+    # ax.zaxis.set_major_formatter('{x:10}')
+    # ax.xaxis.set_major_formatter('{x:10}')
+    # ax.yaxis.set_major_formatter('{x:10}')
     plt.title(t)
     plt.show()
 
@@ -118,6 +128,7 @@ def multi_graphe(file, n: list[int], X, Y, k, subtitle):
 
 
 def graphe(file,  X, Y, k, subtitle):
+
     r = pd.read_csv(file)
     matplotlib.style.use('Solarize_Light2')
     r.drop('Unnamed: 0', axis=1, inplace=True)
