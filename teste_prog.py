@@ -51,8 +51,8 @@ def graphe_3d(file, n: list[int]):
     fig = plt.figure(figsize=(1, 1))
     ax = plt.axes(projection="3d")
     x = r.nb_de_coup
-    y = r.nb_etat_frontiere
-    z = r.nb_etats_generer
+    y = r.nb_etats_generer
+    z = r.nb_etats_explorer
     ax.grid(b=True, color=0,
             linestyle='-.', linewidth=0.3,
             alpha=0.2)
@@ -60,7 +60,7 @@ def graphe_3d(file, n: list[int]):
     my_cmap = plt.get_cmap('Dark2', len(n))
     ax.set_xlabel('nombre de coup à faire', fontweight='bold')
     ax.set_ylabel('nb etat generer', fontweight='bold')
-    ax.set_zlabel('nb etat frontiere', fontweight='bold')
+    ax.set_zlabel('nb etats explorer', fontweight='bold')
     ctt = ax.scatter3D(x, y, z,
                        alpha=0.8,
                        c=r.categorie_de_poids,
@@ -77,7 +77,7 @@ def graphe_3d_sans_color_bar(file, t):
     # fig = plt.figure(figsize=(16, 9))
     ax = plt.axes(projection="3d")
     x = r.nb_de_coup
-    y = r.nb_etat_frontiere
+    y = r.nb_etats_explorer
     z = r.nb_etats_generer
     print(z)
     # print(x)
@@ -87,8 +87,9 @@ def graphe_3d_sans_color_bar(file, t):
 
     my_cmap = plt.get_cmap('Dark2', len(x))
     ax.set_xlabel('nombre de coup à faire')
-    ax.set_ylabel('nb etat generer')
-    ax.set_zlabel('nb etat frontiere')
+    ax.set_ylabel('nb etats explorer')
+    ax.set_zlabel('nb état gnérer ')
+    plt.ticklabel_format(style='plain')
     ctt = ax.scatter3D(x, y, z,
                        alpha=1,
                        c=r.nb_de_coup,

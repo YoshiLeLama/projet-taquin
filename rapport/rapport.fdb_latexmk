@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1680554793 "c:/Users/leofl/OneDrive/Bureau/projet-taquin/rapport/rapport.tex" "rapport.pdf" "rapport" 1680554807 0
+["pdflatex"] 1680619008 "c:/Users/leofl/OneDrive/Bureau/projet-taquin/rapport/rapport.tex" "rapport.pdf" "rapport" 1680619017 0
   "C:/Users/leofl/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1675812362 82535 0266753fb37a3d673c1d739765ad059f ""
   "C:/Users/leofl/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/ecbx1200.pk" 1675718639 31952 a4037fd5afd3330d4cccdcc7257ef464 ""
   "C:/Users/leofl/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/ecbx1440.pk" 1680369073 40136 d57e3121da0ee68fdd49bd53ed0876b1 ""
@@ -94,7 +94,7 @@
   "C:/Users/leofl/AppData/Local/Programs/MiKTeX/tex/latex/refcount/refcount.sty" 1576437552 9878 9e94e8fa600d95f9c7731bb21dfb67a4 ""
   "C:/Users/leofl/AppData/Local/Programs/MiKTeX/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1657800696 9714 ba3194bd52c8499b3f1e3eb91d409670 ""
   "C:/Users/leofl/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388494052 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
-  "c:/Users/leofl/OneDrive/Bureau/projet-taquin/rapport/rapport.tex" 1680554792 32508 d8ba8fcf62a792e08328442913af0493 ""
+  "c:/Users/leofl/OneDrive/Bureau/projet-taquin/rapport/rapport.tex" 1680619003 32629 2543f491338ee4821d2f0fb78d96afd0 ""
   "images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups reg lineaire Linear conflict.png" 1680439708 73152 b63737eb571869bf5f1d57323fdf7af3 ""
   "images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups sans coef.png" 1679340853 124628 6e33c331d6d3fedc7e4cbab88be0df63 ""
   "images//Taquin 3x3 nombre d'etat explorer en fct du nb de coups.png" 1680431859 98822 5468b2f1fa1ae26dc6c13a276940418e ""
@@ -117,7 +117,8 @@
   "images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer conlit lineaire.png" 1680439856 77925 134dc2f7d2392b779e5d06b61e83ca67 ""
   "images//Taquin 3x3 utilisation RAM en fct du nb d'etat generer.png" 1680432636 88579 be446c4071f87242161626d9919675cb ""
   "images//Taquin 3xnb etat dans la frontiere en fct du nb de coups.png" 1680432328 82721 1369cfda75cdb4a98332cc6fd039368a ""
-  "images//Taquin 4x4 pa_db graphe 3d.png" 1680498243 166841 0f899f39d0cac63a8c2a14d8846306c2 ""
+  "images//Taquin 4x4 pa_db graphe 3d (2).png" 1680618967 88034 fe12050ab89da59b4afc92c2d80f7a4d ""
+  "images//Taquin 4x4 pa_db graphe 3d.png" 1680618987 93259 16586e751630ed7b94596b432abbe827 ""
   "images//Taquin 4x4 pa_db nb de etat dans la frontiere en fonction du nb de coups.png" 1680498302 48981 083384453db5715f9de1d590381021ac ""
   "images//Taquin 4x4 pa_db nb de noeud exploere en fonction du nombre de coups.png" 1680498315 51371 2a8accb0cb0526f4526d220e67518705 ""
   "images//Taquin 4x4 pa_db nb de noeud explorer en fct du nb detat generer.png" 1680498334 51270 2855a4410fee28fcbd126cbbfb78ea65 ""
@@ -127,9 +128,9 @@
   "images//graphe 3d Taquin 3x3(2).png" 1679339866 179568 f2a0d85ed62c8eedb2092effdfd892f0 ""
   "images//graphe 3d Taquin 3x3(3).png" 1679339849 109158 12d4e294d53abbf86a412ecadc07f5b3 ""
   "images//graphe 3d Taquin 3x3.png" 1679339830 173813 2ba517b897707382d191e281b97be562 ""
-  "rapport.aux" 1680554802 6847 7240ec7701886d47fc5543c7c5b642f9 "pdflatex"
-  "rapport.out" 1680554802 7128 600d37905de7635d7deb53ba48614556 "pdflatex"
-  "rapport.tex" 1680554792 32508 d8ba8fcf62a792e08328442913af0493 ""
+  "rapport.aux" 1680619017 6847 cb828e19deb682f79fea756175a3b961 "pdflatex"
+  "rapport.out" 1680619017 7128 600d37905de7635d7deb53ba48614556 "pdflatex"
+  "rapport.tex" 1680619003 32629 2543f491338ee4821d2f0fb78d96afd0 ""
   (generated)
   "rapport.aux"
   "rapport.log"
