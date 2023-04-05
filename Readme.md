@@ -22,5 +22,5 @@ cd ./projet-taquin/
 python3 render.py
 ```
 ### Contributors 
-Antoine Roumilhac YoshiLeLama /
-Léo Flandin worlcrafte
+Antoine Roumilhac: YoshiLeLama /
+Léo Flandin: worlcrafte
