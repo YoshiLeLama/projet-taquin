@@ -2,7 +2,6 @@
 __pycache__
 .idea
 *.db
-*.sql
 *.sqlite
 sql.txt
 *.out
