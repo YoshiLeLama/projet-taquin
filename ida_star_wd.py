@@ -191,7 +191,6 @@ def ida_star(plateau_initial):
         if t == math.inf:
             return -1
         bound = t
-        print(bound)
 
 
 num_nodes = 0
