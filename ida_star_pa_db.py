@@ -349,7 +349,7 @@ if __name__ == '__main__':
     plateau = generer_grille_aleatoire()
     while not solvable(plateau):
         plateau = generer_grille_aleatoire()
-    plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
+    # plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
     solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
                       deplacement(DIM_GRILLE))
     print(plateau)
