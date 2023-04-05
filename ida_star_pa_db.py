@@ -182,6 +182,7 @@ def pa_db(file):
     Returns:
         function: fonction qui calcul l'heuristique de la disposition des tuile du noeud étudié.
     """
+    print("chargement de la bd")
     db = dict()
 
     databases = sqlite3.connect(file)
@@ -225,7 +226,7 @@ def pa_db(file):
             result += db.get(str(teste))
         databases.close()
         return result
-
+    print("terminer")
     return heuristique
 
 
@@ -305,28 +306,28 @@ def generer_grille_aleatoire(resolvable: bool = False):
 
 
 def experimet(n) -> None:
-    # global nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo
-    # tp.init_bd_data(tp.file3)
-    # for _ in range(n):
-    #     plateau = generer_grille_aleatoire()
-    #     while not solvable(plateau):
-    #         plateau = generer_grille_aleatoire()
-    #     # gc est le garbage collector. Il permettrait clear la ram
-    #     gc.collect()
-    #     nb_etat_genere = 0
-    #     nb_etat_max_ds_frontiere = 0
-    #     nombre_etats_explo = 0
-    #     solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
-    #                       deplacement(DIM_GRILLE))
-    #     res = solver.ida_star(plateau)
-    #     tp.panda_data(tp.file3,
-    #                   nb_etat_genere,
-    #                   res[1],
-    #                   0,
-    #                   0,
-    #                   nb_etat_max_ds_frontiere,
-    #                   nombre_etats_explo,
-    #                   0)
+    global nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo
+    tp.init_bd_data(tp.file3)
+    for _ in range(n):
+        plateau = generer_grille_aleatoire()
+        while not solvable(plateau):
+            plateau = generer_grille_aleatoire()
+        # gc est le garbage collector. Il permettrait clear la ram
+        gc.collect()
+        nb_etat_genere = 0
+        nb_etat_max_ds_frontiere = 0
+        nombre_etats_explo = 0
+        solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
+                          deplacement(DIM_GRILLE))
+        res = solver.ida_star(plateau)
+        tp.panda_data(tp.file3,
+                      nb_etat_genere,
+                      res[1],
+                      0,
+                      0,
+                      nb_etat_max_ds_frontiere,
+                      nombre_etats_explo,
+                      0)
     tp.graphe_3d_sans_color_bar(tp.file3, "taquin 4x4 utilisant paterne db")
     tp.graphe(tp.file3,  'nb_etat_frontiere', 'nb_etats_explorer',
               'scatter', "nb d'état exploré en fonction du nombre d'état dans la frontière en utilisant l'heuristique paterne db pour 50 taquins")
@@ -345,17 +346,17 @@ set_dim_grille(4)
 
 # main
 if __name__ == '__main__':
-    # plateau = generer_grille_aleatoire()
-    # while not solvable(plateau):
-    #     plateau = generer_grille_aleatoire()
-    # plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
-    # solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
-    #                   deplacement(DIM_GRILLE))
-    # print(plateau)
-    # if solvable(plateau):
-    #     beg = time.time_ns()
-    #     res = solver.ida_star(plateau)
-    #     print(nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo)
-    #     print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
+    plateau = generer_grille_aleatoire()
+    while not solvable(plateau):
+        plateau = generer_grille_aleatoire()
+    plateau = [13, 8, 4, 1, 3, -1, 6, 11, 9, 12, 7, 2, 5, 10, 0, 14]
+    solver = IDA_star(pa_db("bd_resolver/pa5-5-5_db.db"),
+                      deplacement(DIM_GRILLE))
+    print(plateau)
+    if solvable(plateau):
+        beg = time.time_ns()
+        res = solver.ida_star(plateau)
+        print(nb_etat_genere, nb_etat_max_ds_frontiere, nombre_etats_explo)
+        print("solution trouvé en ", (time.time_ns() - beg)*10**(-9), "s", res)
 
-    experimet(50)
+    # experimet(50)
