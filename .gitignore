@@ -5,3 +5,9 @@ __pycache__
 *.sqlite
 sql.txt
 *.out
+rapport/*.aux
+rapport/*.fdb_latexmk
+rapport/*.fls
+rapport/*.log
+rapport/*.pdf
+rapport/*.synctex.gz
