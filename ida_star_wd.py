@@ -186,7 +186,7 @@ def ida_star(plateau_initial):
     while True:
         t = search(path, grilles_rencontrees, 0, bound, plateau_initial)
         if t == -1:
-            return path, bound
+            return path[-1]
         print(t)
         if t == math.inf:
             return -1
@@ -222,6 +222,9 @@ def search(path: list[tq.Etat], grilles_rencontrees: list[tuple], g: int, bound:
                 min_val = t
             path.pop()
             grilles_rencontrees.pop()
+
+        if tq.should_quit:
+               return math.inf
     return min_val
 
 

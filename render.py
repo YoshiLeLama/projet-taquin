@@ -600,7 +600,7 @@ def render_settings():
 
     old_taille_grille = settings_taille_grille
     settings_taille_grille = int(draw_scroll_setting(
-        1, "Taille grille", "", settings_taille_grille, 3, 5, 1))
+        1, "Taille grille", "", settings_taille_grille, 3, 4, 1))
 
     if old_taille_grille != settings_taille_grille:
         reset_animation()
@@ -762,14 +762,17 @@ def load_solution():
             solver = ida.IDA_star(
                 ida.pa_db("bd_resolver/pa5-5-5_db.db"), ida.deplacement(tq.DIM_GRILLE))
             solution = solver.ida_star(grille_actuelle)
-            if solution is not None and chosen_method == SolvingMethods.WD:
+
+            if solution is not None:
                 liste_deplacements_initiale = solution[0][:]
                 deplacements = collections.deque(liste_deplacements_initiale)
+                return
     else:
         solution = ast.astar(grille_actuelle)
         print(solution)
 
-    if solution is not None and chosen_method == SolvingMethods.WD:
+    if solution is not None:
+        print(solution)
         liste_deplacements_initiale = solution.liste_deplacement[:]
         deplacements = collections.deque(liste_deplacements_initiale)
 
